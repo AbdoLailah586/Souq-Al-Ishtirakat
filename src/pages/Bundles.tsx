@@ -5,6 +5,7 @@ import { Gift, Sparkles, ShieldCheck, CheckCircle2, Zap } from 'lucide-react';
 
 export const Bundles: React.FC = () => {
   const { bundles } = useStore();
+  const visibleBundles = bundles.filter(b => !b.isHidden);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-12">
@@ -24,7 +25,7 @@ export const Bundles: React.FC = () => {
 
       {/* Grid of All 6 Bundles */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {bundles.map(bundle => (
+        {visibleBundles.map(bundle => (
           <BundleCard key={bundle.id} bundle={bundle} />
         ))}
       </div>

@@ -1,5 +1,11 @@
 import { SiteSettings, UserProfile, Order, WalletTransaction } from '../types';
 
+/** بيانات الدخول الوحيدة لحساب الإدارة — لا يمكن إنشاء حساب إدارة من واجهة التسجيل */
+export const ADMIN_CREDENTIALS = {
+  email: 'admin@souq-subs.com',
+  password: 'Souq@Admin2026'
+};
+
 export const DEFAULT_SETTINGS: SiteSettings = {
   siteName: 'سوق الاشتراكات',
   siteTagline: 'بازار الاشتراكات الرقمية الأول في مصر والوطن العربي',
@@ -9,27 +15,31 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   whatsappSupportNumber: '201023456789',
   bannerText: '⚡ تسليم فوري لحسابات ChatGPT Plus و Canva Pro وضمان ذهبي كامل طوال فترة الاشتراك!',
   showBanner: true,
-  workingHours: 'خدمة العملاء والتسليم: يومياً من 10 صباحاً إلى 2 صباحاً بتوقيت القاهرة'
+  workingHours: 'خدمة العملاء والتسليم: يومياً من 10 صباحاً إلى 2 صباحاً بتوقيت القاهرة',
+  welcomeBonus: 0
 };
 
-export const DEMO_USERS: UserProfile[] = [
+/** المستخدمون الافتراضيون: حساب إدارة واحد فقط + عميل تجريبي */
+export const SEED_USERS: UserProfile[] = [
+  {
+    id: 'user-admin-root',
+    name: 'مدير النظام',
+    email: ADMIN_CREDENTIALS.email,
+    phone: '01099887766',
+    password: ADMIN_CREDENTIALS.password,
+    role: 'admin',
+    balance: 0,
+    createdAt: '2026-09-01T08:00:00.000Z'
+  },
   {
     id: 'user-demo-customer',
     name: 'عبدالله الشناوي',
     email: 'abdullah@client.com',
     phone: '01012345678',
+    password: '123456',
     role: 'customer',
     balance: 850,
     createdAt: '2026-09-01T10:00:00.000Z'
-  },
-  {
-    id: 'user-demo-admin',
-    name: 'مدير النظام (Admin)',
-    email: 'admin@souq-subs.com',
-    phone: '01099887766',
-    role: 'admin',
-    balance: 50000,
-    createdAt: '2026-09-01T08:00:00.000Z'
   }
 ];
 
@@ -50,7 +60,7 @@ export const INITIAL_ORDERS: Order[] = [
     deliveryDetails: {
       email: 'canva-user89@souq-vip.com',
       password: 'VIP-Canva#2026!Pass',
-      instructions: 'تم تفعيل الحساب ضمن فريق بريميوم. يمكنك تسجيل الدخول والبدء مباشرة، حفظ مشاريعك في الفريق.',
+      instructions: 'تم تفعيل الحساب ضمن فريق بريميوم. يمكنك تسجيل الدخول والبدء مباشرة، وحفظ مشاريعك في الفريق.',
       deliveredAt: '2026-09-08T14:30:00.000Z'
     },
     createdAt: '2026-09-08T14:15:00.000Z'

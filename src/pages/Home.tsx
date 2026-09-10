@@ -18,17 +18,16 @@ import {
   Search
 } from 'lucide-react';
 
-interface HomeProps {
-  setCurrentTab: (tab: string) => void;
-  setSelectedCategory: (cat: string) => void;
-}
 
-export const Home: React.FC<HomeProps> = ({ setCurrentTab, setSelectedCategory }) => {
-  const { services, bundles, openTopUpModal } = useStore();
+
+export const Home: React.FC = () => {
+  const { services, bundles, openTopUpModal, navigate: setCurrentTab, setSelectedCategory } = useStore();
   const { user } = useAuth();
 
-  const featuredServices = services.filter(s => s.featured).slice(0, 6);
-  const featuredBundles = bundles.slice(0, 3);
+  const visibleServices = services.filter(s => !s.isHidden);
+  const visibleBundles = bundles.filter(b => !b.isHidden);
+  const featuredServices = visibleServices.filter(s => s.featured).slice(0, 6);
+  const featuredBundles = visibleBundles.slice(0, 3);
 
   const handleCategoryClick = (catId: string) => {
     setSelectedCategory(catId);

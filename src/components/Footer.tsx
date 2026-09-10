@@ -2,12 +2,10 @@ import React from 'react';
 import { useStore } from '../context/StoreContext';
 import { ShieldCheck, Zap, Headphones, Sparkles, MessageCircle, Lock } from 'lucide-react';
 
-interface FooterProps {
-  setCurrentTab: (tab: string) => void;
-}
 
-export const Footer: React.FC<FooterProps> = ({ setCurrentTab }) => {
-  const { settings } = useStore();
+
+export const Footer: React.FC = () => {
+  const { settings, navigate: setCurrentTab } = useStore();
 
   const handleNav = (tab: string) => {
     setCurrentTab(tab);

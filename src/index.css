@@ -3,6 +3,11 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    /* حتى لا تختفي العناصر تحت الشريط العلوي الثابت عند التمرير */
+    scroll-padding-top: 7rem;
+  }
+
   body {
     background-color: #100f26;
     color: #f1f5f9;
@@ -76,4 +81,9 @@
   filter: blur(100px);
   pointer-events: none;
   z-index: 0;
+}
+
+/* منع التمرير خلف النوافذ المنبثقة */
+body.modal-open {
+  overflow: hidden;
 }

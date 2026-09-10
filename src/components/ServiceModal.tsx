@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useStore } from '../context/StoreContext';
 import { useAuth } from '../context/AuthContext';
+import { effectivePrice, isOfferActive, discountPercent, discountAmount, offerDaysLeft } from '../utils/pricing';
 import { 
   X, 
   Check, 
@@ -13,11 +14,12 @@ import {
   CheckCircle2, 
   AlertCircle,
   HelpCircle,
-  FileText
+  FileText,
+  Tag
 } from 'lucide-react';
 
 export const ServiceModal: React.FC = () => {
-  const { selectedService, closeServiceModal, purchaseItem, openTopUpModal } = useStore();
+  const { selectedService, closeServiceModal, purchaseItem, openTopUpModal, navigate } = useStore();
   const { user } = useAuth();
 
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
@@ -25,13 +27,29 @@ export const ServiceModal: React.FC = () => {
   const [orderStatus, setOrderStatus] = useState<{ success: boolean; message: string; orderId?: string } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // إغلاق النافذة بزر Escape
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') closeServiceModal(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [closeServiceModal]);
+
+  // إعادة ضبط الاختيارات عند فتح خدمة مختلفة
+  useEffect(() => {
+    setSelectedVariantIndex(0);
+    setCustomerNote('');
+    setOrderStatus(null);
+  }, [selectedService?.id]);
+
   if (!selectedService) return null;
 
   const currentVariant = selectedService.variants[selectedVariantIndex] || selectedService.variants[0];
+  const finalPrice = effectivePrice(currentVariant);
+  const onOffer = isOfferActive(currentVariant);
   const userBalance = user?.balance || 0;
-  const isBalanceEnough = userBalance >= currentVariant.price;
+  const isBalanceEnough = userBalance >= finalPrice;
 
-  const handlePurchase = () => {
+  const handlePurchase = async () => {
     if (!user) {
       alert('يرجى تسجيل الدخول أولاً للمتابعة.');
       return;
@@ -43,22 +61,32 @@ export const ServiceModal: React.FC = () => {
     }
 
     setIsSubmitting(true);
-    const result = purchaseItem({
+    const result = await purchaseItem({
       itemType: 'service',
       itemId: selectedService.id,
-      itemName: selectedService.name,
-      variantDuration: currentVariant.duration,
-      variantCode: currentVariant.code,
-      price: currentVariant.price,
+      variantId: currentVariant.id,
       customerNote
     });
 
     setOrderStatus(result);
     setIsSubmitting(false);
+
+    // بمجرد تأكيد الطلب ينتقل العميل مباشرة إلى صفحة حالة الطلب
+    if (result.success) {
+      setTimeout(() => {
+        closeServiceModal();
+        setOrderStatus(null);
+        setCustomerNote('');
+        navigate('dashboard-orders');
+      }, 1400);
+    }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+    <div
+      onClick={closeServiceModal}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
+    >
       <div 
         className="relative w-full max-w-2xl bg-bazaar-card rounded-3xl border border-bazaar-gold/30 shadow-2xl overflow-hidden my-8"
         onClick={e => e.stopPropagation()}
@@ -96,6 +124,29 @@ export const ServiceModal: React.FC = () => {
 
         {/* Modal Scrollable Body */}
         <div className="p-6 max-h-[70vh] overflow-y-auto space-y-6">
+          {/* لافتة العرض */}
+          {onOffer && (
+            <div className="p-4 rounded-2xl bg-gradient-to-l from-emerald-950/80 to-teal-950/60 border border-emerald-500/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+                  <Tag className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-black font-cairo text-emerald-300">
+                    {currentVariant.offerLabel || 'عرض خاص'} — خصم {discountPercent(currentVariant)}%
+                  </h4>
+                  <p className="text-[11px] text-emerald-200/80">
+                    وفّر {discountAmount(currentVariant)} ج.م على باقة «{currentVariant.duration}»
+                    {offerDaysLeft(currentVariant) !== null && ` — العرض ينتهي خلال ${offerDaysLeft(currentVariant)} يوم`}
+                  </p>
+                </div>
+              </div>
+              <div className="text-left shrink-0">
+                <div className="text-xs text-slate-400 line-through">{currentVariant.price} ج.م</div>
+                <div className="text-xl font-black font-cairo text-emerald-400">{finalPrice} ج.م</div>
+              </div>
+            </div>
+          )}
           {/* Duration Selector (if multiple) */}
           {selectedService.variants.length > 1 && (
             <div className="bg-bazaar-bg/80 p-4 rounded-2xl border border-white/5">
@@ -118,11 +169,25 @@ export const ServiceModal: React.FC = () => {
                     }`}
                   >
                     <div>
-                      <div className="text-xs font-bold text-white">{v.duration}</div>
+                      <div className="text-xs font-bold text-white flex items-center gap-1.5">
+                        <span>{v.duration}</span>
+                        {isOfferActive(v) && (
+                          <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                            -{discountPercent(v)}%
+                          </span>
+                        )}
+                      </div>
                       <div className="text-[10px] text-slate-400">كود: {v.code}</div>
                     </div>
-                    <div className="text-sm font-black text-amber-300">
-                      {v.price} ج.م
+                    <div className="text-left">
+                      {isOfferActive(v) && (
+                        <div className="text-[10px] text-slate-500 line-through leading-none">
+                          {v.price} ج.م
+                        </div>
+                      )}
+                      <div className={`text-sm font-black ${isOfferActive(v) ? 'text-emerald-400' : 'text-amber-300'}`}>
+                        {effectivePrice(v)} ج.م
+                      </div>
                     </div>
                   </button>
                 ))}
@@ -201,8 +266,8 @@ export const ServiceModal: React.FC = () => {
               <div className="leading-relaxed flex-1">
                 <p>{orderStatus.message}</p>
                 {orderStatus.success && (
-                  <p className="mt-2 text-[11px] text-emerald-300 font-normal">
-                    يمكنك الآن متابعة حالة طلبك واستلام البيانات فوراً من قسم «طلباتي».
+                  <p className="mt-2 text-[11px] text-emerald-300 font-normal animate-pulse">
+                    جارٍ تحويلك إلى صفحة حالة الطلب لمتابعة التنفيذ...
                   </p>
                 )}
               </div>
@@ -214,9 +279,16 @@ export const ServiceModal: React.FC = () => {
         <div className="bg-bazaar-surface p-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="w-full sm:w-auto flex items-center justify-between sm:justify-start gap-4">
             <div>
-              <div className="text-[11px] text-slate-400">السعر المطلوب</div>
-              <div className="text-2xl font-black text-white font-cairo">
-                {currentVariant.price} <span className="text-xs text-slate-300">ج.م</span>
+              <div className="text-[11px] text-slate-400">
+                {onOffer ? 'السعر بعد الخصم' : 'السعر المطلوب'}
+              </div>
+              <div className="flex items-baseline gap-2 flex-wrap">
+                <span className={`text-2xl font-black font-cairo ${onOffer ? 'text-emerald-400' : 'text-white'}`}>
+                  {finalPrice} <span className="text-xs text-slate-300">ج.م</span>
+                </span>
+                {onOffer && (
+                  <span className="text-xs text-slate-500 line-through">{currentVariant.price} ج.م</span>
+                )}
               </div>
             </div>
 
@@ -242,7 +314,7 @@ export const ServiceModal: React.FC = () => {
             )}
 
             <button
-              onClick={handlePurchase}
+              onClick={() => void handlePurchase()}
               disabled={isSubmitting || (orderStatus?.success ?? false)}
               className={`flex-1 sm:flex-none px-6 py-3 rounded-2xl font-black text-sm transition-all duration-200 flex items-center justify-center gap-2 shadow-lg ${
                 isBalanceEnough

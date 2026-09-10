@@ -22,12 +22,12 @@ if not exist "node_modules\" (
 
 echo.
 echo [2/2] بدء تشغيل سيرفر الموقع المحلي...
-echo الموقع سيعمل الآن على الرابط: http://localhost:3000
+echo الموقع سيعمل الآن على الرابط: http://localhost:5173
 echo.
 echo اضغط Ctrl+C لإيقاف السيرفر في أي وقت.
 echo ========================================================
 
-start http://localhost:3000
+start http://localhost:5173
 call npm run dev
 
 pause

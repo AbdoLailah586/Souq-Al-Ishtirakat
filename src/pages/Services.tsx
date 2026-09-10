@@ -1,21 +1,19 @@
 import React, { useState, useMemo } from 'react';
 import { useStore } from '../context/StoreContext';
 import { CATEGORIES } from '../data/services';
+import { minEffectivePrice, hasAnyOffer } from '../utils/pricing';
 import { ServiceCard } from '../components/ServiceCard';
 import { Search, SlidersHorizontal, Sparkles, X } from 'lucide-react';
 
-interface ServicesProps {
-  selectedCategory: string;
-  setSelectedCategory: (cat: string) => void;
-}
 
-export const Services: React.FC<ServicesProps> = ({ selectedCategory, setSelectedCategory }) => {
-  const { services } = useStore();
+
+export const Services: React.FC = () => {
+  const { services, selectedCategory, setSelectedCategory } = useStore();
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState<'default' | 'price-asc' | 'price-desc'>('default');
+  const [sortBy, setSortBy] = useState<'default' | 'price-asc' | 'price-desc' | 'offers'>('default');
 
   const filteredServices = useMemo(() => {
-    return services.filter(service => {
+    return services.filter(service => !service.isHidden).filter(service => {
       // Category filter
       const matchesCategory = selectedCategory === 'all' || service.category === selectedCategory;
 
@@ -30,11 +28,14 @@ export const Services: React.FC<ServicesProps> = ({ selectedCategory, setSelecte
 
       return matchesCategory && matchesSearch;
     }).sort((a, b) => {
-      const minPriceA = Math.min(...a.variants.map(v => v.price));
-      const minPriceB = Math.min(...b.variants.map(v => v.price));
+      const minPriceA = minEffectivePrice(a.variants);
+      const minPriceB = minEffectivePrice(b.variants);
 
       if (sortBy === 'price-asc') return minPriceA - minPriceB;
       if (sortBy === 'price-desc') return minPriceB - minPriceA;
+      if (sortBy === 'offers') {
+        return Number(hasAnyOffer(b.variants)) - Number(hasAnyOffer(a.variants));
+      }
       return 0; // default order
     });
   }, [services, selectedCategory, searchQuery, sortBy]);
@@ -89,6 +90,7 @@ export const Services: React.FC<ServicesProps> = ({ selectedCategory, setSelecte
               <option value="default">الترتيب الافتراضي</option>
               <option value="price-asc">السعر: من الأقل للأعلى</option>
               <option value="price-desc">السعر: من الأعلى للأقل</option>
+              <option value="offers">العروض والخصومات أولاً</option>
             </select>
           </div>
         </div>

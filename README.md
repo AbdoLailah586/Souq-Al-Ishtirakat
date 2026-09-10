@@ -5,6 +5,61 @@
 
 ---
 
+## 🏷️ Offers & Discounts (v2.1)
+
+Any service duration **or** bundle can carry a time-limited offer. The customer sees the old price struck through, the new price, and the discount percentage.
+
+### Price model
+| Field | Who sees it | Meaning |
+|---|---|---|
+| `originalPrice` | **Admin only** | Supplier cost. Never rendered to customers. |
+| `price` | Customer | The normal advertised price. |
+| `offerPrice` | Customer | Discounted price. When set and lower than `price`, it becomes the price actually charged. |
+| `offerLabel` | Customer | Offer name, e.g. `عرض الجمعة البيضاء`. |
+| `offerEndsAt` | Customer | Optional `YYYY-MM-DD`. The offer stays live through the whole end day, then disappears automatically. |
+
+All pricing goes through `src/utils/pricing.ts`, so the wallet is always charged `effectivePrice()` — the discount can never drift out of sync between the card, the modal, the order and the ledger.
+
+### Creating an offer
+Admin panel → **الاشتراكات والخدمات** (or **العروض والباقات**) → edit → **+ تفعيل عرض** on the duration you want. Pick a quick percentage (5–50%), or type an exact price. Name the offer and optionally set an end date. A live preview shows exactly what the customer will see before you save.
+
+> ⚠️ Fixed in v2.1: service and bundle cards used to strike through `originalPrice` — which is the **supplier cost**. That leaked purchase margins to customers and, since the cost is lower than the sale price, made every product look like it had *risen* in price. Supplier cost is now admin-only.
+
+> ⚠️ Fixed in v2.1: admin number inputs had no `step`, so any decimal value (e.g. a supplier cost of `819.85`) made the form silently invalid — clicking Save did nothing with no error shown.
+
+---
+
+## 🔐 Authentication & Access Control (v2)
+
+The site is now **fully gated**: nothing is visible until a user signs in.
+
+### Admin account (the only one)
+| Field | Value |
+|---|---|
+| Email | `admin@souq-subs.com` |
+| Password | `Souq@Admin2026` |
+
+- There is **no role switcher** anywhere in the UI. Your role is decided at sign-in.
+- Public sign-up **always** creates a `customer` account — the admin email is reserved and rejected at registration.
+- Additional admins can only be created from inside the admin panel (Users tab).
+- The root admin account cannot be deleted or demoted.
+- Change the default password from **حسابي → بياناتي وكلمة المرور** right after your first login.
+
+### Admin capabilities (full access)
+- **Users**: create, edit, block/unblock, delete accounts; add / deduct / set any wallet balance with a logged reason.
+- **Orders**: deliver credentials, change status (قيد التأكيد → جاري التنفيذ → تم التسليم → ملغي), edit any order field, create manual orders for a customer (with optional balance deduction), cancel with automatic refund, delete.
+- **Wallet**: approve/reject top-up receipts (credited to the correct customer), record manual deposits / refunds / deductions, delete ledger entries.
+- **Subscriptions**: full editing of every service — name, English name, category, badge, description, feature list, warranty note, delivery note, plus unlimited durations/variants with codes, retail price and supplier cost. Add, duplicate, hide or delete services.
+- **Offers**: same full control for bundles (components, features, pricing, visibility).
+- **Site settings**: site name & tagline, Instapay handle & name, Vodafone Cash number, WhatsApp support number, top banner, working hours, and a welcome bonus for new sign-ups.
+
+### Order status flow
+After a customer confirms a purchase, they are **redirected automatically** to their order page, which shows a live progress timeline:
+
+`قيد التأكيد` → `جاري التنفيذ` → `تم التسليم`
+
+---
+
 ## 🌟 Overview
 
 **Souq Al-Ishtirakat** is a full-featured digital subscription marketplace designed with a **Dark Digital Night Bazaar** visual aesthetic (`#100f26` deep midnight with radiant gold `#f0a83c`, cyan `#3ddad0`, and AI purple `#9b8bff` accents). 

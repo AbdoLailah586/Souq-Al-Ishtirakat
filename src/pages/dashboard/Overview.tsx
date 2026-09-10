@@ -13,13 +13,9 @@ import {
   Check 
 } from 'lucide-react';
 
-interface OverviewProps {
-  setCurrentTab: (tab: string) => void;
-}
-
-export const Overview: React.FC<OverviewProps> = ({ setCurrentTab }) => {
+export const Overview: React.FC = () => {
   const { user } = useAuth();
-  const { orders, transactions, openTopUpModal } = useStore();
+  const { orders, transactions, openTopUpModal, navigate: setCurrentTab } = useStore();
 
   const userOrders = orders.filter(o => o.userId === user?.id);
   const deliveredCount = userOrders.filter(o => o.status === 'delivered').length;

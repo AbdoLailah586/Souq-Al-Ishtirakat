@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Service, ServiceVariant } from '../types';
 import { useStore } from '../context/StoreContext';
+import { effectivePrice, isOfferActive, discountPercent, offerDaysLeft, hasAnyOffer } from '../utils/pricing';
 import { 
   Sparkles, 
   Check, 
@@ -63,6 +64,16 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => {
       {/* Glow Effect */}
       <div className="absolute top-0 right-0 w-32 h-32 bg-bazaar-gold/5 rounded-full filter blur-2xl group-hover:bg-bazaar-gold/15 transition-all"></div>
 
+      {/* شريط العرض */}
+      {hasAnyOffer(service.variants) && (
+        <div className="absolute top-4 left-0 z-10 bg-gradient-to-l from-emerald-500 to-teal-500 text-bazaar-bg text-[10px] font-black px-3 py-1 rounded-l-full shadow-lg flex items-center gap-1">
+          <Tag className="w-3 h-3 stroke-[3]" />
+          <span>
+            {service.variants.find(v => isOfferActive(v))?.offerLabel || 'عرض خاص'}
+          </span>
+        </div>
+      )}
+
       <div>
         {/* Top Header & Badges */}
         <div className="flex items-start justify-between gap-2 mb-4">
@@ -111,7 +122,14 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => {
                   }`}
                 >
                   <span className="truncate">{variant.duration}</span>
-                  <span className="text-[11px] font-bold">{variant.price} ج.م</span>
+                  <span className="text-[11px] font-bold flex items-center gap-1">
+                    {isOfferActive(variant) && (
+                      <span className="text-[10px] text-slate-500 line-through">{variant.price}</span>
+                    )}
+                    <span className={isOfferActive(variant) ? 'text-emerald-400' : ''}>
+                      {effectivePrice(variant)} ج.م
+                    </span>
+                  </span>
                 </button>
               ))}
             </div>
@@ -143,17 +161,31 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => {
             <Clock className="w-3 h-3 text-slate-400" />
             <span>المدة: {currentVariant.duration}</span>
           </div>
-          <div className="flex items-baseline gap-2">
-            <span className="text-xl sm:text-2xl font-black text-white font-cairo">
-              {currentVariant.price}
+          <div className="flex items-baseline gap-2 flex-wrap">
+            <span className={`text-xl sm:text-2xl font-black font-cairo ${
+              isOfferActive(currentVariant) ? 'text-emerald-400' : 'text-white'
+            }`}>
+              {effectivePrice(currentVariant)}
             </span>
             <span className="text-xs text-slate-300">جنيه مصري</span>
-            {currentVariant.originalPrice && currentVariant.originalPrice < currentVariant.price && (
+            {isOfferActive(currentVariant) && (
               <span className="text-[11px] text-slate-500 line-through">
-                {Math.round(currentVariant.originalPrice)} ج.م
+                {currentVariant.price} ج.م
               </span>
             )}
           </div>
+          {isOfferActive(currentVariant) && (
+            <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+              <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                خصم {discountPercent(currentVariant)}%
+              </span>
+              {offerDaysLeft(currentVariant) !== null && (
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-300 border border-rose-500/30">
+                  باقي {offerDaysLeft(currentVariant)} يوم
+                </span>
+              )}
+            </div>
+          )}
         </div>
 
         <button

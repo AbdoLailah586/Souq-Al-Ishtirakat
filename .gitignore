@@ -27,7 +27,9 @@ lerna-debug.log*
 *.sw?
 Thumbs.db
 
-# Environment variables
+# Environment variables & secrets
 .env
 .env.local
 .env.*.local
+client_secret*.json
+*.secret.json

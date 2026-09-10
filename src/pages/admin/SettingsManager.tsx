@@ -30,6 +30,36 @@ export const SettingsManager: React.FC = () => {
       </div>
 
       <form onSubmit={handleSave} className="p-6 rounded-3xl bg-bazaar-card border border-white/10 space-y-5 text-xs">
+        {/* هوية الموقع */}
+        <div className="space-y-3 pb-4 border-b border-white/5">
+          <h3 className="font-bold text-sm text-white flex items-center gap-1.5">
+            <span>🏮</span>
+            <span>هوية الموقع</span>
+          </h3>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="text-slate-300 font-semibold block mb-1">اسم الموقع:</label>
+              <input
+                type="text"
+                value={formData.siteName}
+                onChange={e => handleChange('siteName', e.target.value)}
+                className="w-full bg-bazaar-bg border border-white/10 rounded-xl p-2.5 text-white"
+              />
+            </div>
+
+            <div>
+              <label className="text-slate-300 font-semibold block mb-1">الوصف التعريفي تحت الاسم:</label>
+              <input
+                type="text"
+                value={formData.siteTagline}
+                onChange={e => handleChange('siteTagline', e.target.value)}
+                className="w-full bg-bazaar-bg border border-white/10 rounded-xl p-2.5 text-white"
+              />
+            </div>
+          </div>
+        </div>
+
         {/* Instapay Settings */}
         <div className="space-y-3 pb-4 border-b border-white/5">
           <h3 className="font-bold text-sm text-bazaar-gold flex items-center gap-1.5">
@@ -122,14 +152,26 @@ export const SettingsManager: React.FC = () => {
         </div>
 
         {/* Working Hours */}
-        <div className="space-y-2">
-          <label className="text-slate-300 font-semibold block">ساعات ومواعيد العمل الموضحة للعملاء:</label>
-          <input
-            type="text"
-            value={formData.workingHours}
-            onChange={e => handleChange('workingHours', e.target.value)}
-            className="w-full bg-bazaar-bg border border-white/10 rounded-xl p-2.5 text-white"
-          />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label className="text-slate-300 font-semibold block mb-1">ساعات ومواعيد العمل الموضحة للعملاء:</label>
+            <input
+              type="text"
+              value={formData.workingHours}
+              onChange={e => handleChange('workingHours', e.target.value)}
+              className="w-full bg-bazaar-bg border border-white/10 rounded-xl p-2.5 text-white"
+            />
+          </div>
+          <div>
+            <label className="text-slate-300 font-semibold block mb-1">هدية ترحيبية للعملاء الجدد (ج.م):</label>
+            <input
+              type="number" step="any"
+              min={0}
+              value={formData.welcomeBonus}
+              onChange={e => handleChange('welcomeBonus', Number(e.target.value))}
+              className="w-full bg-bazaar-bg border border-white/10 rounded-xl p-2.5 text-white"
+            />
+          </div>
         </div>
 
         {isSaved && (

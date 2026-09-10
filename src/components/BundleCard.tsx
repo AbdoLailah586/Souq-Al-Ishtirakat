@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Bundle } from '../types';
 import { useStore } from '../context/StoreContext';
 import { useAuth } from '../context/AuthContext';
+import { effectivePrice, isOfferActive, discountPercent, discountAmount, offerDaysLeft } from '../utils/pricing';
 import { Gift, Check, Sparkles, ShoppingBag, ArrowLeft } from 'lucide-react';
 
 interface BundleCardProps {
@@ -9,48 +10,60 @@ interface BundleCardProps {
 }
 
 export const BundleCard: React.FC<BundleCardProps> = ({ bundle }) => {
-  const { purchaseItem, openTopUpModal } = useStore();
+  const { purchaseItem, openTopUpModal, navigate } = useStore();
   const { user } = useAuth();
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [orderResult, setOrderResult] = useState<{ success: boolean; message: string } | null>(null);
 
-  const handleBuy = () => {
+  const finalPrice = effectivePrice(bundle);
+  const onOffer = isOfferActive(bundle);
+
+  const handleBuy = async () => {
     if (!user) {
       alert('يرجى تسجيل الدخول أولاً');
       return;
     }
 
-    if (user.balance < bundle.price) {
+    if (user.balance < finalPrice) {
       openTopUpModal();
       return;
     }
 
-    const confirmBuy = window.confirm(`هل ترغب في تأكيد شراء «${bundle.name}» بمبلغ ${bundle.price} ج.م من رصيدك؟`);
+    const confirmBuy = window.confirm(`هل ترغب في تأكيد شراء «${bundle.name}» بمبلغ ${finalPrice} ج.م من رصيدك؟`);
     if (!confirmBuy) return;
 
     setIsPurchasing(true);
-    const res = purchaseItem({
+    const res = await purchaseItem({
       itemType: 'bundle',
-      itemId: bundle.id,
-      itemName: bundle.name,
-      variantCode: bundle.code,
-      price: bundle.price,
+      itemId: bundle.id
     });
 
     setOrderResult(res);
     setIsPurchasing(false);
 
     if (res.success) {
-      setTimeout(() => setOrderResult(null), 5000);
+      // تحويل العميل مباشرة إلى صفحة حالة الطلب
+      setTimeout(() => {
+        setOrderResult(null);
+        navigate('dashboard-orders');
+      }, 1400);
     }
   };
 
   return (
     <div className="relative rounded-3xl p-6 bg-gradient-to-br from-bazaar-card/90 via-bazaar-surface to-bazaar-card/90 border-2 border-bazaar-gold/40 hover:border-bazaar-gold transition-all duration-300 shadow-xl hover:shadow-glow-gold flex flex-col justify-between group">
       {/* Top Floating Badge */}
-      <div className="absolute -top-3 left-6 bg-gradient-to-r from-bazaar-gold to-amber-500 text-bazaar-bg font-black text-xs px-3.5 py-1 rounded-full shadow-md flex items-center gap-1.5">
+      <div className={`absolute -top-3 left-6 font-black text-xs px-3.5 py-1 rounded-full shadow-md flex items-center gap-1.5 ${
+        onOffer
+          ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-bazaar-bg'
+          : 'bg-gradient-to-r from-bazaar-gold to-amber-500 text-bazaar-bg'
+      }`}>
         <Sparkles className="w-3.5 h-3.5" />
-        <span>وفر {bundle.savings} جنيه</span>
+        <span>
+          {onOffer
+            ? `${bundle.offerLabel || 'عرض خاص'} — خصم ${discountPercent(bundle)}%`
+            : `وفر ${bundle.savings} جنيه`}
+        </span>
       </div>
 
       <div>
@@ -99,18 +112,34 @@ export const BundleCard: React.FC<BundleCardProps> = ({ bundle }) => {
       <div className="pt-4 border-t border-white/10">
         <div className="flex items-baseline justify-between mb-3">
           <div>
-            <div className="text-[11px] text-slate-400">السعر الإجمالي للباقة</div>
-            <div className="flex items-baseline gap-2">
-              <span className="text-2xl sm:text-3xl font-black text-amber-300 font-cairo">
-                {bundle.price}
+            <div className="text-[11px] text-slate-400">
+              {onOffer ? 'سعر الباقة بعد الخصم' : 'السعر الإجمالي للباقة'}
+            </div>
+            <div className="flex items-baseline gap-2 flex-wrap">
+              <span className={`text-2xl sm:text-3xl font-black font-cairo ${
+                onOffer ? 'text-emerald-400' : 'text-amber-300'
+              }`}>
+                {finalPrice}
               </span>
               <span className="text-xs text-slate-300">جنيه مصري</span>
-              <span className="text-xs text-slate-500 line-through">
-                {Math.round(bundle.originalPrice)} ج.م
-              </span>
+              {onOffer && (
+                <span className="text-xs text-slate-500 line-through">{bundle.price} ج.م</span>
+              )}
             </div>
+            {onOffer && (
+              <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                  وفّر {discountAmount(bundle)} ج.م
+                </span>
+                {offerDaysLeft(bundle) !== null && (
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-300 border border-rose-500/30">
+                    باقي {offerDaysLeft(bundle)} يوم
+                  </span>
+                )}
+              </div>
+            )}
           </div>
-          <span className="text-xs font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-500/30 px-2 py-1 rounded-xl">
+          <span className="text-xs font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-500/30 px-2 py-1 rounded-xl shrink-0">
             خصم فوري
           </span>
         </div>
@@ -124,7 +153,7 @@ export const BundleCard: React.FC<BundleCardProps> = ({ bundle }) => {
         )}
 
         <button
-          onClick={handleBuy}
+          onClick={() => void handleBuy()}
           disabled={isPurchasing}
           className="w-full py-3 rounded-2xl bg-gradient-to-r from-bazaar-gold via-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-bazaar-bg font-black text-sm transition-all duration-200 shadow-lg shadow-bazaar-gold/20 active:scale-98 flex items-center justify-center gap-2"
         >

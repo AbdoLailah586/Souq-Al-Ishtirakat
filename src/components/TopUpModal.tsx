@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useStore } from '../context/StoreContext';
 import { useAuth } from '../context/AuthContext';
 import { 
@@ -28,6 +28,21 @@ export const TopUpModal: React.FC = () => {
   const [statusMessage, setStatusMessage] = useState<{ success: boolean; message: string } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // إغلاق النافذة بزر Escape
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') closeTopUpModal(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [closeTopUpModal]);
+
+  // مزامنة رقم المحوّل مع المستخدم الحالي عند فتح النافذة
+  useEffect(() => {
+    if (isTopUpModalOpen) {
+      setSenderPhone(user?.phone || '');
+      setStatusMessage(null);
+    }
+  }, [isTopUpModalOpen, user?.id]);
+
   if (!isTopUpModalOpen) return null;
 
   const quickAmounts = [100, 200, 350, 500, 850, 1000, 1500];
@@ -49,7 +64,7 @@ export const TopUpModal: React.FC = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!amount || amount <= 0) {
@@ -63,7 +78,7 @@ export const TopUpModal: React.FC = () => {
     }
 
     setIsSubmitting(true);
-    const res = requestTopUp({
+    const res = await requestTopUp({
       amount: Number(amount),
       method,
       senderPhone,
@@ -87,7 +102,10 @@ export const TopUpModal: React.FC = () => {
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+    <div
+      onClick={closeTopUpModal}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
+    >
       <div 
         className="relative w-full max-w-xl bg-bazaar-card rounded-3xl border border-bazaar-gold/30 shadow-2xl overflow-hidden my-8"
         onClick={e => e.stopPropagation()}
@@ -227,7 +245,7 @@ export const TopUpModal: React.FC = () => {
               ))}
             </div>
             <input
-              type="number"
+              type="number" step="any"
               value={amount || ''}
               onChange={e => setAmount(Number(e.target.value))}
               placeholder="أدخل مبلغ مخصص..."

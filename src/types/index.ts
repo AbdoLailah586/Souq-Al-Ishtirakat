@@ -1,9 +1,9 @@
-export type CategoryId = 
-  | 'ai' 
-  | 'design' 
-  | 'video' 
-  | 'entertainment' 
-  | 'productivity' 
+export type CategoryId =
+  | 'ai'
+  | 'design'
+  | 'video'
+  | 'entertainment'
+  | 'productivity'
   | 'marketing';
 
 export interface CategoryInfo {
@@ -20,8 +20,16 @@ export interface ServiceVariant {
   id: string;
   code: string;
   duration: string;
+  /** تكلفة المورد — بيانات داخلية للإدارة فقط ولا تظهر للعميل إطلاقاً */
   originalPrice?: number;
+  /** السعر الأساسي المعلن للعميل */
   price: number;
+  /** سعر العرض — لو موجود وأقل من السعر الأساسي يصبح هو السعر الفعلي */
+  offerPrice?: number;
+  /** اسم العرض الظاهر للعميل (مثال: عرض رمضان) */
+  offerLabel?: string;
+  /** تاريخ انتهاء العرض بصيغة YYYY-MM-DD — اتركه فارغاً لعرض دائم */
+  offerEndsAt?: string;
   isPopular?: boolean;
   note?: string;
 }
@@ -35,6 +43,7 @@ export interface Service {
   iconName: string;
   badge?: string;
   featured?: boolean;
+  isHidden?: boolean;
   shortDescription: string;
   features: string[];
   note?: string;
@@ -48,22 +57,39 @@ export interface Bundle {
   name: string;
   components: string;
   componentsList: string[];
+  /** تكلفة المورد — بيانات داخلية للإدارة فقط ولا تظهر للعميل */
   originalPrice: number;
+  /** السعر الأساسي المعلن للعميل */
   price: number;
+  /** سعر العرض — لو موجود وأقل من السعر الأساسي يصبح هو السعر الفعلي */
+  offerPrice?: number;
+  offerLabel?: string;
+  offerEndsAt?: string;
+  /** التوفير مقارنة بشراء مكونات الباقة منفصلة */
   savings: number;
   badge?: string;
+  isHidden?: boolean;
   description: string;
   features: string[];
 }
+
+export type UserRole = 'customer' | 'admin';
 
 export interface UserProfile {
   id: string;
   name: string;
   email: string;
   phone: string;
-  role: 'customer' | 'admin';
+  password: string;
+  role: UserRole;
   balance: number;
+  isBlocked?: boolean;
+  notes?: string;
   createdAt: string;
+  avatarUrl?: string;
+  city?: string;
+  preferredContact?: 'whatsapp' | 'telegram' | 'phone' | string;
+  isProfileComplete?: boolean;
 }
 
 export interface WalletTransaction {
@@ -71,10 +97,10 @@ export interface WalletTransaction {
   userId: string;
   userName: string;
   userPhone: string;
-  type: 'deposit' | 'purchase' | 'refund';
+  type: 'deposit' | 'purchase' | 'refund' | 'adjustment';
   amount: number;
   status: 'pending' | 'completed' | 'rejected';
-  method: 'instapay' | 'vodafone_cash' | 'internal';
+  method: 'instapay' | 'vodafone_cash' | 'internal' | 'admin';
   senderPhone?: string;
   receiptImage?: string;
   referenceNumber?: string;
@@ -82,6 +108,14 @@ export interface WalletTransaction {
   createdAt: string;
   adminNote?: string;
 }
+
+/**
+ * pending   = قيد التأكيد (تم استلام الطلب وبانتظار مراجعة الإدارة)
+ * processing = جاري التنفيذ (الإدارة تجهز بيانات الحساب)
+ * delivered = تم التسليم
+ * cancelled = ملغي (مع استرداد الرصيد)
+ */
+export type OrderStatus = 'pending' | 'processing' | 'delivered' | 'cancelled';
 
 export interface Order {
   id: string;
@@ -95,7 +129,7 @@ export interface Order {
   variantDuration?: string;
   variantCode?: string;
   price: number;
-  status: 'processing' | 'delivered' | 'cancelled';
+  status: OrderStatus;
   deliveryDetails?: {
     email?: string;
     password?: string;
@@ -104,7 +138,9 @@ export interface Order {
     deliveredAt?: string;
   };
   customerNote?: string;
+  adminNote?: string;
   createdAt: string;
+  updatedAt?: string;
 }
 
 export interface SiteSettings {
@@ -117,4 +153,12 @@ export interface SiteSettings {
   bannerText: string;
   showBanner: boolean;
   workingHours: string;
+  welcomeBonus: number;
 }
+
+export const ORDER_STATUS_LABEL: Record<OrderStatus, string> = {
+  pending: 'قيد التأكيد',
+  processing: 'جاري التنفيذ',
+  delivered: 'تم التسليم',
+  cancelled: 'ملغي'
+};
