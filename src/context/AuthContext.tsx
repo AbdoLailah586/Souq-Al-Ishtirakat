@@ -486,14 +486,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (userId === user?.id)
       return { success: false, message: 'لا يمكنك حذف الحساب الذي تستخدمه حالياً.' };
 
-    const { error } = await supabase.from('profiles').delete().eq('id', userId);
+    const { data, error } = await supabase.rpc('admin_delete_user', { p_user_id: userId });
+
     if (error) return { success: false, message: translateError(error.message) };
+
+    // التحقق من نتيجة الدالة
+    if (data && !data.success) {
+      if (data.error === 'unauthorized')
+        return { success: false, message: 'غير مصرح لك بهذا الإجراء.' };
+      if (data.error === 'cannot_delete_self')
+        return { success: false, message: 'لا يمكنك حذف الحساب الذي تستخدمه حالياً.' };
+      if (data.error === 'user_not_found')
+        return { success: false, message: 'الحساب غير موجود أو تم حذفه مسبقاً.' };
+      return { success: false, message: 'تعذر حذف الحساب.' };
+    }
+
     await refreshUsers();
-    return {
-      success: true,
-      message: 'تم حذف بيانات الحساب. لحذف بيانات الدخول نهائياً استخدم لوحة Supabase.'
-    };
+    return { success: true, message: 'تم حذف الحساب بالكامل. لن يستطيع المستخدم تسجيل الدخول مجدداً.' };
   }, [refreshUsers, user]);
+
 
   const adminSetBalance = useCallback(async (userId: string, newBalance: number, reason?: string): Promise<AuthResult> => {
     const { error } = await supabase.rpc('admin_set_balance', {
