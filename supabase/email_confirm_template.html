@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تأكيد حسابك في سوق الاشتراكات</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Cairo', 'Segoe UI', Arial, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      padding: 20px;
+      direction: rtl;
+    }
+    .wrapper { max-width: 540px; margin: 0 auto; }
+    .card {
+      background: #1a1d2e;
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid rgba(245,197,67,0.15);
+      box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+    }
+    .header {
+      background: linear-gradient(135deg, #1a1d2e 0%, #252836 100%);
+      padding: 36px 28px 28px;
+      text-align: center;
+      border-bottom: 1px solid rgba(245,197,67,0.2);
+    }
+    .logo-icon {
+      font-size: 48px;
+      display: block;
+      margin-bottom: 12px;
+      filter: drop-shadow(0 0 12px rgba(245,197,67,0.4));
+    }
+    .brand-name {
+      color: #f5c543;
+      font-size: 26px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+    }
+    .brand-sub {
+      color: #64748b;
+      font-size: 12px;
+      margin-top: 4px;
+    }
+    .body { padding: 32px 28px; }
+    .greeting {
+      font-size: 20px;
+      font-weight: 800;
+      color: #f8fafc;
+      margin-bottom: 12px;
+    }
+    .message {
+      color: #94a3b8;
+      line-height: 1.8;
+      font-size: 14px;
+      margin-bottom: 28px;
+    }
+    .message strong { color: #f5c543; }
+    .btn-wrapper { text-align: center; margin-bottom: 24px; }
+    .btn {
+      display: inline-block;
+      background: linear-gradient(135deg, #f5c543, #f59e0b);
+      color: #0f1117;
+      text-decoration: none;
+      padding: 16px 40px;
+      border-radius: 14px;
+      font-weight: 900;
+      font-size: 16px;
+      letter-spacing: 0.3px;
+      box-shadow: 0 8px 24px rgba(245,197,67,0.35);
+    }
+    .divider { height: 1px; background: rgba(255,255,255,0.06); margin: 24px 0; }
+    .note {
+      color: #475569;
+      font-size: 11px;
+      line-height: 1.7;
+    }
+    .footer {
+      background: #12141f;
+      padding: 20px 28px;
+      text-align: center;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+    .footer-text { color: #334155; font-size: 11px; line-height: 1.6; }
+    .features {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+    .feature {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 12px;
+      text-align: center;
+    }
+    .feature-icon { font-size: 20px; margin-bottom: 4px; }
+    .feature-text { color: #64748b; font-size: 10px; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="card">
+
+      <!-- Header -->
+      <div class="header">
+        <span class="logo-icon">🏮</span>
+        <div class="brand-name">سوق الاشتراكات</div>
+        <div class="brand-sub">بازار الاشتراكات الرقمية الأول في مصر والوطن العربي</div>
+      </div>
+
+      <!-- Body -->
+      <div class="body">
+        <div class="greeting">أهلاً بك! 👋</div>
+        <p class="message">
+          شكراً لتسجيلك في <strong>سوق الاشتراكات</strong>.<br>
+          حسابك جاهز — اضغط على الزر أدناه لتأكيد بريدك الإلكتروني وتفعيل حسابك فوراً.
+        </p>
+
+        <!-- CTA Button -->
+        <div class="btn-wrapper">
+          <a href="{{ .ConfirmationURL }}" class="btn">
+            ✅ تفعيل حسابي الآن
+          </a>
+        </div>
+
+        <!-- Features -->
+        <div class="features">
+          <div class="feature">
+            <div class="feature-icon">⚡</div>
+            <div class="feature-text">تسليم فوري</div>
+          </div>
+          <div class="feature">
+            <div class="feature-icon">💰</div>
+            <div class="feature-text">محفظة داخلية</div>
+          </div>
+          <div class="feature">
+            <div class="feature-icon">🛡️</div>
+            <div class="feature-text">ضمان ذهبي</div>
+          </div>
+          <div class="feature">
+            <div class="feature-icon">🎧</div>
+            <div class="feature-text">دعم فني بشري</div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <p class="note">
+          إذا لم تطلب إنشاء هذا الحساب، يمكنك تجاهل هذه الرسالة بأمان — لن يتم تفعيل أي حساب دون الضغط على الرابط.<br><br>
+          رابط التفعيل صالح لمدة <strong>24 ساعة</strong> فقط.
+        </p>
+      </div>
+
+      <!-- Footer -->
+      <div class="footer">
+        <p class="footer-text">
+          سوق الاشتراكات &copy; 2026 — جميع الحقوق محفوظة<br>
+          هذه الرسالة مرسلة تلقائياً، يرجى عدم الرد عليها.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</body>
+</html>

@@ -127,7 +127,20 @@ export const AuthPage: React.FC = () => {
     setFeedback(null);
     const res = await loginWithGoogle();
     if (!res.success) {
-      setFeedback(res);
+      // رسالة أوضح لو Google Provider مش مفعّل
+      if (
+        res.message.includes('غير مفعّل') ||
+        res.message.includes('provider') ||
+        res.message.includes('not enabled')
+      ) {
+        setFeedback({
+          success: false,
+          message:
+            'تسجيل الدخول بجوجل غير متاح حالياً. استخدم البريد الإلكتروني وكلمة المرور، أو تواصل مع الدعم.'
+        });
+      } else {
+        setFeedback(res);
+      }
       setIsBusy(false);
     }
   };
@@ -173,9 +186,14 @@ export const AuthPage: React.FC = () => {
         type="button"
         onClick={handleGoogle}
         disabled={isBusy}
-        className="w-full py-3.5 px-4 rounded-2xl bg-white hover:bg-slate-50 text-slate-800 font-bold text-sm shadow-md hover:shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-60 border border-slate-200 group"
+        title="تسجيل الدخول عبر حساب جوجل"
+        className="w-full py-3.5 px-4 rounded-2xl bg-white hover:bg-slate-50 text-slate-800 font-bold text-sm shadow-md hover:shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-60 border border-slate-200 group relative overflow-hidden"
       >
-        <GoogleIcon className="w-5 h-5 transition-transform group-hover:scale-110" />
+        {isBusy ? (
+          <Loader2 className="w-5 h-5 animate-spin text-slate-400" />
+        ) : (
+          <GoogleIcon className="w-5 h-5 transition-transform group-hover:scale-110" />
+        )}
         <span>المتابعة باستخدام حساب جوجل</span>
       </button>
 
@@ -243,8 +261,14 @@ export const AuthPage: React.FC = () => {
           {/* ===== شاشة انتظار تأكيد البريد ===== */}
           {pendingEmail ? (
             <div className="p-6 sm:p-8 space-y-5 text-center">
-              <div className="w-20 h-20 rounded-3xl bg-bazaar-teal/15 border border-bazaar-teal/40 flex items-center justify-center mx-auto">
-                <MailCheck className="w-10 h-10 text-bazaar-teal" />
+              {/* أيقونة الإيميل */}
+              <div className="relative w-20 h-20 mx-auto">
+                <div className="w-20 h-20 rounded-3xl bg-bazaar-teal/15 border border-bazaar-teal/40 flex items-center justify-center">
+                  <MailCheck className="w-10 h-10 text-bazaar-teal" />
+                </div>
+                <div className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center border-2 border-bazaar-card">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-white" />
+                </div>
               </div>
 
               <div className="space-y-2">
@@ -254,15 +278,31 @@ export const AuthPage: React.FC = () => {
                   <br />
                   <span className="text-bazaar-gold font-bold text-sm" dir="ltr">{pendingEmail}</span>
                   <br />
-                  افتح الرسالة واضغط على رابط التأكيد، وبعدها ارجع هنا وسجّل دخولك.
+                  <span className="text-slate-400">افتح الرسالة واضغط على رابط التأكيد، ثم ارجع هنا وسجّل دخولك.</span>
                 </p>
               </div>
 
+              {/* خطوات واضحة */}
+              <div className="grid grid-cols-3 gap-2 text-center">
+                {[
+                  { step: '1', label: 'افتح بريدك', icon: '📧' },
+                  { step: '2', label: 'اضغط الرابط', icon: '🔗' },
+                  { step: '3', label: 'سجّل دخولك', icon: '✅' },
+                ].map(s => (
+                  <div key={s.step} className="p-2.5 rounded-2xl bg-bazaar-surface/60 border border-white/5">
+                    <div className="text-lg mb-1">{s.icon}</div>
+                    <div className="text-[10px] text-slate-300 font-bold">{s.label}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* تنبيه السبام مع الإيميل الصح */}
               <div className="p-3.5 rounded-2xl bg-amber-950/30 border border-amber-500/30 text-[11px] text-amber-200 text-right leading-relaxed flex items-start gap-2">
                 <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
                 <span>
-                  لو مالقيتش الرسالة خلال دقيقة، شوف مجلد <strong>السبام / البريد المهمل</strong> —
-                  الرسالة بتيجي من <span dir="ltr">noreply@mail.app.supabase.io</span>
+                  لو مالقيتش الرسالة خلال دقيقة، شوف مجلد <strong>السبام / البريد المهمل</strong>.
+                  الرسالة بتيجي من{' '}
+                  <span dir="ltr" className="font-bold text-amber-300">abdolailah586@gmail.com</span>
                 </span>
               </div>
 
@@ -288,6 +328,13 @@ export const AuthPage: React.FC = () => {
                 >
                   <ArrowRight className="w-4 h-4" />
                   <span>فعّلت حسابي — ادخل الآن</span>
+                </button>
+
+                <button
+                  onClick={() => { setPendingEmail(null); setMode('register'); setFeedback(null); }}
+                  className="w-full py-2.5 text-[11px] text-slate-500 hover:text-slate-300 transition-colors"
+                >
+                  ← رجوع للتسجيل باستخدام إيميل مختلف
                 </button>
               </div>
             </div>
