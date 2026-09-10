@@ -7,5 +7,17 @@ export default defineConfig({
     port: 5173,
     open: false,
     host: true
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom'],
+          'vendor-supabase': ['@supabase/supabase-js'],
+          'vendor-icons': ['lucide-react'],
+        }
+      }
+    },
+    chunkSizeWarningLimit: 600
   }
 });
