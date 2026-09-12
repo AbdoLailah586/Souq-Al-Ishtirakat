@@ -50,7 +50,7 @@ interface StoreContextType {
 
   requestTopUp: (params: {
     amount: number;
-    method: 'instapay' | 'vodafone_cash';
+    method: 'instapay' | 'vodafone_cash' | 'etisalat_cash' | 'we_pay' | 'orange_cash' | string;
     senderPhone: string;
     receiptImage?: string;
     referenceNumber?: string;
@@ -100,19 +100,41 @@ const rowToVariant = (r: any): ServiceVariant => ({
   isPopular: !!r.is_popular, note: r.note || undefined
 });
 
-const rowToService = (r: any): Service => ({
-  id: r.id, name: r.name, englishName: r.english_name || '',
-  category: (r.category_id || 'ai') as CategoryId, slug: r.slug,
-  iconName: r.icon_name || 'Sparkles', badge: r.badge || undefined,
-  featured: !!r.featured, isHidden: !!r.is_hidden,
-  shortDescription: r.short_description || '',
-  features: Array.isArray(r.features) ? r.features : [],
-  note: r.note || undefined, executionNote: r.execution_note || undefined,
-  variants: (r.service_variants || [])
-    .slice()
-    .sort((a: any, b: any) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
-    .map(rowToVariant)
-});
+const rowToService = (r: any): Service => {
+  const fallback = SERVICES.find(s => s.id === r.id || s.slug === r.slug);
+  return {
+    id: r.id,
+    name: r.name,
+    englishName: r.english_name || fallback?.englishName || '',
+    category: (r.category_id || fallback?.category || 'ai') as CategoryId,
+    slug: r.slug,
+    iconName: r.icon_name || fallback?.iconName || 'Sparkles',
+    imageUrl: r.image_url || fallback?.imageUrl,
+    badge: r.badge || fallback?.badge || undefined,
+    featured: !!r.featured,
+    isHidden: !!r.is_hidden,
+    shortDescription: r.short_description || fallback?.shortDescription || '',
+    features: Array.isArray(r.features) && r.features.length > 0 ? r.features : (fallback?.features || []),
+    note: r.note || fallback?.note || undefined,
+    executionNote: r.execution_note || fallback?.executionNote || undefined,
+    deliveryTime: r.delivery_time || fallback?.deliveryTime || undefined,
+    deliveryFormat: r.delivery_format || fallback?.deliveryFormat || undefined,
+    warrantyText: r.warranty_text || fallback?.warrantyText || undefined,
+    accountType: r.account_type || fallback?.accountType || undefined,
+    activationSteps: Array.isArray(r.activation_steps) && r.activation_steps.length > 0 ? r.activation_steps : (fallback?.activationSteps || undefined),
+    loginInstructions: Array.isArray(r.login_instructions) && r.login_instructions.length > 0 ? r.login_instructions : (fallback?.loginInstructions || undefined),
+    externalLink: r.external_link || fallback?.externalLink || undefined,
+    requiredInputType: r.required_input_type || fallback?.requiredInputType || undefined,
+    requiredInputLabel: r.required_input_label || fallback?.requiredInputLabel || undefined,
+    requiredInputPlaceholder: r.required_input_placeholder || fallback?.requiredInputPlaceholder || undefined,
+    variants: (r.service_variants && r.service_variants.length > 0)
+      ? r.service_variants
+          .slice()
+          .sort((a: any, b: any) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+          .map(rowToVariant)
+      : (fallback?.variants || [])
+  };
+};
 
 const rowToBundle = (r: any): Bundle => ({
   id: r.id, code: r.code || '', name: r.name,
@@ -346,7 +368,13 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       user_id: user.id, type: 'deposit', amount, status: 'pending', method,
       sender_phone: senderPhone, receipt_image: receiptImage || null,
       reference_number: referenceNumber || null,
-      description: `طلب شحن محفظة بمبلغ ${amount} ج.م عبر ${method === 'instapay' ? 'Instapay' : 'فودافون كاش'}`
+      description: `طلب شحن محفظة بمبلغ ${amount} ج.م عبر ${
+        method === 'instapay' ? 'Instapay' :
+        method === 'vodafone_cash' ? 'فودافون كاش' :
+        method === 'etisalat_cash' ? 'اتصالات كاش' :
+        method === 'we_pay' ? 'وي باي (WE Pay)' :
+        method === 'orange_cash' ? 'أورنج كاش / دولي' : method
+      }`
     });
     if (error) return fail(error);
 

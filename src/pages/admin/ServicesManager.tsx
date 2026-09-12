@@ -166,14 +166,22 @@ export const ServicesManager: React.FC = () => {
               }`}
             >
               <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="text-sm font-bold font-cairo text-white truncate">{service.name}</h3>
-                    {service.featured && (
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-bazaar-gold/15 text-bazaar-gold border border-bazaar-gold/30 font-bold">
-                        مميزة
-                      </span>
-                    )}
+                <div className="flex items-start gap-3 min-w-0">
+                  {service.imageUrl && (
+                    <img 
+                      src={service.imageUrl} 
+                      alt={service.name} 
+                      className="w-12 h-12 rounded-xl object-cover border border-white/10 shrink-0 shadow-md"
+                    />
+                  )}
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="text-sm font-bold font-cairo text-white truncate">{service.name}</h3>
+                      {service.featured && (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-bazaar-gold/15 text-bazaar-gold border border-bazaar-gold/30 font-bold">
+                          مميزة
+                        </span>
+                      )}
                     {service.isHidden && (
                       <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-white/10 font-bold">
                         مخفية
@@ -187,6 +195,7 @@ export const ServicesManager: React.FC = () => {
                   </div>
                   <span className="text-[10px] text-slate-400 font-mono">{service.englishName}</span>
                   <p className="text-[11px] text-slate-400 mt-1 line-clamp-2">{service.shortDescription}</p>
+                </div>
                 </div>
                 <div className="text-left shrink-0">
                   <span
@@ -314,6 +323,26 @@ export const ServicesManager: React.FC = () => {
                   <div>
                     <label className="text-xs text-slate-300 font-semibold block mb-1">شارة الخدمة (مثال: الأكثر مبيعاً)</label>
                     <input value={draft.badge || ''} onChange={e => patch({ badge: e.target.value })} className={field} />
+                  </div>
+                  <div>
+                    <label className="text-xs text-slate-300 font-semibold block mb-1">رابط صورة الخدمة / البانر</label>
+                    <input value={draft.imageUrl || ''} onChange={e => patch({ imageUrl: e.target.value })} placeholder="/images/products/chatgpt-plus.jpg" className={field} dir="ltr" />
+                  </div>
+                  <div>
+                    <label className="text-xs text-slate-300 font-semibold block mb-1">وقت البدء والتسليم</label>
+                    <input value={draft.deliveryTime || ''} onChange={e => patch({ deliveryTime: e.target.value })} placeholder="0 - 6 ساعات" className={field} />
+                  </div>
+                  <div>
+                    <label className="text-xs text-slate-300 font-semibold block mb-1">طريقة التسليم</label>
+                    <input value={draft.deliveryFormat || ''} onChange={e => patch({ deliveryFormat: e.target.value })} placeholder="حساب جاهز أو رابط تفعيل" className={field} />
+                  </div>
+                  <div>
+                    <label className="text-xs text-slate-300 font-semibold block mb-1">الضمان الفعلي</label>
+                    <input value={draft.warrantyText || ''} onChange={e => patch({ warrantyText: e.target.value })} placeholder="ضمان 30 يوم" className={field} />
+                  </div>
+                  <div>
+                    <label className="text-xs text-slate-300 font-semibold block mb-1">نوع الحساب</label>
+                    <input value={draft.accountType || ''} onChange={e => patch({ accountType: e.target.value })} placeholder="حساب شخصي / حساب جاهز" className={field} />
                   </div>
                 </div>
 

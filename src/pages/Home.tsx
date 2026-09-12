@@ -264,6 +264,99 @@ export const Home: React.FC = () => {
         </div>
       </section>
 
+      {/* Accepted Payment Methods Showcase */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="bg-gradient-to-br from-bazaar-card via-bazaar-surface to-bazaar-card rounded-3xl p-8 sm:p-10 border border-white/10 relative overflow-hidden shadow-2xl space-y-8">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div className="space-y-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-bazaar-gold/15 text-bazaar-gold text-xs font-black border border-bazaar-gold/30">
+                <span>وسائل دفع رسمية 100%</span>
+              </span>
+              <h2 className="text-2xl sm:text-4xl font-black font-cairo text-white">
+                طرق الدفع والشحن المعتمدة
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-300 max-w-xl">
+                اشحن رصيد محفظتك بسهولة عبر جميع المحافظ الإلكترونية المصرية، انستاباي اللحظي، أو التحويلات الدولية للمغتربين.
+              </p>
+            </div>
+
+            <button
+              onClick={() => setCurrentTab('payment')}
+              className="px-5 py-2.5 rounded-2xl bg-white/5 hover:bg-white/10 text-bazaar-gold border border-bazaar-gold/30 hover:border-bazaar-gold text-xs font-black transition-all flex items-center gap-2 self-start md:self-auto shrink-0 shadow-md"
+            >
+              <span>عرض الدليل الكامل وأرقام التحويل</span>
+              <ArrowLeft className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+            {[
+              {
+                id: 'instapay',
+                name: 'انستاباي',
+                tag: 'تحويل لحظي ⚡',
+                sub: 'رسوم 0% - فوري',
+                img: '/images/payment/instapay.png',
+                border: 'hover:border-purple-500/50'
+              },
+              {
+                id: 'vodafone-cash',
+                name: 'فودافون كاش',
+                tag: 'كاش 📱',
+                sub: 'متاح 24/7',
+                img: '/images/payment/vodafone-cash.png',
+                border: 'hover:border-rose-500/50'
+              },
+              {
+                id: 'etisalat-cash',
+                name: 'اتصالات كاش',
+                tag: 'كاش 🟢',
+                sub: 'كود *777#',
+                img: '/images/payment/etisalat-cash.png',
+                border: 'hover:border-emerald-500/50'
+              },
+              {
+                id: 'we-pay',
+                name: 'وي باي (WE Pay)',
+                tag: 'كاش 🟣',
+                sub: 'تطبيق WE Pay',
+                img: '/images/payment/we-pay.png',
+                border: 'hover:border-purple-500/50'
+              },
+              {
+                id: 'orange-europe',
+                name: 'أورنج / أوروبا',
+                tag: 'محلي ودولي 🌍',
+                sub: 'مغتربين وأوروبا',
+                img: '/images/payment/orange-europe.png',
+                border: 'hover:border-amber-500/50'
+              }
+            ].map(m => (
+              <div
+                key={m.id}
+                onClick={() => openTopUpModal()}
+                className={`glass-card p-4 rounded-2xl border border-white/10 ${m.border} transition-all duration-300 hover:-translate-y-1 cursor-pointer flex flex-col items-center text-center space-y-3 group shadow-md`}
+              >
+                <div className="w-full h-20 rounded-xl bg-black/40 border border-white/10 p-2 flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform">
+                  <img src={m.img} alt={m.name} className="max-h-full max-w-full object-contain" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-black font-cairo text-white group-hover:text-bazaar-gold transition-colors">
+                    {m.name}
+                  </h4>
+                  <div className="text-[10px] text-amber-300/90 font-bold mt-0.5">
+                    {m.tag}
+                  </div>
+                  <div className="text-[9px] text-slate-400">
+                    {m.sub}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Customer Trust / Testimonials */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-xl mx-auto mb-10">

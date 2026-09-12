@@ -142,22 +142,22 @@ export const Footer: React.FC = () => {
         {/* Payment Methods Badges */}
         <div className="space-y-3">
           <h4 className="text-white font-bold font-cairo text-sm">طرق الدفع المدعومة</h4>
-          <div className="flex flex-wrap gap-2 text-[11px]">
-            <span className="px-2.5 py-1 rounded-lg bg-bazaar-card border border-bazaar-border text-slate-300 font-bold">
-              Instapay ⚡
-            </span>
-            <span className="px-2.5 py-1 rounded-lg bg-bazaar-card border border-bazaar-border text-red-400 font-bold">
-              فودافون كاش
-            </span>
-            <span className="px-2.5 py-1 rounded-lg bg-bazaar-card border border-bazaar-border text-orange-400 font-bold">
-              أورنج موني
-            </span>
-            <span className="px-2.5 py-1 rounded-lg bg-bazaar-card border border-bazaar-border text-emerald-400 font-bold">
-              اتصالات كاش
-            </span>
-            <span className="px-2.5 py-1 rounded-lg bg-bazaar-card border border-bazaar-border text-purple-400 font-bold">
-              WE Pay
-            </span>
+          <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 pt-1">
+            {[
+              { name: 'InstaPay', img: '/images/payment/instapay.png' },
+              { name: 'Vodafone Cash', img: '/images/payment/vodafone-cash.png' },
+              { name: 'Etisalat Cash', img: '/images/payment/etisalat-cash.png' },
+              { name: 'WE Pay', img: '/images/payment/we-pay.png' },
+              { name: 'Orange Europe', img: '/images/payment/orange-europe.png' },
+            ].map(p => (
+              <div 
+                key={p.name}
+                className="h-10 rounded-xl bg-bazaar-card/90 border border-white/10 hover:border-bazaar-gold/50 p-1 flex items-center justify-center transition-all hover:scale-105 shadow-sm"
+                title={p.name}
+              >
+                <img src={p.img} alt={p.name} className="max-h-full max-w-full object-contain" />
+              </div>
+            ))}
           </div>
           <p className="text-[11px] text-slate-500 pt-2">
             مواعيد التحويل والتسليم: {settings.workingHours}

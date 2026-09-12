@@ -41,6 +41,7 @@ export interface Service {
   category: CategoryId;
   slug: string;
   iconName: string;
+  imageUrl?: string;
   badge?: string;
   featured?: boolean;
   isHidden?: boolean;
@@ -48,6 +49,16 @@ export interface Service {
   features: string[];
   note?: string;
   executionNote?: string;
+  deliveryTime?: string;
+  deliveryFormat?: string;
+  warrantyText?: string;
+  accountType?: string;
+  activationSteps?: string[];
+  loginInstructions?: string[];
+  externalLink?: { label: string; url: string };
+  requiredInputType?: 'phone' | 'email' | 'text';
+  requiredInputLabel?: string;
+  requiredInputPlaceholder?: string;
   variants: ServiceVariant[];
 }
 
@@ -100,7 +111,7 @@ export interface WalletTransaction {
   type: 'deposit' | 'purchase' | 'refund' | 'adjustment';
   amount: number;
   status: 'pending' | 'completed' | 'rejected';
-  method: 'instapay' | 'vodafone_cash' | 'internal' | 'admin';
+  method: 'instapay' | 'vodafone_cash' | 'etisalat_cash' | 'we_pay' | 'orange_cash' | 'internal' | 'admin' | string;
   senderPhone?: string;
   receiptImage?: string;
   referenceNumber?: string;
@@ -149,6 +160,9 @@ export interface SiteSettings {
   instapayHandle: string;
   instapayName: string;
   vodafoneCashNumber: string;
+  etisalatCashNumber?: string;
+  wePayNumber?: string;
+  orangeCashNumber?: string;
   whatsappSupportNumber: string;
   bannerText: string;
   showBanner: boolean;

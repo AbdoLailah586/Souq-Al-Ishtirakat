@@ -19,7 +19,57 @@ export const TopUpModal: React.FC = () => {
   const { isTopUpModalOpen, closeTopUpModal, requestTopUp, openAuthModal, settings } = useStore();
   const { user } = useAuth();
 
-  const [method, setMethod] = useState<'instapay' | 'vodafone_cash'>('instapay');
+  const [method, setMethod] = useState<'instapay' | 'vodafone_cash' | 'etisalat_cash' | 'we_pay' | 'orange_cash'>('instapay');
+
+  const methodsList = [
+    {
+      id: 'instapay' as const,
+      name: 'انستاباي',
+      tag: 'تحويل لحظي ⚡',
+      logo: '/images/payment/instapay.png',
+      targetLabel: 'عنوان انستاباي اللحظي (IPA):',
+      targetValue: settings.instapayHandle,
+      extra: `اسم المستلم: ${settings.instapayName}`
+    },
+    {
+      id: 'vodafone_cash' as const,
+      name: 'فودافون كاش',
+      tag: 'كاش 📱',
+      logo: '/images/payment/vodafone-cash.png',
+      targetLabel: 'رقم محفظة فودافون كاش:',
+      targetValue: settings.vodafoneCashNumber,
+      extra: 'الكود السريع: *9*7*الرقم*المبلغ#'
+    },
+    {
+      id: 'etisalat_cash' as const,
+      name: 'اتصالات كاش',
+      tag: 'كاش 🟢',
+      logo: '/images/payment/etisalat-cash.png',
+      targetLabel: 'رقم محفظة اتصالات كاش:',
+      targetValue: settings.etisalatCashNumber || settings.vodafoneCashNumber,
+      extra: 'الكود المختصر: *777#'
+    },
+    {
+      id: 'we_pay' as const,
+      name: 'وي باي (WE Pay)',
+      tag: 'كاش 🟣',
+      logo: '/images/payment/we-pay.png',
+      targetLabel: 'رقم محفظة وي باي:',
+      targetValue: settings.wePayNumber || settings.vodafoneCashNumber,
+      extra: 'عبر تطبيق WE Pay الرسمي'
+    },
+    {
+      id: 'orange_cash' as const,
+      name: 'أورنج / أوروبا',
+      tag: 'محلي ودولي 🌍',
+      logo: '/images/payment/orange-europe.png',
+      targetLabel: 'رقم محفظة أورنج / الاستفسار الدولي:',
+      targetValue: settings.orangeCashNumber || settings.vodafoneCashNumber,
+      extra: 'للمغتربين: تواصل مع الدعم لبيانات التحويل الدولي واليورو'
+    }
+  ];
+
+  const currentMethod = methodsList.find(m => m.id === method) || methodsList[0];
   const [amount, setAmount] = useState<number>(250);
   const [senderPhone, setSenderPhone] = useState(user?.phone || '');
   const [referenceNumber, setReferenceNumber] = useState('');
@@ -166,69 +216,51 @@ export const TopUpModal: React.FC = () => {
           {/* Method Selector Tabs */}
           <div>
             <label className="text-xs font-bold text-slate-300 block mb-2">
-              اختر طريقة التحويل:
+              اختر وسيلة الدفع / الشحن المطلوبة:
             </label>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => setMethod('instapay')}
-                className={`p-3.5 rounded-2xl border text-right transition-all flex items-center gap-3 ${
-                  method === 'instapay'
-                    ? 'bg-bazaar-gold/15 border-bazaar-gold text-white shadow-md'
-                    : 'bg-bazaar-bg/60 border-white/5 text-slate-400 hover:border-white/20'
-                }`}
-              >
-                <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center font-black text-sm text-bazaar-gold">
-                  ⚡
-                </div>
-                <div>
-                  <div className="text-xs font-bold text-white">انستاباي (Instapay)</div>
-                  <div className="text-[10px] text-slate-400">تحويل فوري بدون عمولات</div>
-                </div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setMethod('vodafone_cash')}
-                className={`p-3.5 rounded-2xl border text-right transition-all flex items-center gap-3 ${
-                  method === 'vodafone_cash'
-                    ? 'bg-bazaar-teal/15 border-bazaar-teal text-white shadow-md'
-                    : 'bg-bazaar-bg/60 border-white/5 text-slate-400 hover:border-white/20'
-                }`}
-              >
-                <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-sm text-bazaar-teal">
-                  <Smartphone className="w-4 h-4" />
-                </div>
-                <div>
-                  <div className="text-xs font-bold text-white">محافظ كاش الذكية</div>
-                  <div className="text-[10px] text-slate-400">فودافون كاش ومحافظ البنوك</div>
-                </div>
-              </button>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {methodsList.map(m => (
+                <button
+                  key={m.id}
+                  type="button"
+                  onClick={() => setMethod(m.id)}
+                  className={`p-2.5 rounded-2xl border text-right transition-all flex items-center gap-2.5 relative overflow-hidden ${
+                    method === m.id
+                      ? 'bg-bazaar-gold/15 border-bazaar-gold text-white shadow-lg ring-1 ring-bazaar-gold/30'
+                      : 'bg-bazaar-bg/70 border-white/5 text-slate-400 hover:border-white/20'
+                  }`}
+                >
+                  <div className="w-11 h-9 rounded-xl overflow-hidden bg-black/40 border border-white/10 shrink-0 p-1 flex items-center justify-center">
+                    <img src={m.logo} alt={m.name} className="w-full h-full object-contain" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-xs font-bold text-white truncate">{m.name}</div>
+                    <div className="text-[9px] text-amber-300/80 font-medium truncate">{m.tag}</div>
+                  </div>
+                </button>
+              ))}
             </div>
           </div>
 
           {/* Payment Account Details Box */}
-          <div className="p-4 rounded-2xl bg-bazaar-bg/90 border border-bazaar-border space-y-3">
+          <div className="p-4 rounded-2xl bg-bazaar-bg/90 border border-bazaar-gold/30 space-y-3 shadow-inner">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-300">
-                {method === 'instapay' ? 'عنوان انستاباي للتحويل عليه:' : 'رقم فودافون كاش للتحويل عليه:'}
+              <span className="text-xs font-bold text-slate-200">
+                {currentMethod.targetLabel}
               </span>
-              <span className="text-[10px] text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-500/30">
+              <span className="text-[10px] text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-500/30 font-bold">
                 متاح الآن 🟢
               </span>
             </div>
 
             <div className="flex items-center justify-between bg-bazaar-card p-3 rounded-xl border border-white/10">
-              <span className="font-mono text-sm font-bold text-amber-300 select-all" dir="ltr">
-                {method === 'instapay' ? settings.instapayHandle : settings.vodafoneCashNumber}
+              <span className="font-mono text-xs sm:text-sm font-black text-amber-300 select-all truncate" dir="ltr">
+                {currentMethod.targetValue}
               </span>
               <button
                 type="button"
-                onClick={() => handleCopy(
-                  method === 'instapay' ? settings.instapayHandle : settings.vodafoneCashNumber,
-                  'account'
-                )}
-                className="px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs text-slate-300 hover:text-white flex items-center gap-1 transition-all"
+                onClick={() => handleCopy(currentMethod.targetValue, 'account')}
+                className="px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs text-slate-300 hover:text-white flex items-center gap-1 transition-all shrink-0 ml-1"
               >
                 {copiedKey === 'account' ? (
                   <>
@@ -244,9 +276,9 @@ export const TopUpModal: React.FC = () => {
               </button>
             </div>
 
-            {method === 'instapay' && (
-              <p className="text-[11px] text-slate-400">
-                اسم المستلم في التطبيق: <span className="text-white font-semibold">{settings.instapayName}</span>
+            {currentMethod.extra && (
+              <p className="text-[11px] text-slate-300 font-medium">
+                {currentMethod.extra}
               </p>
             )}
           </div>
