@@ -3,14 +3,14 @@ import { Bundle } from '../types';
 import { useStore } from '../context/StoreContext';
 import { useAuth } from '../context/AuthContext';
 import { effectivePrice, isOfferActive, discountPercent, discountAmount, offerDaysLeft } from '../utils/pricing';
-import { Gift, Check, Sparkles, ShoppingBag, ArrowLeft } from 'lucide-react';
+import { Gift, Check, Sparkles, ShoppingBag, ArrowLeft, LogIn } from 'lucide-react';
 
 interface BundleCardProps {
   bundle: Bundle;
 }
 
 export const BundleCard: React.FC<BundleCardProps> = ({ bundle }) => {
-  const { purchaseItem, openTopUpModal, navigate } = useStore();
+  const { purchaseItem, openTopUpModal, openAuthModal, navigate } = useStore();
   const { user } = useAuth();
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [orderResult, setOrderResult] = useState<{ success: boolean; message: string } | null>(null);
@@ -20,7 +20,7 @@ export const BundleCard: React.FC<BundleCardProps> = ({ bundle }) => {
 
   const handleBuy = async () => {
     if (!user) {
-      alert('يرجى تسجيل الدخول أولاً');
+      openAuthModal(`يرجى تسجيل الدخول أو إنشاء حساب جديد لطلب باقة «${bundle.name}».`);
       return;
     }
 
@@ -157,8 +157,17 @@ export const BundleCard: React.FC<BundleCardProps> = ({ bundle }) => {
           disabled={isPurchasing}
           className="w-full py-3 rounded-2xl bg-gradient-to-r from-bazaar-gold via-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-bazaar-bg font-black text-sm transition-all duration-200 shadow-lg shadow-bazaar-gold/20 active:scale-98 flex items-center justify-center gap-2"
         >
-          <ShoppingBag className="w-4 h-4 stroke-[2.5]" />
-          <span>اطلب الباقة الآن من الرصيد</span>
+          {!user ? (
+            <>
+              <LogIn className="w-4 h-4 stroke-[2.5]" />
+              <span>تسجيل الدخول لطلب الباقة</span>
+            </>
+          ) : (
+            <>
+              <ShoppingBag className="w-4 h-4 stroke-[2.5]" />
+              <span>اطلب الباقة الآن من الرصيد</span>
+            </>
+          )}
         </button>
       </div>
     </div>

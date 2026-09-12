@@ -3,12 +3,12 @@ import { useAuth } from '../context/AuthContext';
 import { useStore } from '../context/StoreContext';
 import {
   Sparkles, Wallet, Plus, User, ShoppingBag, Menu, X,
-  Layers, Sliders, ChevronDown, LogOut, UserCog
+  Layers, Sliders, ChevronDown, LogOut, UserCog, LogIn, UserPlus
 } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
   const { user, isAdmin, logout } = useAuth();
-  const { openTopUpModal, settings, orders, transactions, currentTab, navigate } = useStore();
+  const { openTopUpModal, openAuthModal, settings, orders, transactions, currentTab, navigate } = useStore();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -120,119 +120,141 @@ export const Navbar: React.FC = () => {
             </button>
           )}
 
-          {/* المحفظة (للعملاء) */}
-          {user && !isAdmin && (
-            <div className="flex items-center bg-bazaar-card border border-bazaar-border hover:border-bazaar-gold/40 rounded-xl p-1 sm:px-3 sm:py-1.5 transition-all shadow-inner">
-              <div
-                onClick={() => handleNavClick('dashboard-wallet')}
-                className="flex items-center gap-2 cursor-pointer pl-2 select-none"
-                title="اضغط لفتح المحفظة"
-              >
-                <div className="w-7 h-7 rounded-lg bg-bazaar-gold/15 text-bazaar-gold flex items-center justify-center">
-                  <Wallet className="w-4 h-4" />
-                </div>
-                <div className="hidden sm:block text-right">
-                  <div className="text-[10px] text-slate-400 leading-none">رصيد المحفظة</div>
-                  <div className="text-xs sm:text-sm font-black text-amber-300 leading-tight">
-                    {user.balance.toLocaleString()} <span className="text-[10px] font-normal text-slate-300">ج.م</span>
-                  </div>
-                </div>
-              </div>
+          {/* أزرار تسجيل الدخول وحساب جديد للزائر أو بيانات العميل */}
+          {!user ? (
+            <div className="flex items-center gap-2">
               <button
-                onClick={openTopUpModal}
-                className="bg-gradient-to-r from-bazaar-gold to-amber-500 hover:from-amber-400 hover:to-amber-500 text-bazaar-bg font-bold px-2 sm:px-2.5 py-1 rounded-lg text-xs flex items-center gap-1 transition-transform active:scale-95 shadow-sm"
-                title="شحن الرصيد الآن"
+                onClick={() => openAuthModal(undefined, 'login')}
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold bg-gradient-to-r from-bazaar-gold to-amber-500 hover:from-amber-400 hover:to-amber-500 text-bazaar-bg shadow-md shadow-bazaar-gold/20 active:scale-95 transition-all"
               >
-                <Plus className="w-3.5 h-3.5 stroke-[3]" />
-                <span className="hidden sm:inline">شحن</span>
+                <LogIn className="w-4 h-4" />
+                <span>تسجيل الدخول</span>
+              </button>
+              <button
+                onClick={() => openAuthModal(undefined, 'register')}
+                className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-bazaar-card hover:bg-white/10 text-slate-200 border border-white/10 transition-all"
+              >
+                <UserPlus className="w-3.5 h-3.5 text-bazaar-teal" />
+                <span>حساب جديد</span>
               </button>
             </div>
-          )}
-
-          {/* قائمة الحساب */}
-          <div className="relative" ref={menuRef}>
-            <button
-              onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-              className="flex items-center gap-2 bg-bazaar-card hover:bg-bazaar-cardHover border border-bazaar-border rounded-xl px-2.5 py-1.5 transition-all"
-            >
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-bazaar-purple/30 to-bazaar-teal/30 border border-white/10 flex items-center justify-center text-sm font-bold text-white">
-                {user ? user.name.slice(0, 1) : <User className="w-4 h-4" />}
-              </div>
-              <span className="text-xs font-semibold text-slate-200 hidden md:inline max-w-[90px] truncate">
-                {user?.name}
-              </span>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
-            </button>
-
-            {isProfileMenuOpen && (
-              <div className="absolute left-0 mt-2 w-60 rounded-2xl bg-bazaar-card border border-bazaar-border shadow-2xl p-2 z-50">
-                <div className="p-2 border-b border-bazaar-border/60">
-                  <p className="text-xs font-bold text-white">{user?.name}</p>
-                  <p className="text-[11px] text-slate-400 truncate" dir="ltr">{user?.email}</p>
-                  <span
-                    className={`inline-block mt-1 text-[10px] px-2 py-0.5 rounded-full font-bold ${
-                      isAdmin ? 'bg-bazaar-gold/20 text-bazaar-gold' : 'bg-bazaar-teal/20 text-bazaar-teal'
-                    }`}
-                  >
-                    {isAdmin ? 'مدير المتجر (Admin)' : 'عميل'}
-                  </span>
-                </div>
-
-                <div className="py-1">
-                  <button
-                    onClick={() => handleNavClick('dashboard')}
-                    className="w-full text-right px-3 py-2 rounded-lg text-xs text-slate-200 hover:bg-white/5 flex items-center justify-between"
-                  >
-                    <span>لوحة التحكم الرئيسية</span>
-                    <Layers className="w-3.5 h-3.5 text-slate-400" />
-                  </button>
-                  <button
-                    onClick={() => handleNavClick('dashboard-orders')}
-                    className="w-full text-right px-3 py-2 rounded-lg text-xs text-slate-200 hover:bg-white/5 flex items-center justify-between"
-                  >
-                    <span>طلباتي وحساباتي المسلمة</span>
-                    <ShoppingBag className="w-3.5 h-3.5 text-slate-400" />
-                  </button>
-                  <button
+          ) : (
+            <>
+              {/* المحفظة (للعملاء) */}
+              {!isAdmin && (
+                <div className="flex items-center bg-bazaar-card border border-bazaar-border hover:border-bazaar-gold/40 rounded-xl p-1 sm:px-3 sm:py-1.5 transition-all shadow-inner">
+                  <div
                     onClick={() => handleNavClick('dashboard-wallet')}
-                    className="w-full text-right px-3 py-2 rounded-lg text-xs text-slate-200 hover:bg-white/5 flex items-center justify-between"
+                    className="flex items-center gap-2 cursor-pointer pl-2 select-none"
+                    title="اضغط لفتح المحفظة"
                   >
-                    <span>محفظتي وحركات الشحن</span>
-                    <Wallet className="w-3.5 h-3.5 text-slate-400" />
-                  </button>
+                    <div className="w-7 h-7 rounded-lg bg-bazaar-gold/15 text-bazaar-gold flex items-center justify-center">
+                      <Wallet className="w-4 h-4" />
+                    </div>
+                    <div className="hidden sm:block text-right">
+                      <div className="text-[10px] text-slate-400 leading-none">رصيد المحفظة</div>
+                      <div className="text-xs sm:text-sm font-black text-amber-300 leading-tight">
+                        {user.balance.toLocaleString()} <span className="text-[10px] font-normal text-slate-300">ج.م</span>
+                      </div>
+                    </div>
+                  </div>
                   <button
-                    onClick={() => handleNavClick('dashboard-profile')}
-                    className="w-full text-right px-3 py-2 rounded-lg text-xs text-slate-200 hover:bg-white/5 flex items-center justify-between"
+                    onClick={openTopUpModal}
+                    className="bg-gradient-to-r from-bazaar-gold to-amber-500 hover:from-amber-400 hover:to-amber-500 text-bazaar-bg font-bold px-2 sm:px-2.5 py-1 rounded-lg text-xs flex items-center gap-1 transition-transform active:scale-95 shadow-sm"
+                    title="شحن الرصيد الآن"
                   >
-                    <span>بياناتي وكلمة المرور</span>
-                    <UserCog className="w-3.5 h-3.5 text-slate-400" />
+                    <Plus className="w-3.5 h-3.5 stroke-[3]" />
+                    <span className="hidden sm:inline">شحن</span>
                   </button>
                 </div>
+              )}
 
-                {isAdmin && (
-                  <div className="pt-1 border-t border-bazaar-border/60">
-                    <button
-                      onClick={() => handleNavClick('admin')}
-                      className="w-full text-right px-3 py-2 rounded-lg text-xs text-bazaar-gold font-bold hover:bg-bazaar-gold/10 flex items-center justify-between"
-                    >
-                      <span>لوحة تحكم الإدارة الكاملة</span>
-                      <Sliders className="w-3.5 h-3.5" />
-                    </button>
+              {/* قائمة الحساب */}
+              <div className="relative" ref={menuRef}>
+                <button
+                  onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+                  className="flex items-center gap-2 bg-bazaar-card hover:bg-bazaar-cardHover border border-bazaar-border rounded-xl px-2.5 py-1.5 transition-all"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-bazaar-purple/30 to-bazaar-teal/30 border border-white/10 flex items-center justify-center text-sm font-bold text-white">
+                    {user.name.slice(0, 1)}
+                  </div>
+                  <span className="text-xs font-semibold text-slate-200 hidden md:inline max-w-[90px] truncate">
+                    {user.name}
+                  </span>
+                  <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+                </button>
+
+                {isProfileMenuOpen && (
+                  <div className="absolute left-0 mt-2 w-60 rounded-2xl bg-bazaar-card border border-bazaar-border shadow-2xl p-2 z-50">
+                    <div className="p-2 border-b border-bazaar-border/60">
+                      <p className="text-xs font-bold text-white">{user.name}</p>
+                      <p className="text-[11px] text-slate-400 truncate" dir="ltr">{user.email}</p>
+                      <span
+                        className={`inline-block mt-1 text-[10px] px-2 py-0.5 rounded-full font-bold ${
+                          isAdmin ? 'bg-bazaar-gold/20 text-bazaar-gold' : 'bg-bazaar-teal/20 text-bazaar-teal'
+                        }`}
+                      >
+                        {isAdmin ? 'مدير المتجر (Admin)' : 'عميل'}
+                      </span>
+                    </div>
+
+                    <div className="py-1">
+                      <button
+                        onClick={() => handleNavClick('dashboard')}
+                        className="w-full text-right px-3 py-2 rounded-lg text-xs text-slate-200 hover:bg-white/5 flex items-center justify-between"
+                      >
+                        <span>لوحة التحكم الرئيسية</span>
+                        <Layers className="w-3.5 h-3.5 text-slate-400" />
+                      </button>
+                      <button
+                        onClick={() => handleNavClick('dashboard-orders')}
+                        className="w-full text-right px-3 py-2 rounded-lg text-xs text-slate-200 hover:bg-white/5 flex items-center justify-between"
+                      >
+                        <span>طلباتي وحساباتي المسلمة</span>
+                        <ShoppingBag className="w-3.5 h-3.5 text-slate-400" />
+                      </button>
+                      <button
+                        onClick={() => handleNavClick('dashboard-wallet')}
+                        className="w-full text-right px-3 py-2 rounded-lg text-xs text-slate-200 hover:bg-white/5 flex items-center justify-between"
+                      >
+                        <span>محفظتي وحركات الشحن</span>
+                        <Wallet className="w-3.5 h-3.5 text-slate-400" />
+                      </button>
+                      <button
+                        onClick={() => handleNavClick('dashboard-profile')}
+                        className="w-full text-right px-3 py-2 rounded-lg text-xs text-slate-200 hover:bg-white/5 flex items-center justify-between"
+                      >
+                        <span>بياناتي وكلمة المرور</span>
+                        <UserCog className="w-3.5 h-3.5 text-slate-400" />
+                      </button>
+                    </div>
+
+                    {isAdmin && (
+                      <div className="pt-1 border-t border-bazaar-border/60">
+                        <button
+                          onClick={() => handleNavClick('admin')}
+                          className="w-full text-right px-3 py-2 rounded-lg text-xs text-bazaar-gold font-bold hover:bg-bazaar-gold/10 flex items-center justify-between"
+                        >
+                          <span>لوحة تحكم الإدارة الكاملة</span>
+                          <Sliders className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    )}
+
+                    <div className="pt-1 border-t border-bazaar-border/60">
+                      <button
+                        onClick={handleLogout}
+                        className="w-full text-right px-3 py-2 rounded-lg text-xs text-rose-300 font-bold hover:bg-rose-950/40 flex items-center justify-between"
+                      >
+                        <span>تسجيل الخروج</span>
+                        <LogOut className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
                 )}
-
-                <div className="pt-1 border-t border-bazaar-border/60">
-                  <button
-                    onClick={handleLogout}
-                    className="w-full text-right px-3 py-2 rounded-lg text-xs text-rose-300 font-bold hover:bg-rose-950/40 flex items-center justify-between"
-                  >
-                    <span>تسجيل الخروج</span>
-                    <LogOut className="w-3.5 h-3.5" />
-                  </button>
-                </div>
               </div>
-            )}
-          </div>
+            </>
+          )}
 
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -269,12 +291,37 @@ export const Navbar: React.FC = () => {
             </button>
           )}
 
-          <button
-            onClick={handleLogout}
-            className="w-full text-right px-4 py-2.5 rounded-xl text-sm font-bold text-rose-300 bg-rose-950/30 border border-rose-500/20 mt-2"
-          >
-            تسجيل الخروج
-          </button>
+          {user ? (
+            <button
+              onClick={handleLogout}
+              className="w-full text-right px-4 py-2.5 rounded-xl text-sm font-bold text-rose-300 bg-rose-950/30 border border-rose-500/20 mt-2"
+            >
+              تسجيل الخروج
+            </button>
+          ) : (
+            <div className="pt-3 mt-2 border-t border-bazaar-border/60 space-y-2">
+              <button
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  openAuthModal(undefined, 'login');
+                }}
+                className="w-full py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-bazaar-gold to-amber-500 text-bazaar-bg flex items-center justify-center gap-2 shadow-md active:scale-95 transition-all"
+              >
+                <LogIn className="w-4 h-4" />
+                <span>تسجيل الدخول</span>
+              </button>
+              <button
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  openAuthModal(undefined, 'register');
+                }}
+                className="w-full py-2.5 rounded-xl text-xs font-bold bg-bazaar-card text-slate-200 border border-white/10 flex items-center justify-center gap-2 active:scale-95 transition-all"
+              >
+                <UserPlus className="w-4 h-4 text-bazaar-teal" />
+                <span>إنشاء حساب جديد</span>
+              </button>
+            </div>
+          )}
         </div>
       )}
     </header>

@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 
 export const TopUpModal: React.FC = () => {
-  const { isTopUpModalOpen, closeTopUpModal, requestTopUp, settings } = useStore();
+  const { isTopUpModalOpen, closeTopUpModal, requestTopUp, openAuthModal, settings } = useStore();
   const { user } = useAuth();
 
   const [method, setMethod] = useState<'instapay' | 'vodafone_cash'>('instapay');
@@ -44,6 +44,34 @@ export const TopUpModal: React.FC = () => {
   }, [isTopUpModalOpen, user?.id]);
 
   if (!isTopUpModalOpen) return null;
+
+  if (!user) {
+    return (
+      <div onClick={closeTopUpModal} className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+        <div onClick={e => e.stopPropagation()} className="relative w-full max-w-md bg-bazaar-card rounded-3xl border border-bazaar-gold/30 shadow-2xl p-6 sm:p-8 text-center space-y-4">
+          <button onClick={closeTopUpModal} className="absolute left-4 top-4 text-slate-400 hover:text-white p-1">
+            <X className="w-5 h-5" />
+          </button>
+          <div className="w-16 h-16 mx-auto rounded-2xl bg-bazaar-gold/15 text-bazaar-gold flex items-center justify-center text-3xl">
+            💳
+          </div>
+          <h2 className="text-xl font-black font-cairo text-white">تسجيل الدخول مطلوب لشحن المحفظة</h2>
+          <p className="text-xs text-slate-300 leading-relaxed">
+            يجب تسجيل الدخول إلى حسابك أو إنشاء حساب جديد لتتمكن من إضافة رصيد ورفع إيصال التحويل.
+          </p>
+          <button
+            onClick={() => {
+              closeTopUpModal();
+              openAuthModal('يرجى تسجيل الدخول أو إنشاء حساب جديد لشحن المحفظة وإضافة الرصيد.');
+            }}
+            className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-bazaar-gold to-amber-500 text-bazaar-bg font-black text-sm shadow-lg shadow-bazaar-gold/25 active:scale-95 transition-all"
+          >
+            تسجيل الدخول / إنشاء حساب الآن
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const quickAmounts = [100, 200, 350, 500, 850, 1000, 1500];
 

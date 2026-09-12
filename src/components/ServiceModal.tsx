@@ -15,11 +15,12 @@ import {
   AlertCircle,
   HelpCircle,
   FileText,
-  Tag
+  Tag,
+  LogIn
 } from 'lucide-react';
 
 export const ServiceModal: React.FC = () => {
-  const { selectedService, closeServiceModal, purchaseItem, openTopUpModal, navigate } = useStore();
+  const { selectedService, closeServiceModal, purchaseItem, openTopUpModal, openAuthModal, navigate } = useStore();
   const { user } = useAuth();
 
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
@@ -51,7 +52,7 @@ export const ServiceModal: React.FC = () => {
 
   const handlePurchase = async () => {
     if (!user) {
-      alert('يرجى تسجيل الدخول أولاً للمتابعة.');
+      openAuthModal(`يرجى تسجيل الدخول أو إنشاء حساب جديد للاشتراك في خدمة «${selectedService.name}».`);
       return;
     }
 
@@ -292,41 +293,58 @@ export const ServiceModal: React.FC = () => {
               </div>
             </div>
 
-            {user && (
+            {user ? (
               <div className="border-r border-white/10 pr-4">
                 <div className="text-[11px] text-slate-400">رصيد محفظتك</div>
                 <div className={`text-sm font-bold ${isBalanceEnough ? 'text-emerald-400' : 'text-rose-400'}`}>
                   {userBalance.toLocaleString()} ج.م
                 </div>
               </div>
+            ) : (
+              <div className="border-r border-white/10 pr-4">
+                <div className="text-[11px] text-slate-400">حالة الحساب</div>
+                <div className="text-xs font-bold text-amber-300">زائر (غير مسجل)</div>
+              </div>
             )}
           </div>
 
           <div className="w-full sm:w-auto flex items-center gap-2">
-            {!isBalanceEnough && (
+            {!user ? (
               <button
-                onClick={openTopUpModal}
-                className="flex-1 sm:flex-none px-4 py-3 rounded-2xl bg-bazaar-card hover:bg-white/10 border border-bazaar-gold/40 text-bazaar-gold text-xs font-bold flex items-center justify-center gap-1.5 transition-all"
+                onClick={() => openAuthModal(`يرجى تسجيل الدخول أو إنشاء حساب جديد للاشتراك في خدمة «${selectedService.name}».`)}
+                className="flex-1 sm:flex-none px-6 py-3.5 rounded-2xl font-black text-sm transition-all duration-200 flex items-center justify-center gap-2 shadow-lg bg-gradient-to-r from-bazaar-gold to-amber-500 hover:from-amber-400 hover:to-amber-500 text-bazaar-bg shadow-bazaar-gold/25 active:scale-95"
               >
-                <Plus className="w-4 h-4" />
-                <span>شحن رصيد إضافي</span>
+                <LogIn className="w-4 h-4" />
+                <span>تسجيل الدخول للاشتراك</span>
               </button>
-            )}
+            ) : (
+              <>
+                {!isBalanceEnough && (
+                  <button
+                    onClick={openTopUpModal}
+                    className="flex-1 sm:flex-none px-4 py-3 rounded-2xl bg-bazaar-card hover:bg-white/10 border border-bazaar-gold/40 text-bazaar-gold text-xs font-bold flex items-center justify-center gap-1.5 transition-all"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>شحن رصيد إضافي</span>
+                  </button>
+                )}
 
-            <button
-              onClick={() => void handlePurchase()}
-              disabled={isSubmitting || (orderStatus?.success ?? false)}
-              className={`flex-1 sm:flex-none px-6 py-3 rounded-2xl font-black text-sm transition-all duration-200 flex items-center justify-center gap-2 shadow-lg ${
-                isBalanceEnough
-                  ? 'bg-gradient-to-r from-bazaar-gold to-amber-500 hover:from-amber-400 hover:to-amber-500 text-bazaar-bg shadow-bazaar-gold/25'
-                  : 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white'
-              }`}
-            >
-              <ShoppingBag className="w-4 h-4" />
-              <span>
-                {isBalanceEnough ? 'تأكيد الشراء من الرصيد' : 'شحن المحفظة لإتمام الشراء'}
-              </span>
-            </button>
+                <button
+                  onClick={() => void handlePurchase()}
+                  disabled={isSubmitting || (orderStatus?.success ?? false)}
+                  className={`flex-1 sm:flex-none px-6 py-3 rounded-2xl font-black text-sm transition-all duration-200 flex items-center justify-center gap-2 shadow-lg ${
+                    isBalanceEnough
+                      ? 'bg-gradient-to-r from-bazaar-gold to-amber-500 hover:from-amber-400 hover:to-amber-500 text-bazaar-bg shadow-bazaar-gold/25'
+                      : 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white'
+                  }`}
+                >
+                  <ShoppingBag className="w-4 h-4" />
+                  <span>
+                    {isBalanceEnough ? 'تأكيد الشراء من الرصيد' : 'شحن المحفظة لإتمام الشراء'}
+                  </span>
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>

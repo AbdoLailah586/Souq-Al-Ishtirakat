@@ -5,6 +5,8 @@ import {
 import { supabase, translateError, parseInsufficientFunds } from '../lib/supabase';
 import { useAuth } from './AuthContext';
 import { DEFAULT_SETTINGS } from '../data/initialData';
+import { SERVICES } from '../data/services';
+import { BUNDLES } from '../data/bundles';
 
 interface ActionResult { success: boolean; message: string; orderId?: string; }
 
@@ -27,6 +29,12 @@ interface StoreContextType {
   isTopUpModalOpen: boolean;
   openTopUpModal: () => void;
   closeTopUpModal: () => void;
+
+  isAuthModalOpen: boolean;
+  authModalReason: string | null;
+  authModalMode: 'login' | 'register';
+  openAuthModal: (reason?: string, mode?: 'login' | 'register') => void;
+  closeAuthModal: () => void;
 
   refreshAll: () => Promise<void>;
   refreshOrders: () => Promise<void>;
@@ -178,6 +186,28 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [isTopUpModalOpen, setIsTopUpModalOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authModalReason, setAuthModalReason] = useState<string | null>(null);
+  const [authModalMode, setAuthModalMode] = useState<'login' | 'register'>('login');
+
+  const openAuthModal = useCallback((reason?: string, mode?: 'login' | 'register') => {
+    setAuthModalReason(reason || null);
+    setAuthModalMode(mode || 'login');
+    setIsAuthModalOpen(true);
+  }, []);
+
+  const closeAuthModal = useCallback(() => {
+    setIsAuthModalOpen(false);
+    setAuthModalReason(null);
+  }, []);
+
+  // إغلاق نافذة تسجيل الدخول تلقائياً بمجرد تسجيل الدخول بنجاح
+  useEffect(() => {
+    if (isAuthenticated) {
+      setIsAuthModalOpen(false);
+      setAuthModalReason(null);
+    }
+  }, [isAuthenticated]);
 
   const navigate = useCallback((tab: string) => {
     setCurrentTab(tab);
@@ -189,14 +219,22 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // ================= التحميل =================
   const refreshCatalog = useCallback(async () => {
-    const [svc, bnd, st] = await Promise.all([
-      supabase.from('services').select('*, service_variants(*)').order('sort_order'),
-      supabase.from('bundles').select('*').order('sort_order'),
-      supabase.from('site_settings').select('*').eq('id', 1).maybeSingle()
-    ]);
-    if (svc.data) setServices(svc.data.map(rowToService));
-    if (bnd.data) setBundles(bnd.data.map(rowToBundle));
-    if (st.data) setSettings(rowToSettings(st.data));
+    try {
+      const [svc, bnd, st] = await Promise.all([
+        supabase.from('services').select('*, service_variants(*)').order('sort_order'),
+        supabase.from('bundles').select('*').order('sort_order'),
+        supabase.from('site_settings').select('*').eq('id', 1).maybeSingle()
+      ]);
+      if (svc.data && svc.data.length > 0) setServices(svc.data.map(rowToService));
+      else setServices(SERVICES);
+      if (bnd.data && bnd.data.length > 0) setBundles(bnd.data.map(rowToBundle));
+      else setBundles(BUNDLES);
+      if (st.data) setSettings(rowToSettings(st.data));
+    } catch (e) {
+      console.error('Failed to load catalog:', e);
+      setServices(SERVICES);
+      setBundles(BUNDLES);
+    }
   }, []);
 
   const refreshOrders = useCallback(async () => {
@@ -221,13 +259,24 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setIsLoadingData(false);
   }, [refreshCatalog, refreshOrders, refreshTransactions]);
 
+  // تحميل الكتالوج فوراً لجميع الزوار (مسجلين أو غير مسجلين)
   useEffect(() => {
-    if (isAuthenticated) void refreshAll();
-    else {
-      setServices([]); setBundles([]); setOrders([]); setTransactions([]);
+    void refreshCatalog();
+  }, [refreshCatalog]);
+
+  // تحميل الطلبات والمعاملات الخاصة بالمستخدم فقط عند تسجيل الدخول
+  useEffect(() => {
+    if (isAuthenticated) {
+      setIsLoadingData(true);
+      Promise.all([refreshOrders(), refreshTransactions()]).finally(() => {
+        setIsLoadingData(false);
+      });
+    } else {
+      setOrders([]);
+      setTransactions([]);
       setIsLoadingData(false);
     }
-  }, [isAuthenticated, refreshAll]);
+  }, [isAuthenticated, refreshOrders, refreshTransactions]);
 
   // تحديث فوري عند أي تغيير في الطلبات أو المحفظة (Realtime)
   useEffect(() => {
@@ -244,7 +293,15 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const openServiceModal = (s: Service) => setSelectedService(s);
   const closeServiceModal = () => setSelectedService(null);
-  const openTopUpModal = () => setIsTopUpModalOpen(true);
+
+  const openTopUpModal = useCallback(() => {
+    if (!user) {
+      openAuthModal('يرجى تسجيل الدخول أو إنشاء حساب جديد لشحن محفظتك وإضافة الرصيد.');
+      return;
+    }
+    setIsTopUpModalOpen(true);
+  }, [user, openAuthModal]);
+
   const closeTopUpModal = () => setIsTopUpModalOpen(false);
 
   // ================= الشراء =================
@@ -535,6 +592,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     currentTab, navigate, selectedCategory, setSelectedCategory,
     selectedService, openServiceModal, closeServiceModal,
     isTopUpModalOpen, openTopUpModal, closeTopUpModal,
+    isAuthModalOpen, authModalReason, authModalMode, openAuthModal, closeAuthModal,
     refreshAll, refreshOrders, refreshTransactions, refreshCatalog,
     purchaseItem, requestTopUp,
     approveTopUp, rejectTopUp, deleteTransaction, adminAddTransaction,
@@ -543,7 +601,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     saveBundle, updateBundle, deleteBundle, updateSettings
   }), [services, bundles, orders, transactions, settings, isLoadingData,
        currentTab, selectedCategory, selectedService, isTopUpModalOpen,
-       navigate, refreshAll, refreshOrders, refreshTransactions, refreshCatalog, user, isAdmin]);
+       isAuthModalOpen, authModalReason, authModalMode, openAuthModal, closeAuthModal,
+       navigate, refreshAll, refreshOrders, refreshTransactions, refreshCatalog, user, isAdmin, openTopUpModal]);
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
 };

@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import {
   Lock, Mail, User, Phone, Eye, EyeOff, LogIn, UserPlus, ShieldCheck,
   Sparkles, AlertCircle, CheckCircle2, Zap, Wallet, Headphones,
-  MailCheck, Loader2, ArrowRight, KeyRound
+  MailCheck, Loader2, ArrowRight, KeyRound, X
 } from 'lucide-react';
 
 /** أيقونة جوجل الرسمية بالألوان */
@@ -16,12 +16,24 @@ const GoogleIcon: React.FC<{ className?: string }> = ({ className = 'w-5 h-5' })
   </svg>
 );
 
-type Mode = 'login' | 'register' | 'forgot';
+export type Mode = 'login' | 'register' | 'forgot';
 
-export const AuthPage: React.FC = () => {
+export interface AuthPageProps {
+  isModal?: boolean;
+  onClose?: () => void;
+  reason?: string;
+  initialMode?: Mode;
+}
+
+export const AuthPage: React.FC<AuthPageProps> = ({
+  isModal = false,
+  onClose,
+  reason,
+  initialMode = 'login'
+}) => {
   const { login, register, loginWithGoogle, signInWithGoogleCredential, resendConfirmation, resetPassword } = useAuth();
 
-  const [mode, setMode] = useState<Mode>('login');
+  const [mode, setMode] = useState<Mode>(initialMode);
   const [showPassword, setShowPassword] = useState(false);
   const [feedback, setFeedback] = useState<{ success: boolean; message: string } | null>(null);
   const [isBusy, setIsBusy] = useState(false);
@@ -35,6 +47,19 @@ export const AuthPage: React.FC = () => {
     name: '', email: '', phone: '', password: '', confirmPassword: ''
   });
   const [forgotEmail, setForgotEmail] = useState('');
+
+  React.useEffect(() => {
+    if (initialMode) setMode(initialMode);
+  }, [initialMode]);
+
+  React.useEffect(() => {
+    if (!isModal || !onClose) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isModal, onClose]);
 
   const startCooldown = () => {
     setResendCooldown(60);
@@ -205,61 +230,10 @@ export const AuthPage: React.FC = () => {
     </>
   );
 
-  return (
-    <div className="min-h-screen bg-bazaar-bg text-slate-100 flex items-center justify-center p-4 sm:p-6 relative overflow-hidden">
-      <div className="absolute -top-40 -right-32 w-96 h-96 rounded-full bg-bazaar-gold/10 blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-40 -left-32 w-96 h-96 rounded-full bg-bazaar-purple/10 blur-3xl pointer-events-none" />
-
-      <div className="relative w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-        {/* اللوحة التعريفية */}
-        <div className="hidden lg:block space-y-6 pr-4">
-          <div className="flex items-center gap-3">
-            <div className="w-14 h-14 rounded-3xl bg-gradient-to-br from-bazaar-card to-bazaar-surface border border-bazaar-gold/40 flex items-center justify-center text-3xl shadow-glow-gold">
-              🏮
-            </div>
-            <div>
-              <h1 className="text-3xl font-black font-cairo gold-gradient-text">سوق الاشتراكات</h1>
-              <p className="text-xs text-slate-400">بازار الاشتراكات الرقمية الأول في مصر والوطن العربي</p>
-            </div>
-          </div>
-
-          <p className="text-sm text-slate-300 leading-relaxed">
-            سجّل دخولك للوصول إلى بازار الاشتراكات الرقمية: أدوات الذكاء الاصطناعي، التصميم،
-            المونتاج والتسويق — بأسعار مصرية وضمان كامل طوال فترة الاشتراك.
-          </p>
-
-          <div className="space-y-3">
-            {[
-              { icon: Zap, title: 'تسليم فوري', desc: 'استلم بيانات حسابك خلال دقائق من الطلب' },
-              { icon: Wallet, title: 'محفظة داخلية', desc: 'اشحن عبر انستاباي أو فودافون كاش واشترِ بضغطة' },
-              { icon: ShieldCheck, title: 'ضمان ذهبي', desc: 'استبدال فوري لأي حساب يتوقف خلال مدة الاشتراك' },
-              { icon: Headphones, title: 'دعم فني بشري', desc: 'فريق متاح يومياً للرد على استفساراتك' }
-            ].map(item => (
-              <div key={item.title} className="flex items-start gap-3 p-3.5 rounded-2xl bg-bazaar-card/60 border border-white/5">
-                <div className="w-9 h-9 rounded-xl bg-bazaar-gold/15 text-bazaar-gold flex items-center justify-center shrink-0">
-                  <item.icon className="w-4 h-4" />
-                </div>
-                <div>
-                  <h3 className="text-xs font-bold text-white">{item.title}</h3>
-                  <p className="text-[11px] text-slate-400">{item.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* البطاقة */}
-        <div className="bg-bazaar-card border border-bazaar-gold/25 rounded-3xl shadow-2xl overflow-hidden">
-          <div className="lg:hidden bg-gradient-to-r from-bazaar-surface to-bazaar-card p-5 border-b border-white/10 flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-bazaar-bg border border-bazaar-gold/40 flex items-center justify-center text-2xl">🏮</div>
-            <div>
-              <h1 className="text-lg font-black font-cairo gold-gradient-text">سوق الاشتراكات</h1>
-              <p className="text-[10px] text-slate-400">اشتراكاتك الرقمية بضغطة زر</p>
-            </div>
-          </div>
-
-          {/* ===== شاشة انتظار تأكيد البريد ===== */}
-          {pendingEmail ? (
+  const cardBody = (
+    <>
+      {/* ===== شاشة انتظار تأكيد البريد ===== */}
+      {pendingEmail ? (
             <div className="p-6 sm:p-8 space-y-5 text-center">
               {/* أيقونة الإيميل */}
               <div className="relative w-20 h-20 mx-auto">
@@ -521,6 +495,111 @@ export const AuthPage: React.FC = () => {
               </div>
             </>
           )}
+    </>
+  );
+
+  if (isModal) {
+    return (
+      <div
+        onClick={onClose}
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
+      >
+        <div
+          onClick={e => e.stopPropagation()}
+          className="relative w-full max-w-lg bg-bazaar-card rounded-3xl border border-bazaar-gold/30 shadow-2xl overflow-hidden my-8"
+        >
+          {/* زر إغلاق النافذة */}
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="absolute left-4 top-4 z-20 w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center transition-colors"
+              title="إغلاق"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          )}
+
+          {/* ترويسة النافذة */}
+          <div className="bg-gradient-to-r from-bazaar-surface to-bazaar-card p-5 border-b border-white/10 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-bazaar-bg border border-bazaar-gold/40 flex items-center justify-center text-xl shadow-glow-gold">
+              🏮
+            </div>
+            <div>
+              <h2 className="text-base font-black font-cairo gold-gradient-text">سوق الاشتراكات</h2>
+              <p className="text-[11px] text-slate-400">
+                {mode === 'login' ? 'تسجيل الدخول إلى حسابك' : mode === 'register' ? 'إنشاء حساب عميل جديد' : 'استعادة كلمة المرور'}
+              </p>
+            </div>
+          </div>
+
+          {/* تنبيه سبب طلب تسجيل الدخول */}
+          {reason && (
+            <div className="mx-5 mt-4 p-3.5 rounded-2xl bg-bazaar-gold/10 border border-bazaar-gold/30 text-amber-200 text-xs font-bold flex items-center gap-2.5">
+              <Sparkles className="w-4 h-4 text-bazaar-gold shrink-0" />
+              <span>{reason}</span>
+            </div>
+          )}
+
+          {cardBody}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-bazaar-bg text-slate-100 flex items-center justify-center p-4 sm:p-6 relative overflow-hidden">
+      <div className="absolute -top-40 -right-32 w-96 h-96 rounded-full bg-bazaar-gold/10 blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-40 -left-32 w-96 h-96 rounded-full bg-bazaar-purple/10 blur-3xl pointer-events-none" />
+
+      <div className="relative w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+        {/* اللوحة التعريفية */}
+        <div className="hidden lg:block space-y-6 pr-4">
+          <div className="flex items-center gap-3">
+            <div className="w-14 h-14 rounded-3xl bg-gradient-to-br from-bazaar-card to-bazaar-surface border border-bazaar-gold/40 flex items-center justify-center text-3xl shadow-glow-gold">
+              🏮
+            </div>
+            <div>
+              <h1 className="text-3xl font-black font-cairo gold-gradient-text">سوق الاشتراكات</h1>
+              <p className="text-xs text-slate-400">بازار الاشتراكات الرقمية الأول في مصر والوطن العربي</p>
+            </div>
+          </div>
+
+          <p className="text-sm text-slate-300 leading-relaxed">
+            سجّل دخولك للوصول إلى بازار الاشتراكات الرقمية: أدوات الذكاء الاصطناعي، التصميم،
+            المونتاج والتسويق — بأسعار مصرية وضمان كامل طوال فترة الاشتراك.
+          </p>
+
+          <div className="space-y-3">
+            {[
+              { icon: Zap, title: 'تسليم فوري', desc: 'استلم بيانات حسابك خلال دقائق من الطلب' },
+              { icon: Wallet, title: 'محفظة داخلية', desc: 'اشحن عبر انستاباي أو فودافون كاش واشترِ بضغطة' },
+              { icon: ShieldCheck, title: 'ضمان ذهبي', desc: 'استبدال فوري لأي حساب يتوقف خلال مدة الاشتراك' },
+              { icon: Headphones, title: 'دعم فني بشري', desc: 'فريق متاح يومياً للرد على استفساراتك' }
+            ].map(item => (
+              <div key={item.title} className="flex items-start gap-3 p-3.5 rounded-2xl bg-bazaar-card/60 border border-white/5">
+                <div className="w-9 h-9 rounded-xl bg-bazaar-gold/15 text-bazaar-gold flex items-center justify-center shrink-0">
+                  <item.icon className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-xs font-bold text-white">{item.title}</h3>
+                  <p className="text-[11px] text-slate-400">{item.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* البطاقة */}
+        <div className="bg-bazaar-card border border-bazaar-gold/25 rounded-3xl shadow-2xl overflow-hidden">
+          <div className="lg:hidden bg-gradient-to-r from-bazaar-surface to-bazaar-card p-5 border-b border-white/10 flex items-center gap-3">
+            <div className="w-11 h-11 rounded-2xl bg-bazaar-bg border border-bazaar-gold/40 flex items-center justify-center text-2xl">🏮</div>
+            <div>
+              <h1 className="text-lg font-black font-cairo gold-gradient-text">سوق الاشتراكات</h1>
+              <p className="text-[10px] text-slate-400">اشتراكاتك الرقمية بضغطة زر</p>
+            </div>
+          </div>
+
+          {cardBody}
         </div>
       </div>
     </div>
