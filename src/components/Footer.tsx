@@ -140,26 +140,79 @@ export const Footer: React.FC = () => {
         </div>
 
         {/* Payment Methods Badges */}
-        <div className="space-y-3">
+        <div className="space-y-4">
           <h4 className="text-white font-bold font-cairo text-sm">طرق الدفع المدعومة</h4>
-          <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 pt-1">
-            {[
-              { name: 'InstaPay', img: '/images/payment/instapay.png' },
-              { name: 'Vodafone Cash', img: '/images/payment/vodafone-cash.png' },
-              { name: 'Etisalat Cash', img: '/images/payment/etisalat-cash.png' },
-              { name: 'WE Pay', img: '/images/payment/we-pay.png' },
-              { name: 'Orange Europe', img: '/images/payment/orange-europe.png' },
-            ].map(p => (
+          
+          <div className="space-y-3 pt-1">
+            {/* Row 1: InstaPay */}
+            <div 
+              onClick={() => handleNav('payment')}
+              className="cursor-pointer group flex items-center justify-start transition-all"
+              title="انستاباي - تحويل فوري ولحظي"
+            >
+              <img 
+                src="/images/payment/instapay.png?v=3" 
+                alt="انستاباي InstaPay" 
+                className="h-8 w-auto max-w-[170px] object-contain filter drop-shadow hover:scale-105 transition-transform duration-200" 
+              />
+            </div>
+
+            {/* Row 2: Vodafone Cash & Etisalat Cash */}
+            <div className="grid grid-cols-2 gap-3 items-center">
               <div 
-                key={p.name}
-                className="h-10 rounded-xl bg-bazaar-card/90 border border-white/10 hover:border-bazaar-gold/50 p-1 flex items-center justify-center transition-all hover:scale-105 shadow-sm"
-                title={p.name}
+                onClick={() => handleNav('payment')}
+                className="cursor-pointer group flex items-center justify-start transition-all"
+                title="فودافون كاش"
               >
-                <img src={p.img} alt={p.name} className="max-h-full max-w-full object-contain" />
+                <img 
+                  src="/images/payment/vodafone-cash.png?v=3" 
+                  alt="فودافون كاش Vodafone Cash" 
+                  className="h-9 w-auto max-w-full object-contain filter drop-shadow hover:scale-105 transition-transform duration-200" 
+                />
               </div>
-            ))}
+
+              <div 
+                onClick={() => handleNav('payment')}
+                className="cursor-pointer group flex items-center justify-start transition-all"
+                title="اتصالات كاش"
+              >
+                <img 
+                  src="/images/payment/etisalat-cash.png?v=3" 
+                  alt="اتصالات كاش Etisalat Cash" 
+                  className="h-9 w-auto max-w-full object-contain filter drop-shadow hover:scale-105 transition-transform duration-200" 
+                />
+              </div>
+            </div>
+
+            {/* Row 3: WE Pay & Orange Europe */}
+            <div className="grid grid-cols-2 gap-3 items-center">
+              <div 
+                onClick={() => handleNav('payment')}
+                className="cursor-pointer group flex items-center justify-start transition-all"
+                title="وي باي WE Pay"
+              >
+                <img 
+                  src="/images/payment/we-pay.png?v=3" 
+                  alt="وي باي WE Pay" 
+                  className="h-9 w-auto max-w-full object-contain filter drop-shadow hover:scale-105 transition-transform duration-200" 
+                />
+              </div>
+
+              <div 
+                onClick={() => handleNav('payment')}
+                className="cursor-pointer group flex items-center justify-start transition-all"
+                title="أورنج كاش وتحويلات أوروبا والدولية"
+              >
+                <img 
+                  src="/images/payment/orange-europe.png?v=3" 
+                  alt="أورنج كاش Orange Europe" 
+                  className="h-9 w-auto max-w-full object-contain filter drop-shadow hover:scale-105 transition-transform duration-200" 
+                />
+              </div>
+            </div>
           </div>
-          <p className="text-[11px] text-slate-500 pt-2">
+
+          <p className="text-[11px] text-slate-400 pt-1 leading-relaxed">
             مواعيد التحويل والتسليم: {settings.workingHours}
           </p>
         </div>
