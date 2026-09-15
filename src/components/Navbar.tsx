@@ -2,14 +2,14 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useStore } from '../context/StoreContext';
 import { CATEGORIES } from '../data/services';
-import { Search, ShoppingCart, MapPin, Menu, ChevronDown, X } from 'lucide-react';
+import { Search, ShoppingCart, MapPin, Menu, ChevronDown, X, Sun, Moon } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
   const { user, isAdmin, logout } = useAuth();
   const {
     settings, orders, transactions, navigate, openAuthModal, openTopUpModal,
     cartCount, searchQuery, setSearchQuery, submitSearch, setSelectedCategory, services,
-    openProduct, cartToast, dismissCartToast
+    openProduct, cartToast, dismissCartToast, theme, toggleTheme
   } = useStore();
 
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -160,6 +160,21 @@ export const Navbar: React.FC = () => {
             </span>
             <span className="hidden sm:inline text-xs font-bold pb-1">السلة</span>
           </button>
+
+          {/* Theme Mode Toggle (Dark / Light) */}
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="p-1.5 sm:p-2 border border-white/10 hover:border-white/40 bg-white/5 hover:bg-white/10 rounded-full text-slate-200 hover:text-white transition-all flex items-center justify-center relative group"
+            aria-label={theme === 'dark' ? 'تفعيل الوضع النهاري' : 'تفعيل الوضع الليلي'}
+            title={theme === 'dark' ? 'تفعيل الوضع النهاري (Light Mode)' : 'تفعيل الوضع الليلي (Dark Mode)'}
+          >
+            {theme === 'dark' ? (
+              <Sun className="w-5 h-5 text-amber-300 transition-transform group-hover:rotate-45" />
+            ) : (
+              <Moon className="w-5 h-5 text-slate-200 group-hover:text-amazon-yellow transition-transform group-hover:-rotate-12" />
+            )}
+          </button>
         </div>
       </div>
 
@@ -194,13 +209,24 @@ export const Navbar: React.FC = () => {
       )}
 
       {mobileOpen && (
-        <div className="lg:hidden bg-white text-[#0F1111] border-b shadow-lg p-3 space-y-1">
+        <div className="lg:hidden bg-white dark:bg-[#161538] text-[#0F1111] dark:text-slate-100 border-b border-slate-200 dark:border-white/10 shadow-lg p-3 space-y-1">
+          <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100 dark:border-white/10">
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400">مظهر الموقع:</span>
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1.5 bg-slate-100 dark:bg-white/10 text-slate-800 dark:text-slate-200"
+            >
+              {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-300" /> : <Moon className="w-4 h-4 text-slate-600" />}
+              <span>{theme === 'dark' ? 'الوضع النهاري' : 'الوضع الليلي'}</span>
+            </button>
+          </div>
           {CATEGORIES.map(c => (
-            <button key={c.id} type="button" onClick={() => go('services', c.id)} className="block w-full text-right py-2 border-b">{c.name}</button>
+            <button key={c.id} type="button" onClick={() => go('services', c.id)} className="block w-full text-right py-2 border-b border-slate-100 dark:border-white/5">{c.name}</button>
           ))}
           <button type="button" onClick={() => go('bundles')} className="block w-full text-right py-2">عروض اليوم</button>
           {!user && (
-            <button type="button" onClick={() => { setMobileOpen(false); openAuthModal(); }} className="block w-full text-right py-2 font-bold">سجّل الدخول</button>
+            <button type="button" onClick={() => { setMobileOpen(false); openAuthModal(); }} className="block w-full text-right py-2 font-bold text-amazon-linkHover">سجّل الدخول</button>
           )}
         </div>
       )}

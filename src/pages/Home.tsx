@@ -6,6 +6,7 @@ import { minEffectivePrice, hasAnyOffer, effectivePrice, isOfferActive, discount
 import { productRating, formatCount } from '../utils/productMeta';
 import { ProductCarousel } from '../components/ProductCarousel';
 import { ProductTile } from '../components/ProductTile';
+import { BundleCard } from '../components/BundleCard';
 import { StarRating } from '../components/StarRating';
 import { 
   Sparkles, 
@@ -138,12 +139,12 @@ export const Home: React.FC = () => {
       <section className="-mt-24 sm:-mt-32 relative z-20 max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Tile 1: AI 4-in-1 Quad Card */}
-          <div className="bg-white p-4 border border-slate-200 shadow-sm rounded-sm flex flex-col justify-between">
+          <div className="bg-white dark:bg-[#161538] p-5 border border-slate-200/80 dark:border-white/10 shadow-sm hover:shadow-xl rounded-3xl flex flex-col justify-between transition-all duration-300">
             <div>
-              <h2 className="text-lg font-bold text-[#0F1111] mb-1 font-cairo">
+              <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-1 font-cairo">
                 أشهر اشتراكات الذكاء الاصطناعي
               </h2>
-              <p className="text-[11px] text-amazon-muted mb-3">
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mb-3.5">
                 حسابات مميزة بأعلى سقف استخدام
               </p>
               <div className="grid grid-cols-2 gap-2.5">
@@ -156,17 +157,17 @@ export const Home: React.FC = () => {
                       onClick={() => openProduct(service)}
                       className="text-right group"
                     >
-                      <div className="h-20 bg-slate-50 border border-slate-100 rounded-sm p-2 flex items-center justify-center mb-1 group-hover:bg-slate-100 transition-colors">
+                      <div className="h-20 bg-slate-50 dark:bg-black/30 border border-slate-100 dark:border-white/5 rounded-2xl p-2 flex items-center justify-center mb-1.5 group-hover:border-slate-300 dark:group-hover:border-white/20 transition-all">
                         {service.imageUrl ? (
-                          <img src={service.imageUrl} alt={service.name} className="max-h-full max-w-full object-contain" />
+                          <img src={service.imageUrl} alt={service.name} className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform" />
                         ) : (
                           <span className="text-2xl">🤖</span>
                         )}
                       </div>
-                      <div className="text-xs font-semibold text-[#0F1111] truncate group-hover:text-amazon-linkHover">
+                      <div className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate group-hover:text-amazon-orange dark:group-hover:text-bazaar-gold transition-colors">
                         {service.name}
                       </div>
-                      <div className="text-[11px] amazon-price font-bold">
+                      <div className="text-[11px] font-black text-rose-600 dark:text-rose-400">
                         {p} ج.م
                       </div>
                     </button>
@@ -176,19 +177,19 @@ export const Home: React.FC = () => {
             </div>
             <button
               onClick={() => handleCategoryClick('ai')}
-              className="mt-4 text-xs font-bold amazon-link text-right block"
+              className="mt-4 text-xs font-bold text-amazon-link dark:text-teal-400 hover:underline text-right block"
             >
               استكشف كل أدوات الذكاء الاصطناعي ›
             </button>
           </div>
 
           {/* Tile 2: Design & Content 4-in-1 Quad Card */}
-          <div className="bg-white p-4 border border-slate-200 shadow-sm rounded-sm flex flex-col justify-between">
+          <div className="bg-white dark:bg-[#161538] p-5 border border-slate-200/80 dark:border-white/10 shadow-sm hover:shadow-xl rounded-3xl flex flex-col justify-between transition-all duration-300">
             <div>
-              <h2 className="text-lg font-bold text-[#0F1111] mb-1 font-cairo">
+              <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-1 font-cairo">
                 أدوات التصميم والمونتاج
               </h2>
-              <p className="text-[11px] text-amazon-muted mb-3">
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mb-3.5">
                 برامج احترافية لصناع المحتوى
               </p>
               <div className="grid grid-cols-2 gap-2.5">
@@ -201,17 +202,17 @@ export const Home: React.FC = () => {
                       onClick={() => openProduct(service)}
                       className="text-right group"
                     >
-                      <div className="h-20 bg-slate-50 border border-slate-100 rounded-sm p-2 flex items-center justify-center mb-1 group-hover:bg-slate-100 transition-colors">
+                      <div className="h-20 bg-slate-50 dark:bg-black/30 border border-slate-100 dark:border-white/5 rounded-2xl p-2 flex items-center justify-center mb-1.5 group-hover:border-slate-300 dark:group-hover:border-white/20 transition-all">
                         {service.imageUrl ? (
-                          <img src={service.imageUrl} alt={service.name} className="max-h-full max-w-full object-contain" />
+                          <img src={service.imageUrl} alt={service.name} className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform" />
                         ) : (
                           <span className="text-2xl">🎨</span>
                         )}
                       </div>
-                      <div className="text-xs font-semibold text-[#0F1111] truncate group-hover:text-amazon-linkHover">
+                      <div className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate group-hover:text-amazon-orange dark:group-hover:text-bazaar-gold transition-colors">
                         {service.name}
                       </div>
-                      <div className="text-[11px] amazon-price font-bold">
+                      <div className="text-[11px] font-black text-rose-600 dark:text-rose-400">
                         {p} ج.م
                       </div>
                     </button>
@@ -221,53 +222,58 @@ export const Home: React.FC = () => {
             </div>
             <button
               onClick={() => handleCategoryClick('design')}
-              className="mt-4 text-xs font-bold amazon-link text-right block"
+              className="mt-4 text-xs font-bold text-amazon-link dark:text-teal-400 hover:underline text-right block"
             >
               استكشف كل برامج التصميم ›
             </button>
           </div>
 
           {/* Tile 3: Top Savings Bundle Spotlight Card */}
-          <div className="bg-white p-4 border border-slate-200 shadow-sm rounded-sm flex flex-col justify-between">
+          <div className="bg-white dark:bg-[#161538] p-5 border border-slate-200/80 dark:border-white/10 shadow-sm hover:shadow-xl rounded-3xl flex flex-col justify-between transition-all duration-300">
             <div>
               <div className="flex items-center justify-between gap-1 mb-1">
-                <h2 className="text-lg font-bold text-[#0F1111] font-cairo">
+                <h2 className="text-lg font-bold text-slate-900 dark:text-white font-cairo">
                   أقوى باقات التوفير
                 </h2>
-                <span className="bg-[#CC0C39] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-sm">
+                <span className="bg-gradient-to-r from-rose-600 to-pink-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
                   خصم مجمع
                 </span>
               </div>
-              <p className="text-[11px] text-amazon-muted mb-3">
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mb-3.5">
                 اشتراكات مجمعة في باقة واحدة
               </p>
 
               {topBundle && (
                 <div 
                   onClick={() => openBundleProduct(topBundle)}
-                  className="cursor-pointer group space-y-2.5"
+                  className="cursor-pointer group space-y-3"
                 >
-                  <div className="h-32 bg-[#F7F7F7] border border-slate-200 rounded-sm p-3 flex flex-col items-center justify-center text-center group-hover:border-slate-300">
-                    <span className="text-4xl mb-1">🎁</span>
-                    <span className="text-xs font-bold text-[#0F1111] group-hover:text-amazon-linkHover">
-                      {topBundle.name}
-                    </span>
-                    <span className="text-[10px] text-emerald-700 font-bold">
-                      وفر {topBundle.savings} ج.م مقابل الشراء المنفصل
-                    </span>
+                  <div className="h-36 relative overflow-hidden rounded-2xl bg-slate-900 border border-slate-200/80 dark:border-white/10 group-hover:border-amber-500/50 transition-all">
+                    <img
+                      src={topBundle.imageUrl || '/images/bundles/bundle-chatgpt-gemini.jpg'}
+                      alt={topBundle.name}
+                      className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20 pointer-events-none" />
+                    <div className="absolute bottom-2.5 right-2.5 left-2.5 flex items-center justify-between z-10 text-white">
+                      <span className="text-xs font-black truncate drop-shadow">{topBundle.name}</span>
+                      <span className="text-[10px] font-bold bg-rose-600 px-2.5 py-0.5 rounded-full shadow">
+                        وفر {topBundle.savings} ج.م
+                      </span>
+                    </div>
                   </div>
 
                   <div className="space-y-1 text-xs">
                     <div className="flex items-baseline gap-1.5">
-                      <span className="text-xs text-amazon-muted">ج.م</span>
-                      <span className="text-2xl font-bold amazon-price leading-none">
+                      <span className="text-xs text-slate-500 dark:text-slate-400">ج.م</span>
+                      <span className="text-2xl font-black text-rose-600 dark:text-rose-400 leading-none">
                         {effectivePrice(topBundle)}
                       </span>
-                      <span className="text-xs text-amazon-muted line-through">
+                      <span className="text-xs text-slate-400 dark:text-slate-500 line-through mr-1">
                         {topBundle.price} ج.م
                       </span>
                     </div>
-                    <p className="text-[11px] text-amazon-muted line-clamp-2">
+                    <p className="text-[11px] text-slate-600 dark:text-slate-300 line-clamp-2 leading-relaxed">
                       {topBundle.description}
                     </p>
                   </div>
@@ -277,31 +283,31 @@ export const Home: React.FC = () => {
 
             <button
               onClick={() => navigate('bundles')}
-              className="mt-4 text-xs font-bold amazon-link text-right block"
+              className="mt-4 text-xs font-bold text-amazon-link dark:text-teal-400 hover:underline text-right block"
             >
               عرض جميع الباقات (6 باقات) ›
             </button>
           </div>
 
           {/* Tile 4: Instant Wallet & Top Up Card */}
-          <div className="bg-white p-4 border border-slate-200 shadow-sm rounded-sm flex flex-col justify-between">
+          <div className="bg-white dark:bg-[#161538] p-5 border border-slate-200/80 dark:border-white/10 shadow-sm hover:shadow-xl rounded-3xl flex flex-col justify-between transition-all duration-300">
             <div>
-              <h2 className="text-lg font-bold text-[#0F1111] mb-1 font-cairo">
+              <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-1 font-cairo">
                 محفظتك وطرق الدفع
               </h2>
-              <p className="text-[11px] text-amazon-muted mb-3">
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mb-3.5">
                 شحن رصيد فوري عبر انستاباي والمحافظ
               </p>
 
               {user ? (
-                <div className="space-y-3 bg-slate-50 p-3.5 border border-slate-200 rounded-sm text-right">
+                <div className="space-y-3 bg-slate-50 dark:bg-black/25 p-3.5 border border-slate-200/80 dark:border-white/5 rounded-2xl text-right">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-amazon-muted">الرصيد المتاح:</span>
-                    <span className="font-bold text-lg text-emerald-700 font-cairo">
+                    <span className="text-slate-500 dark:text-slate-400">الرصيد المتاح:</span>
+                    <span className="font-black text-lg text-emerald-600 dark:text-emerald-400 font-cairo">
                       {user.balance.toLocaleString()} ج.م
                     </span>
                   </div>
-                  <p className="text-[11px] text-amazon-muted">
+                  <p className="text-[11px] text-slate-600 dark:text-slate-300">
                     رصيدك جاهز لإتمام أي طلب بنقرة واحدة بدون انتظار تأكيد الدفع.
                   </p>
                   <button
@@ -312,8 +318,8 @@ export const Home: React.FC = () => {
                   </button>
                 </div>
               ) : (
-                <div className="space-y-3 bg-slate-50 p-3.5 border border-slate-200 rounded-sm text-right">
-                  <p className="text-xs text-[#0F1111] font-semibold leading-relaxed">
+                <div className="space-y-3 bg-slate-50 dark:bg-black/25 p-3.5 border border-slate-200/80 dark:border-white/5 rounded-2xl text-right">
+                  <p className="text-xs text-slate-800 dark:text-slate-200 font-semibold leading-relaxed">
                     سجّل دخولك الآن للوصول إلى لوحة طلباتك، إدارة اشتراكاتك، وشحن محفظتك.
                   </p>
                   <button
@@ -326,17 +332,17 @@ export const Home: React.FC = () => {
               )}
 
               {/* Payment Partners Icons */}
-              <div className="pt-3 border-t border-slate-100 mt-3">
-                <span className="block text-[10px] text-amazon-muted mb-2">طرق الدفع المعتمدة:</span>
+              <div className="pt-3 border-t border-slate-100 dark:border-white/10 mt-3">
+                <span className="block text-[10px] text-slate-500 dark:text-slate-400 mb-2">طرق الدفع المعتمدة:</span>
                 <div className="grid grid-cols-3 gap-1.5">
-                  <div className="bg-white border border-slate-200 p-1 rounded text-center">
-                    <span className="text-[10px] font-bold text-purple-700">انستاباي ⚡</span>
+                  <div className="bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 p-1.5 rounded-xl text-center">
+                    <span className="text-[10px] font-bold text-purple-600 dark:text-purple-300">انستاباي ⚡</span>
                   </div>
-                  <div className="bg-white border border-slate-200 p-1 rounded text-center">
-                    <span className="text-[10px] font-bold text-rose-700">فودافون كاش</span>
+                  <div className="bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 p-1.5 rounded-xl text-center">
+                    <span className="text-[10px] font-bold text-rose-600 dark:text-rose-300">فودافون كاش</span>
                   </div>
-                  <div className="bg-white border border-slate-200 p-1 rounded text-center">
-                    <span className="text-[10px] font-bold text-emerald-700">اتصالات كاش</span>
+                  <div className="bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 p-1.5 rounded-xl text-center">
+                    <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-300">اتصالات كاش</span>
                   </div>
                 </div>
               </div>
@@ -344,7 +350,7 @@ export const Home: React.FC = () => {
 
             <button
               onClick={() => navigate('payment')}
-              className="mt-4 text-xs font-bold amazon-link text-right block"
+              className="mt-4 text-xs font-bold text-amazon-link dark:text-teal-400 hover:underline text-right block"
             >
               عرض دليل الشحن والحسابات البنكية ›
             </button>
@@ -379,166 +385,83 @@ export const Home: React.FC = () => {
       />
 
       {/* 6. Amazon Bundles Shelf (Full 6 Bundles Showcase) */}
-      <section className="bg-white mx-3 sm:mx-4 lg:mx-6 p-4 sm:p-6 border border-slate-200 shadow-sm rounded-sm space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 pb-3 border-b border-slate-200">
+      <section className="bg-white dark:bg-[#161538] mx-3 sm:mx-4 lg:mx-6 p-5 sm:p-6 border border-slate-200/80 dark:border-white/10 shadow-sm rounded-3xl space-y-6 transition-all">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 pb-4 border-b border-slate-200 dark:border-white/10">
           <div>
-            <div className="flex items-center gap-1.5 text-xs font-bold text-[#CC0C39] mb-1">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-rose-600 dark:text-rose-400 mb-1">
               <Gift className="w-4 h-4" />
               <span>عروض التوفير الشاملة</span>
             </div>
-            <h2 className="text-xl sm:text-2xl font-bold font-cairo text-[#0F1111]">
+            <h2 className="text-xl sm:text-2xl font-black font-cairo text-slate-900 dark:text-white">
               باقات التوفير الكبرى (Bundles)
             </h2>
-            <p className="text-xs text-amazon-muted mt-0.5">
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
               اشتراكات متعددة مجمعة في باقة واحدة بخصم فوري يصل إلى 120 جنيه
             </p>
           </div>
 
           <button
             onClick={() => navigate('bundles')}
-            className="text-xs font-bold amazon-link whitespace-nowrap self-start sm:self-auto"
+            className="text-xs sm:text-sm font-bold text-amazon-link dark:text-teal-400 hover:underline whitespace-nowrap self-start sm:self-auto flex items-center gap-1"
           >
-            عرض كافة الباقات (6) ›
+            <span>عرض كافة الباقات ({visibleBundles.length})</span>
+            <ArrowLeft className="w-3.5 h-3.5" />
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {visibleBundles.map(bundle => {
-            const price = effectivePrice(bundle);
-            const onOffer = isOfferActive(bundle);
-            const { rating, count } = productRating(bundle.id);
-
-            return (
-              <div
-                key={bundle.id}
-                className="border border-slate-200 hover:border-slate-300 rounded-sm p-4 flex flex-col justify-between bg-white group transition-all"
-              >
-                <div>
-                  <div className="flex items-start justify-between gap-2">
-                    <button
-                      type="button"
-                      onClick={() => openBundleProduct(bundle)}
-                      className="text-right"
-                    >
-                      <h3 className="text-base font-bold text-[#0F1111] group-hover:text-amazon-linkHover leading-snug">
-                        {bundle.name}
-                      </h3>
-                      <span className="text-[11px] text-amazon-muted">كود: {bundle.code}</span>
-                    </button>
-                    <span className="bg-[#CC0C39] text-white text-[10px] font-bold px-2 py-0.5 rounded-sm shrink-0">
-                      وفر {bundle.savings} ج.م
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-1.5 mt-1.5">
-                    <StarRating rating={rating} size="sm" />
-                    <span className="text-xs amazon-link">{formatCount(count)}</span>
-                  </div>
-
-                  <p className="text-xs text-amazon-muted mt-2 line-clamp-2 leading-relaxed">
-                    {bundle.description}
-                  </p>
-
-                  {/* Components List */}
-                  <div className="mt-3 p-2.5 bg-slate-50 border border-slate-100 rounded-sm space-y-1">
-                    <span className="text-[10px] font-bold text-slate-600 block">محتويات الباقة:</span>
-                    <ul className="text-xs text-[#0F1111] space-y-0.5">
-                      {bundle.componentsList.slice(0, 3).map((comp, idx) => (
-                        <li key={idx} className="flex items-center gap-1.5">
-                          <CheckCircle2 className="w-3 h-3 text-emerald-600 shrink-0" />
-                          <span className="truncate">{comp}</span>
-                        </li>
-                      ))}
-                      {bundle.componentsList.length > 3 && (
-                        <li className="text-[10px] text-amazon-link font-medium">
-                          + {bundle.componentsList.length - 3} عناصر إضافية
-                        </li>
-                      )}
-                    </ul>
-                  </div>
-                </div>
-
-                <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
-                  <div>
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-xs text-amazon-muted">ج.م</span>
-                      <span className="text-xl font-bold amazon-price leading-none">{price}</span>
-                      <span className="text-xs text-amazon-muted line-through mr-1">{bundle.price} ج.م</span>
-                    </div>
-                    <span className="text-[10px] text-emerald-700 font-bold block mt-0.5">
-                      تسليم فوري موحد
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      type="button"
-                      onClick={() => openBundleProduct(bundle)}
-                      className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-[#0F1111] rounded-sm text-xs font-semibold"
-                    >
-                      التفاصيل
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => addToCart({ itemType: 'bundle', itemId: bundle.id, quantity: 1 })}
-                      className="btn-cart px-3.5 py-1.5 rounded-full text-xs font-bold shadow-sm"
-                    >
-                      أضف للسلة
-                    </button>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {visibleBundles.map(bundle => (
+            <BundleCard key={bundle.id} bundle={bundle} />
+          ))}
         </div>
       </section>
 
-      {/* 7. Amazon 4 Value Propositions Strip */}
+      {/* 7. Value Propositions Strip */}
       <section className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          <div className="bg-white p-4 border border-slate-200 rounded-sm shadow-sm flex items-start gap-3">
-            <div className="w-10 h-10 rounded-full bg-amber-50 text-amazon-orange flex items-center justify-center shrink-0">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+          <div className="bg-white dark:bg-[#161538] p-4 sm:p-5 border border-slate-200/80 dark:border-white/10 rounded-3xl shadow-sm flex items-start gap-3.5 transition-all">
+            <div className="w-11 h-11 rounded-2xl bg-amber-500/15 text-amber-500 flex items-center justify-center shrink-0 border border-amber-500/20">
               <Zap className="w-5 h-5" />
             </div>
             <div className="space-y-0.5">
-              <h4 className="text-sm font-bold text-[#0F1111]">تسليم رقمي فوري</h4>
-              <p className="text-xs text-amazon-muted leading-relaxed">
-                تصلك بيانات الحساب والترخيص فوراً على لوحة طلباتك بدون تأخير.
+              <h4 className="text-sm font-bold text-slate-900 dark:text-white">تسليم رقمي فوري</h4>
+              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                تصلك بيانات الحساب والترخيص فوراً على لوحة طلباتك بدون أي تأخير.
               </p>
             </div>
           </div>
 
-          <div className="bg-white p-4 border border-slate-200 rounded-sm shadow-sm flex items-start gap-3">
-            <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+          <div className="bg-white dark:bg-[#161538] p-4 sm:p-5 border border-slate-200/80 dark:border-white/10 rounded-3xl shadow-sm flex items-start gap-3.5 transition-all">
+            <div className="w-11 h-11 rounded-2xl bg-emerald-500/15 text-emerald-500 flex items-center justify-center shrink-0 border border-emerald-500/20">
               <ShieldCheck className="w-5 h-5" />
             </div>
             <div className="space-y-0.5">
-              <h4 className="text-sm font-bold text-[#0F1111]">ضمان ذهبي 100%</h4>
-              <p className="text-xs text-amazon-muted leading-relaxed">
+              <h4 className="text-sm font-bold text-slate-900 dark:text-white">ضمان ذهبي 100%</h4>
+              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
                 دعم فني مستمر واستبدال فوري لأي حساب طوال فترة الاشتراك.
               </p>
             </div>
           </div>
 
-          <div className="bg-white p-4 border border-slate-200 rounded-sm shadow-sm flex items-start gap-3">
-            <div className="w-10 h-10 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+          <div className="bg-white dark:bg-[#161538] p-4 sm:p-5 border border-slate-200/80 dark:border-white/10 rounded-3xl shadow-sm flex items-start gap-3.5 transition-all">
+            <div className="w-11 h-11 rounded-2xl bg-purple-500/15 text-purple-500 flex items-center justify-center shrink-0 border border-purple-500/20">
               <CreditCard className="w-5 h-5" />
             </div>
             <div className="space-y-0.5">
-              <h4 className="text-sm font-bold text-[#0F1111]">دفع محلي بالجنيه</h4>
-              <p className="text-xs text-amazon-muted leading-relaxed">
+              <h4 className="text-sm font-bold text-slate-900 dark:text-white">دفع محلي بالجنيه</h4>
+              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
                 بدون فيزا دولية — ادفع عبر انستاباي أو المحافظ الإلكترونية.
               </p>
             </div>
           </div>
 
-          <div className="bg-white p-4 border border-slate-200 rounded-sm shadow-sm flex items-start gap-3">
-            <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+          <div className="bg-white dark:bg-[#161538] p-4 sm:p-5 border border-slate-200/80 dark:border-white/10 rounded-3xl shadow-sm flex items-start gap-3.5 transition-all">
+            <div className="w-11 h-11 rounded-2xl bg-blue-500/15 text-blue-500 flex items-center justify-center shrink-0 border border-blue-500/20">
               <Headphones className="w-5 h-5" />
             </div>
             <div className="space-y-0.5">
-              <h4 className="text-sm font-bold text-[#0F1111]">دعم فني 24/7</h4>
-              <p className="text-xs text-amazon-muted leading-relaxed">
+              <h4 className="text-sm font-bold text-slate-900 dark:text-white">دعم فني 24/7</h4>
+              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
                 فريق متخصص لمساعدتك في التفعيل والرد على استفساراتك عبر واتساب.
               </p>
             </div>
@@ -548,27 +471,27 @@ export const Home: React.FC = () => {
 
       {/* 8. Accepted Payment Methods Strip */}
       <section className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
-        <div className="bg-white p-5 border border-slate-200 rounded-sm shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="bg-white dark:bg-[#161538] p-5 sm:p-6 border border-slate-200/80 dark:border-white/10 rounded-3xl shadow-sm flex flex-col md:flex-row items-center justify-between gap-4 transition-all">
           <div className="space-y-1 text-center md:text-right">
-            <h3 className="text-base font-bold text-[#0F1111] font-cairo">
+            <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white font-cairo">
               طرق الشحن والدفع المعتمدة لدى سوق الاشتراكات
             </h3>
-            <p className="text-xs text-amazon-muted">
+            <p className="text-xs text-slate-500 dark:text-slate-400">
               اشحن رصيد محفظتك بسهولة خلال ثوانٍ وبدون أي رسوم إضافية.
             </p>
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-2">
             {[
-              { name: 'انستاباي (InstaPay)', color: 'text-purple-700 bg-purple-50 border-purple-200' },
-              { name: 'فودافون كاش', color: 'text-rose-700 bg-rose-50 border-rose-200' },
-              { name: 'اتصالات كاش', color: 'text-emerald-700 bg-emerald-50 border-emerald-200' },
-              { name: 'وي باي (WE Pay)', color: 'text-indigo-700 bg-indigo-50 border-indigo-200' },
-              { name: 'أورنج كاش', color: 'text-amber-700 bg-amber-50 border-amber-200' },
+              { name: 'انستاباي (InstaPay)', color: 'text-purple-600 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/40 border-purple-200 dark:border-purple-800/40' },
+              { name: 'فودافون كاش', color: 'text-rose-600 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800/40' },
+              { name: 'اتصالات كاش', color: 'text-emerald-600 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800/40' },
+              { name: 'وي باي (WE Pay)', color: 'text-indigo-600 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/40 border-indigo-200 dark:border-indigo-800/40' },
+              { name: 'أورنج كاش', color: 'text-amber-600 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800/40' },
             ].map(pm => (
               <span
                 key={pm.name}
-                className={`text-xs font-bold px-3 py-1.5 rounded border ${pm.color}`}
+                className={`text-xs font-bold px-3.5 py-1.5 rounded-full border ${pm.color}`}
               >
                 {pm.name}
               </span>
@@ -577,70 +500,70 @@ export const Home: React.FC = () => {
 
           <button
             onClick={openTopUpModal}
-            className="btn-buy px-5 py-2 rounded-full text-xs font-bold shadow-sm whitespace-nowrap"
+            className="btn-buy px-6 py-2.5 rounded-full text-xs font-bold shadow-sm whitespace-nowrap active:scale-95 transition-all"
           >
             شحن رصيد الآن
           </button>
         </div>
       </section>
 
-      {/* 9. Amazon Verified Customer Reviews */}
+      {/* 9. Verified Customer Reviews */}
       <section className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
-        <div className="bg-white p-5 sm:p-6 border border-slate-200 rounded-sm shadow-sm space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div className="bg-white dark:bg-[#161538] p-5 sm:p-6 border border-slate-200/80 dark:border-white/10 rounded-3xl shadow-sm space-y-5 transition-all">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-white/10">
             <div>
-              <h2 className="text-xl font-bold font-cairo text-[#0F1111]">
+              <h2 className="text-xl sm:text-2xl font-black font-cairo text-slate-900 dark:text-white">
                 تقييمات وتجارب العملاء الموثقة
               </h2>
-              <div className="flex items-center gap-1.5 mt-1">
+              <div className="flex items-center gap-2 mt-1">
                 <StarRating rating={4.9} size="md" />
-                <span className="text-xs text-amazon-muted">4.9 من 5 بناءً على 480+ تقييم شراء موثق</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400">4.9 من 5 بناءً على 480+ تقييم شراء موثق</span>
               </div>
             </div>
-            <span className="text-xs text-emerald-700 font-bold bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-sm hidden sm:inline-block">
+            <span className="text-xs text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40 px-3 py-1 rounded-full hidden sm:inline-block">
               ✓ تقييمات موثقة 100%
             </span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="p-4 bg-slate-50 border border-slate-200 rounded-sm space-y-2">
+            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200/70 dark:border-white/5 space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-[#0F1111]">محمود حسني</span>
-                <span className="text-[10px] text-emerald-700 font-semibold">شراء موثق ✓</span>
+                <span className="text-xs font-bold text-slate-900 dark:text-white">محمود حسني</span>
+                <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">شراء موثق ✓</span>
               </div>
               <StarRating rating={5} size="sm" />
-              <p className="text-xs text-amazon-muted leading-relaxed">
+              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
                 "اشتراك Gemini Pro بـ 150 جنيه مع مساحة 5 تيرابايت كاملة على إيميلي الشخصي صفقة خيالية، والدعم تواصل معايا في دقائق لتأكيد التفعيل."
               </p>
-              <div className="text-[10px] text-slate-400 pt-1">
+              <div className="text-[10px] text-slate-400 dark:text-slate-500 pt-1">
                 المنتج: Gemini Pro 5TB
               </div>
             </div>
 
-            <div className="p-4 bg-slate-50 border border-slate-200 rounded-sm space-y-2">
+            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200/70 dark:border-white/5 space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-[#0F1111]">سارة الجيار</span>
-                <span className="text-[10px] text-emerald-700 font-semibold">شراء موثق ✓</span>
+                <span className="text-xs font-bold text-slate-900 dark:text-white">سارة الجيار</span>
+                <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">شراء موثق ✓</span>
               </div>
               <StarRating rating={5} size="sm" />
-              <p className="text-xs text-amazon-muted leading-relaxed">
+              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
                 "أنا شغالة صناعة محتوى وبستخدم CapCut Pro و Canva Pro، وفرت أكتر من ألف جنيه مقارنة بالأسعار الرسمية، والموقع منظم جداً ببيانات الحسابات."
               </p>
-              <div className="text-[10px] text-slate-400 pt-1">
+              <div className="text-[10px] text-slate-400 dark:text-slate-500 pt-1">
                 المنتج: Canva Pro + CapCut Pro
               </div>
             </div>
 
-            <div className="p-4 bg-slate-50 border border-slate-200 rounded-sm space-y-2">
+            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200/70 dark:border-white/5 space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-[#0F1111]">علي فاروق</span>
-                <span className="text-[10px] text-emerald-700 font-semibold">شراء موثق ✓</span>
+                <span className="text-xs font-bold text-slate-900 dark:text-white">علي فاروق</span>
+                <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">شراء موثق ✓</span>
               </div>
               <StarRating rating={5} size="sm" />
-              <p className="text-xs text-amazon-muted leading-relaxed">
+              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
                 "باقة التاجر الرقمي مع داتا الأرقام وواتساب سندر فرقت جداً في حملاتي التسويقية، الداتا مصنفة بدقة والبرنامج اشتغل معايا بكفاءة."
               </p>
-              <div className="text-[10px] text-slate-400 pt-1">
+              <div className="text-[10px] text-slate-400 dark:text-slate-500 pt-1">
                 المنتج: باقة التاجر الرقمي
               </div>
             </div>

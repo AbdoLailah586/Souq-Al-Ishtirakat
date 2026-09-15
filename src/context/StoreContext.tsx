@@ -23,6 +23,10 @@ interface StoreContextType {
   selectedCategory: string;
   setSelectedCategory: (cat: string) => void;
 
+  theme: 'light' | 'dark';
+  toggleTheme: () => void;
+  setTheme: (t: 'light' | 'dark') => void;
+
   selectedService: Service | null;
   selectedBundle: Bundle | null;
   isServiceModalOpen: boolean;
@@ -165,17 +169,21 @@ const rowToService = (r: any): Service => {
   };
 };
 
-const rowToBundle = (r: any): Bundle => ({
-  id: r.id, code: r.code || '', name: r.name,
-  components: r.components || '',
-  componentsList: Array.isArray(r.components_list) ? r.components_list : [],
-  originalPrice: Number(r.original_price) || 0, price: Number(r.price),
-  offerPrice: num(r.offer_price), offerLabel: r.offer_label || undefined,
-  offerEndsAt: r.offer_ends_at || undefined,
-  savings: Number(r.savings) || 0, badge: r.badge || undefined,
-  isHidden: !!r.is_hidden, description: r.description || '',
-  features: Array.isArray(r.features) ? r.features : []
-});
+const rowToBundle = (r: any): Bundle => {
+  const fallback = BUNDLES.find(b => b.id === r.id);
+  return {
+    id: r.id, code: r.code || '', name: r.name,
+    components: r.components || '',
+    componentsList: Array.isArray(r.components_list) ? r.components_list : [],
+    imageUrl: r.image_url || fallback?.imageUrl || undefined,
+    originalPrice: Number(r.original_price) || 0, price: Number(r.price),
+    offerPrice: num(r.offer_price), offerLabel: r.offer_label || undefined,
+    offerEndsAt: r.offer_ends_at || undefined,
+    savings: Number(r.savings) || 0, badge: r.badge || undefined,
+    isHidden: !!r.is_hidden, description: r.description || '',
+    features: Array.isArray(r.features) ? r.features : []
+  };
+};
 
 const rowToOrder = (r: any): Order => ({
   id: r.id, orderNumber: r.order_number, userId: r.user_id,
@@ -273,6 +281,36 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const [currentTab, setCurrentTab] = useState('home');
   const [selectedCategory, setSelectedCategory] = useState('all');
+
+  const THEME_KEY = 'souq_theme_v1';
+  const [theme, setThemeState] = useState<'light' | 'dark'>(() => {
+    try {
+      const saved = localStorage.getItem(THEME_KEY);
+      if (saved === 'dark' || saved === 'light') return saved;
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    } catch {
+      return 'light';
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(THEME_KEY, theme);
+    } catch {}
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [theme]);
+
+  const toggleTheme = useCallback(() => {
+    setThemeState(prev => (prev === 'dark' ? 'light' : 'dark'));
+  }, []);
+
+  const setTheme = useCallback((t: 'light' | 'dark') => {
+    setThemeState(t);
+  }, []);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [selectedBundle, setSelectedBundle] = useState<Bundle | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -834,6 +872,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const value = useMemo<StoreContextType>(() => ({
     services, bundles, orders, transactions, settings, isLoadingData,
     currentTab, navigate, selectedCategory, setSelectedCategory,
+    theme, toggleTheme, setTheme,
     selectedService, selectedBundle, isServiceModalOpen, openServiceModal, openProduct, openBundleProduct, closeServiceModal,
     isTopUpModalOpen, openTopUpModal, closeTopUpModal,
     searchQuery, setSearchQuery, submitSearch,
@@ -846,7 +885,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     saveService, updateService, deleteService,
     saveBundle, updateBundle, deleteBundle, updateSettings
   }), [services, bundles, orders, transactions, settings, isLoadingData,
-       currentTab, selectedCategory, selectedService, selectedBundle, isTopUpModalOpen, isServiceModalOpen,
+       currentTab, selectedCategory, theme, toggleTheme, setTheme,
+       selectedService, selectedBundle, isTopUpModalOpen, isServiceModalOpen,
        searchQuery, cart, cartCount, cartToast,
        isAuthModalOpen, authModalReason, authModalMode, openAuthModal, closeAuthModal,
        navigate, refreshAll, refreshOrders, refreshTransactions, refreshCatalog, user, isAdmin, openTopUpModal,

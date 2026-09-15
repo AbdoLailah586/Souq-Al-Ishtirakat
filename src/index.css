@@ -12,6 +12,12 @@
     color: #0F1111;
     font-family: 'Tajawal', Arial, sans-serif;
     overflow-x: hidden;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  .dark body {
+    background-color: #0d0c22;
+    color: #f1f5f9;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -26,12 +32,27 @@
 ::-webkit-scrollbar-track {
   background: #EAEDED;
 }
+.dark ::-webkit-scrollbar-track {
+  background: #0d0c22;
+}
 ::-webkit-scrollbar-thumb {
   background: #888;
   border-radius: 4px;
 }
+.dark ::-webkit-scrollbar-thumb {
+  background: #313060;
+}
 ::-webkit-scrollbar-thumb:hover {
   background: #555;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #464488;
+}
+
+.glass-card {
+  background: rgba(22, 21, 56, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 .no-scrollbar::-webkit-scrollbar {

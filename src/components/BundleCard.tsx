@@ -2,17 +2,17 @@ import React, { useState } from 'react';
 import { Bundle } from '../types';
 import { useStore } from '../context/StoreContext';
 import { useAuth } from '../context/AuthContext';
-import { effectivePrice, isOfferActive, discountPercent, discountAmount } from '../utils/pricing';
+import { effectivePrice, isOfferActive, discountPercent } from '../utils/pricing';
 import { productRating, formatCount } from '../utils/productMeta';
 import { StarRating } from './StarRating';
-import { Gift, Check, Sparkles, ShoppingCart, ArrowLeft } from 'lucide-react';
+import { Check, Sparkles, ShoppingCart, ArrowLeft, Gift } from 'lucide-react';
 
 interface BundleCardProps {
   bundle: Bundle;
 }
 
 export const BundleCard: React.FC<BundleCardProps> = ({ bundle }) => {
-  const { addToCart, openBundleProduct, navigate } = useStore();
+  const { addToCart, openBundleProduct } = useStore();
   const { user } = useAuth();
   const [added, setAdded] = useState(false);
 
@@ -31,118 +31,147 @@ export const BundleCard: React.FC<BundleCardProps> = ({ bundle }) => {
   };
 
   return (
-    <div className="relative rounded-sm p-5 bg-white border border-slate-200 hover:border-slate-300 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group">
-      {/* Top Floating Badge */}
-      {onOffer && (
-        <div className="absolute -top-3 left-4 bg-[#CC0C39] text-white text-[11px] font-bold px-2.5 py-0.5 rounded-sm shadow-sm flex items-center gap-1">
-          <Sparkles className="w-3 h-3" />
-          <span>{bundle.offerLabel || 'عرض محدود'} — خصم {discountPercent(bundle)}%</span>
-        </div>
-      )}
+    <div className="relative rounded-3xl overflow-hidden bg-white dark:bg-[#161538] border border-slate-200/80 dark:border-white/10 hover:border-amber-500/40 dark:hover:border-bazaar-gold/50 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between group">
+      
+      {/* Top Banner Image with 3D Artwork */}
+      <div className="relative h-48 w-full overflow-hidden bg-slate-900 border-b border-slate-100 dark:border-white/10">
+        {bundle.imageUrl ? (
+          <img
+            src={bundle.imageUrl}
+            alt={bundle.name}
+            className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
+            loading="lazy"
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-amber-500/20 via-purple-500/20 to-slate-900 flex items-center justify-center">
+            <Gift className="w-16 h-16 text-amber-400 opacity-60" />
+          </div>
+        )}
 
-      <div>
-        {/* Header */}
-        <div className="flex items-start justify-between gap-3 mb-2">
-          <div>
-            <span className="text-[11px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-sm">
-              كود: {bundle.code}
+        {/* Subtle Vignette Gradient */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/30 pointer-events-none" />
+
+        {/* Floating Code and Badge Top Bar */}
+        <div className="absolute top-3 right-3 left-3 flex items-center justify-between z-10">
+          <span className="text-[11px] font-bold text-white bg-black/60 backdrop-blur-md px-3 py-1 rounded-full border border-white/20 shadow-sm">
+            كود: {bundle.code}
+          </span>
+          {bundle.badge && (
+            <span className="text-[11px] font-black px-3 py-1 rounded-full bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 shadow-md flex items-center gap-1">
+              <Sparkles className="w-3 h-3 stroke-[3]" />
+              <span>{bundle.badge}</span>
             </span>
+          )}
+        </div>
+
+        {/* Offer Discount Ribbon Over Image */}
+        {onOffer && (
+          <div className="absolute bottom-2.5 right-3 bg-gradient-to-r from-[#CC0C39] to-rose-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg flex items-center gap-1.5 backdrop-blur-sm">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>{bundle.offerLabel || 'عرض خاص'} — خصم {discountPercent(bundle)}%</span>
+          </div>
+        )}
+      </div>
+
+      {/* Card Body */}
+      <div className="p-5 flex-1 flex flex-col justify-between">
+        <div>
+          {/* Title & Rating */}
+          <button
+            type="button"
+            onClick={() => openBundleProduct(bundle)}
+            className="text-right block w-full group/title"
+          >
+            <h3 className="text-lg font-bold font-cairo text-slate-900 dark:text-white group-hover/title:text-amazon-orange dark:group-hover/title:text-bazaar-gold transition-colors leading-snug">
+              {bundle.name}
+            </h3>
+          </button>
+
+          <div className="flex items-center gap-2 pt-1 pb-2.5">
+            <StarRating rating={rating} size="sm" />
             <button
               type="button"
               onClick={() => openBundleProduct(bundle)}
-              className="text-right block mt-1"
+              className="text-xs text-amazon-link dark:text-teal-400 hover:underline"
             >
-              <h3 className="text-lg font-bold font-cairo text-[#0F1111] group-hover:text-amazon-linkHover transition-colors leading-snug">
-                {bundle.name}
-              </h3>
+              ({formatCount(count)} تقييم معتمد)
             </button>
-            {bundle.badge && (
-              <p className="text-xs font-semibold text-amber-700 mt-0.5">
-                ✨ {bundle.badge}
-              </p>
-            )}
           </div>
-          <div className="w-12 h-12 rounded-sm bg-slate-50 border border-slate-200 flex items-center justify-center shrink-0 text-2xl">
-            🎁
-          </div>
-        </div>
 
-        {/* Rating */}
-        <div className="flex items-center gap-1.5 pb-2">
-          <StarRating rating={rating} size="sm" />
-          <span className="text-xs amazon-link">{formatCount(count)} تقييم</span>
-        </div>
+          {/* Short Description */}
+          <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-3.5 line-clamp-2">
+            {bundle.description}
+          </p>
 
-        {/* Description */}
-        <p className="text-xs text-amazon-muted mb-3 leading-relaxed line-clamp-2">
-          {bundle.description}
-        </p>
-
-        {/* Bundled Items Box */}
-        <div className="bg-slate-50 rounded-sm p-3 border border-slate-100 space-y-1.5 mb-4">
-          <span className="text-[11px] font-bold text-slate-700 block mb-1">
-            محتويات الباقة الرسمية:
-          </span>
-          {bundle.componentsList.map((item, i) => (
-            <div key={i} className="flex items-center gap-2 text-xs text-[#0F1111]">
-              <div className="w-4 h-4 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
-                <Check className="w-2.5 h-2.5 stroke-[3]" />
+          {/* Bundled Items Rounded Box */}
+          <div className="bg-slate-50/80 dark:bg-white/[0.04] rounded-2xl p-3 border border-slate-200/60 dark:border-white/5 space-y-1.5 mb-4">
+            <div className="text-[11px] font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1 mb-1.5">
+              <Gift className="w-3.5 h-3.5 text-amber-500" />
+              <span>محتويات الباقة الرسمية:</span>
+            </div>
+            {bundle.componentsList.map((item, i) => (
+              <div key={i} className="flex items-center gap-2 text-xs text-slate-800 dark:text-slate-200">
+                <div className="w-4 h-4 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-300/40">
+                  <Check className="w-2.5 h-2.5 stroke-[3]" />
+                </div>
+                <span className="font-medium text-[11px] sm:text-xs truncate">{item}</span>
               </div>
-              <span className="font-medium">{item}</span>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
 
-      {/* Pricing & Purchase Buttons */}
-      <div className="pt-3 border-t border-slate-100">
-        <div className="flex items-baseline justify-between mb-3">
-          <div>
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-xs text-amazon-muted">ج.م</span>
-              <span className="text-2xl font-bold amazon-price leading-none">
-                {finalPrice}
-              </span>
-              <span className="text-xs text-amazon-muted line-through mr-1">
-                {bundle.price} ج.م
-              </span>
+        {/* Pricing & Purchase Buttons */}
+        <div className="pt-3.5 border-t border-slate-100 dark:border-white/10">
+          <div className="flex items-baseline justify-between mb-3.5">
+            <div>
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">ج.م</span>
+                <span className="text-2xl font-black text-rose-600 dark:text-rose-400 leading-none">
+                  {finalPrice}
+                </span>
+                <span className="text-xs text-slate-400 dark:text-slate-500 line-through mr-1">
+                  {bundle.price} ج.م
+                </span>
+              </div>
+              <div className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold mt-1 flex items-center gap-1">
+                <span>توفير {bundle.savings} ج.م مقارنة بالشراء المنفصل</span>
+              </div>
             </div>
-            <div className="text-[11px] text-emerald-700 font-bold mt-0.5">
-              توفير {bundle.savings} ج.م مقابل الشراء المنفصل
-            </div>
+
+            <button
+              type="button"
+              onClick={() => openBundleProduct(bundle)}
+              className="text-xs text-amazon-link dark:text-teal-400 hover:underline font-semibold flex items-center gap-0.5"
+            >
+              <span>التفاصيل</span>
+              <ArrowLeft className="w-3 h-3" />
+            </button>
           </div>
 
-          <button
-            type="button"
-            onClick={() => openBundleProduct(bundle)}
-            className="text-xs amazon-link font-semibold"
-          >
-            التفاصيل الكاملة ›
-          </button>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => openBundleProduct(bundle)}
+              className="w-full py-2.5 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/15 text-slate-800 dark:text-slate-100 font-bold text-xs transition-colors"
+            >
+              عرض الباقة
+            </button>
+
+            <button
+              type="button"
+              onClick={handleAdd}
+              className={`w-full py-2.5 rounded-full text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-sm ${
+                added
+                  ? 'bg-emerald-600 text-white'
+                  : 'btn-cart text-[#0F1111] hover:shadow-md active:scale-95'
+              }`}
+            >
+              <ShoppingCart className="w-4 h-4" />
+              <span>{added ? 'تمت الإضافة ✓' : 'أضف للسلة'}</span>
+            </button>
+          </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
-          <button
-            type="button"
-            onClick={() => openBundleProduct(bundle)}
-            className="w-full py-2 rounded-full bg-slate-100 hover:bg-slate-200 text-[#0F1111] font-semibold text-xs transition-colors"
-          >
-            عرض المنتج
-          </button>
-
-          <button
-            type="button"
-            onClick={handleAdd}
-            className={`w-full py-2 rounded-full text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
-              added
-                ? 'bg-emerald-600 text-white'
-                : 'btn-cart shadow-sm active:scale-95'
-            }`}
-          >
-            <ShoppingCart className="w-3.5 h-3.5" />
-            <span>{added ? 'تمت الإضافة ✓' : 'أضف للسلة'}</span>
-          </button>
-        </div>
       </div>
     </div>
   );

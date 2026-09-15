@@ -74,7 +74,7 @@ export const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-amazon-bg text-[#0F1111] font-cairo antialiased selection:bg-amazon-orange selection:text-white">
+    <div className="min-h-screen flex flex-col bg-[#EAEDED] dark:bg-[#0d0c22] text-[#0F1111] dark:text-slate-100 font-cairo antialiased selection:bg-amazon-orange selection:text-white transition-colors duration-300">
       <Navbar />
 
       <main className="flex-1">

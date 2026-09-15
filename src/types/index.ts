@@ -68,6 +68,7 @@ export interface Bundle {
   name: string;
   components: string;
   componentsList: string[];
+  imageUrl?: string;
   /** تكلفة المورد — بيانات داخلية للإدارة فقط ولا تظهر للعميل */
   originalPrice: number;
   /** السعر الأساسي المعلن للعميل */

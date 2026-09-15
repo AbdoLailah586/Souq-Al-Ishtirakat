@@ -5,6 +5,7 @@ export const BUNDLES: Bundle[] = [
     id: 'bundle-chatgpt-gemini',
     code: '21885',
     name: 'ChatGPT زائد Gemini',
+    imageUrl: '/images/bundles/bundle-chatgpt-gemini.jpg',
     components: 'ChatGPT Plus + Gemini Pro (إضافة بسعر خاص)',
     componentsList: [
       'ChatGPT Plus (شهر كامل مع GPT-5)',
@@ -26,6 +27,7 @@ export const BUNDLES: Bundle[] = [
     id: 'bundle-claude-gemini',
     code: '23164',
     name: 'Claude زائد Gemini',
+    imageUrl: '/images/bundles/bundle-claude-gemini.jpg',
     components: 'Claude Pro 5X + Gemini Pro (إضافة بسعر خاص)',
     componentsList: [
       'Claude Pro 5X (حدود استخدام 5X)',
@@ -47,6 +49,7 @@ export const BUNDLES: Bundle[] = [
     id: 'bundle-academic-year',
     code: '23232',
     name: 'باقة السنة الدراسية',
+    imageUrl: '/images/bundles/bundle-academic-year.jpg',
     components: 'Office 365 + Gemini Pro + Canva Pro (سنة)',
     componentsList: [
       'Microsoft Office 365 (سنة كاملة)',
@@ -69,6 +72,7 @@ export const BUNDLES: Bundle[] = [
     id: 'bundle-digital-merchant',
     code: '23940',
     name: 'باقة التاجر الرقمي',
+    imageUrl: '/images/bundles/bundle-digital-merchant.jpg',
     components: 'داتا أرقام + واتساب سندر (سنة) + Canva Pro (سنة)',
     componentsList: [
       'داتا أرقام مصرية (30-45 مليون رقم)',
@@ -91,6 +95,7 @@ export const BUNDLES: Bundle[] = [
     id: 'bundle-launch-project',
     code: '24140',
     name: 'ابدأ مشروعك',
+    imageUrl: '/images/bundles/bundle-launch-project.jpg',
     components: 'واتساب سندر (مدى الحياة) + داتا أرقام + Canva Pro (3 سنوات)',
     componentsList: [
       'واتساب سندر (مدى الحياة)',
@@ -113,6 +118,7 @@ export const BUNDLES: Bundle[] = [
     id: 'bundle-freelancer-kit',
     code: '25339',
     name: 'عدة الفريلانسر',
+    imageUrl: '/images/bundles/bundle-freelancer-kit.jpg',
     components: 'Office 365 + Adobe Express/Pro + Gemini Pro',
     componentsList: [
       'Microsoft Office 365 (سنة كاملة)',
