@@ -22,6 +22,55 @@ import {
   Info
 } from 'lucide-react';
 
+const parseHighlight = (text?: string, fallback = '') => {
+  const raw = (text || fallback).trim();
+  if (!raw) return { main: fallback, sub: '', full: fallback };
+
+  // Parentheses split: e.g. "0 - 6 ساعات (تسليم سريع 10 - 20 دقيقة)"
+  if (raw.includes('(')) {
+    const parts = raw.split('(');
+    return {
+      main: parts[0].trim(),
+      sub: parts[1]?.replace(')', '').trim() || '',
+      full: raw
+    };
+  }
+
+  // " ودعم " split: e.g. "ضمان 30 يوم ودعم فني طوال المدة"
+  if (raw.includes(' ودعم')) {
+    const parts = raw.split(' ودعم');
+    return {
+      main: parts[0].trim(),
+      sub: 'دعم ' + parts[1].trim(),
+      full: raw
+    };
+  }
+
+  // " أو " split: e.g. "حساب جديد جاهز أو تفعيل على إيميلك الشخصي"
+  if (raw.includes(' أو ')) {
+    const parts = raw.split(' أو ');
+    return {
+      main: parts[0].trim(),
+      sub: 'أو ' + parts[1].trim(),
+      full: raw
+    };
+  }
+
+  // Fallback for longer strings to split into title + subtitle
+  if (raw.length > 20) {
+    const words = raw.split(' ');
+    if (words.length >= 3) {
+      return {
+        main: words.slice(0, 2).join(' '),
+        sub: words.slice(2).join(' '),
+        full: raw
+      };
+    }
+  }
+
+  return { main: raw, sub: '', full: raw };
+};
+
 export const ServiceModal: React.FC = () => {
   const { selectedService, isServiceModalOpen, closeServiceModal, purchaseItem, openTopUpModal, openAuthModal, navigate } = useStore();
   const { user } = useAuth();
@@ -54,6 +103,11 @@ export const ServiceModal: React.FC = () => {
   const onOffer = isOfferActive(currentVariant);
   const userBalance = user?.balance || 0;
   const isBalanceEnough = userBalance >= finalPrice;
+
+  const timeHighlight = parseHighlight(selectedService.deliveryTime, '0 - 6 ساعات');
+  const warrantyHighlight = parseHighlight(selectedService.warrantyText, 'ضمان كامل المدة');
+  const formatHighlight = parseHighlight(selectedService.deliveryFormat, 'تسليم فوري');
+  const typeHighlight = parseHighlight(selectedService.accountType, 'حساب خاص');
 
   const handlePurchase = async () => {
     if (!user) {
@@ -149,44 +203,84 @@ export const ServiceModal: React.FC = () => {
         </div>
 
         {/* Quick Highlights Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 p-4 bg-bazaar-surface/70 border-b border-white/10 text-xs shrink-0">
-          <div className="bg-white/[0.03] p-2.5 rounded-2xl border border-white/5 flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-amber-500/15 text-amber-400 flex items-center justify-center shrink-0">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 p-3.5 sm:p-4 bg-bazaar-surface/70 border-b border-white/10 text-xs shrink-0 overflow-hidden">
+          <div 
+            title={timeHighlight.full}
+            className="bg-white/[0.03] hover:bg-white/[0.06] p-2.5 rounded-2xl border border-white/5 flex items-center gap-2.5 min-w-0 overflow-hidden transition-colors cursor-default"
+          >
+            <div className="w-8 h-8 rounded-xl bg-amber-500/15 text-amber-400 flex items-center justify-center shrink-0 border border-amber-500/20">
               <Zap className="w-4 h-4" />
             </div>
-            <div>
-              <div className="text-[10px] text-slate-400">وقت البدء والتسليم</div>
-              <div className="font-bold text-slate-200 truncate">{selectedService.deliveryTime || '0 - 6 ساعات'}</div>
+            <div className="min-w-0 flex-1 overflow-hidden">
+              <div className="text-[10px] text-slate-400 font-medium truncate">وقت البدء والتسليم</div>
+              <div className="font-bold text-slate-100 text-xs truncate leading-tight mt-0.5">
+                {timeHighlight.main}
+              </div>
+              {timeHighlight.sub && (
+                <div className="text-[9px] text-amber-400/90 truncate leading-tight mt-0.5 font-medium">
+                  {timeHighlight.sub}
+                </div>
+              )}
             </div>
           </div>
 
-          <div className="bg-white/[0.03] p-2.5 rounded-2xl border border-white/5 flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center shrink-0">
+          <div 
+            title={warrantyHighlight.full}
+            className="bg-white/[0.03] hover:bg-white/[0.06] p-2.5 rounded-2xl border border-white/5 flex items-center gap-2.5 min-w-0 overflow-hidden transition-colors cursor-default"
+          >
+            <div className="w-8 h-8 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/20">
               <ShieldCheck className="w-4 h-4" />
             </div>
-            <div>
-              <div className="text-[10px] text-slate-400">الضمان الفعلي</div>
-              <div className="font-bold text-slate-200 truncate">{selectedService.warrantyText || 'ضمان كامل المدة'}</div>
+            <div className="min-w-0 flex-1 overflow-hidden">
+              <div className="text-[10px] text-slate-400 font-medium truncate">الضمان الفعلي</div>
+              <div className="font-bold text-slate-100 text-xs truncate leading-tight mt-0.5">
+                {warrantyHighlight.main}
+              </div>
+              {warrantyHighlight.sub && (
+                <div className="text-[9px] text-emerald-400/90 truncate leading-tight mt-0.5 font-medium">
+                  {warrantyHighlight.sub}
+                </div>
+              )}
             </div>
           </div>
 
-          <div className="bg-white/[0.03] p-2.5 rounded-2xl border border-white/5 flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-cyan-500/15 text-cyan-400 flex items-center justify-center shrink-0">
+          <div 
+            title={formatHighlight.full}
+            className="bg-white/[0.03] hover:bg-white/[0.06] p-2.5 rounded-2xl border border-white/5 flex items-center gap-2.5 min-w-0 overflow-hidden transition-colors cursor-default"
+          >
+            <div className="w-8 h-8 rounded-xl bg-cyan-500/15 text-cyan-400 flex items-center justify-center shrink-0 border border-cyan-500/20">
               <Package className="w-4 h-4" />
             </div>
-            <div>
-              <div className="text-[10px] text-slate-400">طريقة التسليم</div>
-              <div className="font-bold text-slate-200 truncate">{selectedService.deliveryFormat || 'تسليم فوري'}</div>
+            <div className="min-w-0 flex-1 overflow-hidden">
+              <div className="text-[10px] text-slate-400 font-medium truncate">طريقة التسليم</div>
+              <div className="font-bold text-slate-100 text-xs truncate leading-tight mt-0.5">
+                {formatHighlight.main}
+              </div>
+              {formatHighlight.sub && (
+                <div className="text-[9px] text-cyan-400/90 truncate leading-tight mt-0.5 font-medium">
+                  {formatHighlight.sub}
+                </div>
+              )}
             </div>
           </div>
 
-          <div className="bg-white/[0.03] p-2.5 rounded-2xl border border-white/5 flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-purple-500/15 text-purple-400 flex items-center justify-center shrink-0">
+          <div 
+            title={typeHighlight.full}
+            className="bg-white/[0.03] hover:bg-white/[0.06] p-2.5 rounded-2xl border border-white/5 flex items-center gap-2.5 min-w-0 overflow-hidden transition-colors cursor-default"
+          >
+            <div className="w-8 h-8 rounded-xl bg-purple-500/15 text-purple-400 flex items-center justify-center shrink-0 border border-purple-500/20">
               <UserCheck className="w-4 h-4" />
             </div>
-            <div>
-              <div className="text-[10px] text-slate-400">نوع الحساب</div>
-              <div className="font-bold text-slate-200 truncate">{selectedService.accountType || 'حساب خاص'}</div>
+            <div className="min-w-0 flex-1 overflow-hidden">
+              <div className="text-[10px] text-slate-400 font-medium truncate">نوع الحساب</div>
+              <div className="font-bold text-slate-100 text-xs truncate leading-tight mt-0.5">
+                {typeHighlight.main}
+              </div>
+              {typeHighlight.sub && (
+                <div className="text-[9px] text-purple-400/90 truncate leading-tight mt-0.5 font-medium">
+                  {typeHighlight.sub}
+                </div>
+              )}
             </div>
           </div>
         </div>
