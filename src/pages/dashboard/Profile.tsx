@@ -8,7 +8,7 @@ import {
 
 export const Profile: React.FC = () => {
   const { user, updateOwnProfile, changeOwnPassword, logout, isAdmin } = useAuth();
-  const { orders } = useStore();
+  const { orders, navigate } = useStore();
 
   const [profileForm, setProfileForm] = useState({ name: user?.name || '', phone: user?.phone || '' });
   const [passwordForm, setPasswordForm] = useState({ newPassword: '', confirm: '' });
@@ -45,14 +45,14 @@ export const Profile: React.FC = () => {
   };
 
   const field =
-    'w-full bg-bazaar-bg border border-white/10 focus:border-bazaar-gold rounded-xl p-3 text-xs text-white focus:outline-none transition-colors';
+    'w-full bg-slate-50 border border-slate-300 focus:border-amazon-orange focus:bg-white rounded-sm p-2.5 text-xs text-[#0F1111] focus:outline-none transition-colors';
 
   const Alert: React.FC<{ data: { success: boolean; message: string } }> = ({ data }) => (
     <div
-      className={`p-3 rounded-xl text-xs font-bold flex items-center gap-2 ${
+      className={`p-3 rounded-sm text-xs font-bold flex items-center gap-2 ${
         data.success
-          ? 'bg-emerald-950/80 text-emerald-200 border border-emerald-500/40'
-          : 'bg-rose-950/80 text-rose-200 border border-rose-500/40'
+          ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+          : 'bg-rose-50 text-rose-800 border border-rose-200'
       }`}
     >
       {data.success ? <CheckCircle2 className="w-4 h-4 shrink-0" /> : <AlertCircle className="w-4 h-4 shrink-0" />}
@@ -61,151 +61,140 @@ export const Profile: React.FC = () => {
   );
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
-      <div className="flex items-center gap-3">
-        <div className="w-12 h-12 rounded-2xl bg-bazaar-gold/15 text-bazaar-gold flex items-center justify-center">
-          <UserCog className="w-6 h-6" />
-        </div>
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-black font-cairo text-white">بياناتي الشخصية</h1>
-          <p className="text-xs text-slate-400">تعديل بيانات حسابك وكلمة المرور الخاصة بك.</p>
-        </div>
+    <div className="max-w-4xl mx-auto px-3 sm:px-4 lg:px-6 py-6 space-y-6">
+      {/* Breadcrumbs */}
+      <div className="text-xs text-amazon-muted flex items-center gap-1.5">
+        <button onClick={() => navigate('home')} className="amazon-link">الرئيسية</button>
+        <span>›</span>
+        <button onClick={() => navigate('dashboard')} className="amazon-link">لوحة التحكم</button>
+        <span>›</span>
+        <span className="text-[#0F1111] font-semibold">تسجيل الدخول والأمان</span>
       </div>
 
-      {/* ملخص الحساب */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="p-5 rounded-3xl bg-bazaar-card border border-bazaar-gold/30">
-          <div className="flex items-center justify-between text-xs text-slate-400">
-            <span>الرصيد الحالي</span>
-            <Wallet className="w-4 h-4 text-bazaar-gold" />
-          </div>
-          <div className="text-2xl font-black text-amber-300 font-cairo mt-1">
-            {user.balance.toLocaleString()} <span className="text-xs font-normal text-slate-300">ج.م</span>
-          </div>
+      {/* Header */}
+      <div className="bg-white p-5 sm:p-6 border border-slate-200 shadow-sm rounded-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold font-cairo text-[#0F1111]">
+            الملف الشخصي وإعدادات الأمان
+          </h1>
+          <p className="text-xs text-amazon-muted mt-0.5">
+            إدارة بيانات حسابك، رقم الهاتف للتسليم، وتحديث كلمة المرور.
+          </p>
         </div>
-        <div className="p-5 rounded-3xl bg-bazaar-card border border-white/5">
-          <div className="flex items-center justify-between text-xs text-slate-400">
-            <span>عدد الطلبات</span>
-            <ShoppingBag className="w-4 h-4 text-bazaar-teal" />
-          </div>
-          <div className="text-2xl font-black text-bazaar-teal font-cairo mt-1">{myOrders.length}</div>
-        </div>
-        <div className="p-5 rounded-3xl bg-bazaar-card border border-white/5">
-          <div className="flex items-center justify-between text-xs text-slate-400">
-            <span>تاريخ الانضمام</span>
-            <Calendar className="w-4 h-4 text-bazaar-purple" />
-          </div>
-          <div className="text-sm font-bold text-white font-cairo mt-2">
-            {new Date(user.createdAt).toLocaleDateString('ar-EG')}
-          </div>
-        </div>
+
+        <button
+          onClick={logout}
+          className="px-4 py-2 rounded-full border border-slate-300 bg-slate-50 hover:bg-slate-100 text-rose-700 text-xs font-bold flex items-center gap-1.5 transition-all self-start sm:self-auto"
+        >
+          <LogOut className="w-4 h-4" />
+          <span>تسجيل الخروج</span>
+        </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* البيانات الأساسية */}
-        <form onSubmit={handleProfileSave} className="p-6 rounded-3xl bg-bazaar-card border border-white/10 space-y-4">
-          <h2 className="text-sm font-bold font-cairo text-white flex items-center gap-2">
-            <UserIcon className="w-4 h-4 text-bazaar-gold" />
-            <span>البيانات الأساسية</span>
-          </h2>
-
-          <div>
-            <label className="text-xs text-slate-300 font-semibold block mb-1.5">الاسم بالكامل</label>
-            <input
-              type="text"
-              value={profileForm.name}
-              onChange={e => setProfileForm({ ...profileForm, name: e.target.value })}
-              className={field}
-            />
-          </div>
-
-          <div>
-            <label className="text-xs text-slate-300 font-semibold block mb-1.5">رقم الواتساب</label>
-            <input
-              type="tel"
-              value={profileForm.phone}
-              onChange={e => setProfileForm({ ...profileForm, phone: e.target.value })}
-              className={field}
-            />
-          </div>
-
-          <div>
-            <label className="text-xs text-slate-300 font-semibold block mb-1.5 flex items-center gap-1.5">
-              <Mail className="w-3.5 h-3.5" />
-              <span>البريد الإلكتروني (لا يمكن تغييره)</span>
-            </label>
-            <input type="text" value={user.email} disabled dir="ltr" className={`${field} opacity-60 cursor-not-allowed`} />
+        {/* تعديل البيانات الأساسية */}
+        <div className="bg-white p-5 sm:p-6 rounded-sm border border-slate-200 shadow-sm space-y-4">
+          <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
+            <UserIcon className="w-5 h-5 text-amazon-orange" />
+            <h2 className="text-base font-bold font-cairo text-[#0F1111]">البيانات الشخصية</h2>
           </div>
 
           {profileMsg && <Alert data={profileMsg} />}
 
-          <button
-            type="submit"
-            className="w-full py-3 rounded-2xl bg-gradient-to-r from-bazaar-gold to-amber-500 text-bazaar-bg font-black text-xs flex items-center justify-center gap-2"
-          >
-            <Save className="w-4 h-4" />
-            <span>حفظ البيانات</span>
-          </button>
-        </form>
+          <form onSubmit={handleProfileSave} className="space-y-3.5 text-xs">
+            <div>
+              <label className="block text-[#0F1111] font-semibold mb-1">الاسم الكامل:</label>
+              <input
+                type="text"
+                value={profileForm.name}
+                onChange={e => setProfileForm({ ...profileForm, name: e.target.value })}
+                className={field}
+                required
+              />
+            </div>
 
-        {/* كلمة المرور */}
-        <form onSubmit={handlePasswordSave} className="p-6 rounded-3xl bg-bazaar-card border border-white/10 space-y-4">
-          <h2 className="text-sm font-bold font-cairo text-white flex items-center gap-2">
-            <Lock className="w-4 h-4 text-bazaar-teal" />
-            <span>تغيير كلمة المرور</span>
-          </h2>
+            <div>
+              <label className="block text-[#0F1111] font-semibold mb-1">البريد الإلكتروني (ثابت):</label>
+              <input
+                type="email"
+                value={user.email}
+                disabled
+                className="w-full bg-slate-100 border border-slate-200 rounded-sm p-2.5 text-xs text-slate-500 cursor-not-allowed"
+                dir="ltr"
+              />
+              <span className="text-[10px] text-amazon-muted block mt-1">البريد الإلكتروني مرتبط بحسابك ولا يمكن تعديله.</span>
+            </div>
 
-          <p className="text-[11px] text-slate-400 bg-white/[0.02] p-2.5 rounded-xl leading-relaxed">
-            أنت مسجّل الدخول بالفعل، لذلك يكفي كتابة كلمة المرور الجديدة مرتين.
-          </p>
+            <div>
+              <label className="block text-[#0F1111] font-semibold mb-1">رقم الهاتف (للتسليم والإشعارات):</label>
+              <input
+                type="tel"
+                value={profileForm.phone}
+                onChange={e => setProfileForm({ ...profileForm, phone: e.target.value })}
+                className={field}
+                placeholder="01012345678"
+                dir="ltr"
+              />
+            </div>
 
-          <div>
-            <label className="text-xs text-slate-300 font-semibold block mb-1.5">كلمة المرور الجديدة</label>
-            <input
-              type="password"
-              required
-              value={passwordForm.newPassword}
-              onChange={e => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
-              className={field}
-            />
-          </div>
+            <button
+              type="submit"
+              disabled={isBusy}
+              className="w-full py-2 rounded-full btn-buy text-xs font-bold shadow-sm transition-all flex items-center justify-center gap-1.5"
+            >
+              <Save className="w-4 h-4" />
+              <span>{isBusy ? 'جاري الحفظ...' : 'حفظ التعديلات'}</span>
+            </button>
+          </form>
+        </div>
 
-          <div>
-            <label className="text-xs text-slate-300 font-semibold block mb-1.5">تأكيد كلمة المرور الجديدة</label>
-            <input
-              type="password"
-              required
-              value={passwordForm.confirm}
-              onChange={e => setPasswordForm({ ...passwordForm, confirm: e.target.value })}
-              className={field}
-            />
+        {/* تغيير كلمة المرور */}
+        <div className="bg-white p-5 sm:p-6 rounded-sm border border-slate-200 shadow-sm space-y-4">
+          <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
+            <Lock className="w-5 h-5 text-amazon-orange" />
+            <h2 className="text-base font-bold font-cairo text-[#0F1111]">تغيير كلمة المرور</h2>
           </div>
 
           {passwordMsg && <Alert data={passwordMsg} />}
 
-          <button
-            type="submit"
-            className="w-full py-3 rounded-2xl bg-gradient-to-r from-bazaar-teal to-emerald-500 text-bazaar-bg font-black text-xs flex items-center justify-center gap-2"
-          >
-            <Lock className="w-4 h-4" />
-            <span>تحديث كلمة المرور</span>
-          </button>
-        </form>
+          <form onSubmit={handlePasswordSave} className="space-y-3.5 text-xs">
+            <div>
+              <label className="block text-[#0F1111] font-semibold mb-1">كلمة المرور الجديدة:</label>
+              <input
+                type="password"
+                value={passwordForm.newPassword}
+                onChange={e => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                className={field}
+                minLength={6}
+                placeholder="••••••••"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-[#0F1111] font-semibold mb-1">تأكيد كلمة المرور الجديدة:</label>
+              <input
+                type="password"
+                value={passwordForm.confirm}
+                onChange={e => setPasswordForm({ ...passwordForm, confirm: e.target.value })}
+                className={field}
+                minLength={6}
+                placeholder="••••••••"
+                required
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={isBusy || !passwordForm.newPassword}
+              className="w-full py-2 rounded-full btn-buy text-xs font-bold shadow-sm transition-all flex items-center justify-center gap-1.5"
+            >
+              <Lock className="w-4 h-4" />
+              <span>{isBusy ? 'جاري التحديث...' : 'تحديث كلمة المرور'}</span>
+            </button>
+          </form>
+        </div>
       </div>
-
-      <button
-        onClick={() => { if (window.confirm('هل تريد تسجيل الخروج؟')) void logout(); }}
-        className="px-5 py-3 rounded-2xl bg-rose-950/40 hover:bg-rose-950/70 text-rose-300 border border-rose-500/30 text-xs font-bold flex items-center gap-2 transition-all"
-      >
-        <LogOut className="w-4 h-4" />
-        <span>تسجيل الخروج من الحساب</span>
-      </button>
-
-      {isAdmin && (
-        <p className="text-[11px] text-slate-500">
-          أنت مسجّل الدخول بحساب الإدارة — لديك صلاحية كاملة على كل أقسام الموقع.
-        </p>
-      )}
     </div>
   );
 };

@@ -1,155 +1,163 @@
 import React from 'react';
-import { ShieldCheck, AlertTriangle, CheckCircle, RefreshCw, Lock, HelpCircle } from 'lucide-react';
+import { useStore } from '../context/StoreContext';
+import { ShieldCheck, AlertTriangle, CheckCircle, RefreshCw, Lock } from 'lucide-react';
 
 export const AboutWarranty: React.FC = () => {
+  const { navigate } = useStore();
+
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
+    <div className="max-w-5xl mx-auto px-3 sm:px-4 lg:px-6 py-6 space-y-6">
+      {/* Breadcrumbs */}
+      <div className="text-xs text-amazon-muted flex items-center gap-1.5">
+        <button onClick={() => navigate('home')} className="amazon-link">الرئيسية</button>
+        <span>›</span>
+        <span className="text-[#0F1111] font-semibold">سياسة الضمان والاستبدال</span>
+      </div>
+
       {/* Header */}
-      <div className="text-center max-w-2xl mx-auto space-y-3">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-950/80 text-emerald-300 text-xs font-bold border border-emerald-500/40">
-          <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+      <div className="bg-white p-5 sm:p-6 border border-slate-200 shadow-sm rounded-sm text-right space-y-2">
+        <div className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-sm border border-emerald-200">
+          <ShieldCheck className="w-3.5 h-3.5" />
           <span>سياسة الضمان والاستبدال الذهبي</span>
         </div>
-        <h1 className="text-3xl sm:text-5xl font-black font-cairo text-white">
-          الضمان وشروط الاستخدام
+        <h1 className="text-2xl sm:text-3xl font-bold font-cairo text-[#0F1111]">
+          الضمان وشروط الاستخدام الرسمية
         </h1>
-        <p className="text-xs sm:text-sm text-slate-300">
-          نحن نضمن تشغيل واستقرار كافة الاشتراكات طوال فترة الضمان المحددة، مع دعم فني متواصل واستبدال فوري عند الحاجة.
+        <p className="text-xs sm:text-sm text-amazon-muted max-w-2xl leading-relaxed">
+          نحن نضمن تشغيل واستقرار كافة الاشتراكات طوال فترة الضمان المحددة، مع دعم فني متواصل عبر واتساب واستبدال فوري عند الحاجة.
         </p>
       </div>
 
       {/* Main Pillars */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="p-6 rounded-3xl bg-bazaar-card border border-white/5 space-y-2 text-center">
-          <div className="w-12 h-12 rounded-2xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center mx-auto">
-            <CheckCircle className="w-6 h-6" />
+        <div className="p-5 rounded-sm bg-white border border-slate-200 shadow-sm space-y-2 text-right">
+          <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center">
+            <CheckCircle className="w-5 h-5" />
           </div>
-          <h3 className="font-bold text-white text-sm">استبدال فوري</h3>
-          <p className="text-xs text-slate-400 leading-relaxed">
-            في حال حدوث أي توقف في الحساب خلال فترة الضمان، يتم تعويضك بحساب جديد فوراً.
+          <h3 className="font-bold text-[#0F1111] text-sm font-cairo">استبدال فوري</h3>
+          <p className="text-xs text-amazon-muted leading-relaxed">
+            في حال حدوث أي توقف في الحساب خلال فترة الضمان، يتم تعويضك بحساب جديد فوراً بدون تعقيدات.
           </p>
         </div>
 
-        <div className="p-6 rounded-3xl bg-bazaar-card border border-white/5 space-y-2 text-center">
-          <div className="w-12 h-12 rounded-2xl bg-bazaar-gold/15 text-bazaar-gold flex items-center justify-center mx-auto">
-            <Lock className="w-6 h-6" />
+        <div className="p-5 rounded-sm bg-white border border-slate-200 shadow-sm space-y-2 text-right">
+          <div className="w-10 h-10 rounded-full bg-amber-50 text-amazon-orange flex items-center justify-center">
+            <Lock className="w-5 h-5" />
           </div>
-          <h3 className="font-bold text-white text-sm">أمان وخصوصية</h3>
-          <p className="text-xs text-slate-400 leading-relaxed">
-            بياناتك ومشاريعك في أمان تام، مع إمكانية التفعيل على حساباتك الشخصية في معظم الخدمات.
+          <h3 className="font-bold text-[#0F1111] text-sm font-cairo">أمان وخصوصية</h3>
+          <p className="text-xs text-amazon-muted leading-relaxed">
+            بياناتك ومشاريعك في أمان تام، مع إمكانية التفعيل على حساباتك الشخصية في معظم خدمات الذكاء الاصطناعي.
           </p>
         </div>
 
-        <div className="p-6 rounded-3xl bg-bazaar-card border border-white/5 space-y-2 text-center">
-          <div className="w-12 h-12 rounded-2xl bg-bazaar-teal/15 text-bazaar-teal flex items-center justify-center mx-auto">
-            <RefreshCw className="w-6 h-6" />
+        <div className="p-5 rounded-sm bg-white border border-slate-200 shadow-sm space-y-2 text-right">
+          <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center">
+            <RefreshCw className="w-5 h-5" />
           </div>
-          <h3 className="font-bold text-white text-sm">تجديد مستمر</h3>
-          <p className="text-xs text-slate-400 leading-relaxed">
-            إمكانية تجديد اشتراكاتك بنفس الأسعار المخفضة قبل انتهاء المدة بدون فقدان ملفاتك.
+          <h3 className="font-bold text-[#0F1111] text-sm font-cairo">تجديد مستمر</h3>
+          <p className="text-xs text-amazon-muted leading-relaxed">
+            إمكانية تجديد اشتراكاتك بنفس الأسعار المخفضة قبل انتهاء المدة بدون فقدان ملفاتك أو محادثاتك.
           </p>
         </div>
       </div>
 
       {/* Critical Conditions Box */}
-      <div className="p-6 sm:p-8 rounded-3xl bg-amber-950/30 border-2 border-amber-500/40 space-y-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
-            <AlertTriangle className="w-5 h-5" />
-          </div>
-          <h3 className="text-lg font-bold font-cairo text-white">
+      <div className="p-5 sm:p-6 rounded-sm bg-amber-50/70 border border-amber-300 shadow-sm space-y-3">
+        <div className="flex items-center gap-2 text-amber-900">
+          <AlertTriangle className="w-5 h-5 text-amazon-orange" />
+          <h3 className="text-base font-bold font-cairo">
             شروط وتعليمات هامة جداً للحفاظ على سريان الضمان
           </h3>
         </div>
 
-        <div className="space-y-3 text-xs text-slate-200 leading-relaxed pr-2">
+        <div className="space-y-2.5 text-xs text-[#0F1111] leading-relaxed pr-2">
           <div className="flex items-start gap-2">
-            <span className="text-amber-400 font-bold">•</span>
+            <span className="text-amazon-orange font-bold">•</span>
             <p>
-              <strong className="text-amber-300">حسابات نتفلكس (Netflix):</strong> يتم تسليم الحساب مع بريد Outlook مرتبط لاستلام رمز الدخول (OTP). <span className="underline font-bold text-rose-300">ممنوع نهائياً تغيير كلمة مرور بريد Outlook</span>؛ تغييرها يلغي الضمان فوراً ولا يشمله التعويض. مدة الضمان للحساب الشهري هي 25 يوماً وصلاحية الاشتراك 30 يوماً.
+              <strong>حسابات نتفلكس (Netflix):</strong> يتم تسليم الحساب مع بريد Outlook مرتبط لاستلام رمز الدخول (OTP). <span className="underline font-bold text-rose-700">ممنوع نهائياً تغيير كلمة مرور بريد Outlook</span>؛ تغييرها يلغي الضمان فوراً ولا يشمله التعويض. مدة الضمان للحساب الشهري هي 25 يوماً وصلاحية الاشتراك 30 يوماً.
             </p>
           </div>
 
           <div className="flex items-start gap-2">
-            <span className="text-amber-400 font-bold">•</span>
+            <span className="text-amazon-orange font-bold">•</span>
             <p>
-              <strong className="text-amber-300">اشتراك فيجما (Figma Pro Education):</strong> البريد الإلكتروني وكلمة السر متطابقين مع حساب Hotmail المرتبط. <span className="underline font-bold text-rose-300">ممنوع تغيير البريد الإلكتروني داخل Figma</span> حفاظاً على استمرار الخطة التعليمية وضمان السنتين.
+              <strong>اشتراك فيجما (Figma Pro Education):</strong> البريد الإلكتروني وكلمة السر متطابقين مع حساب Hotmail المرتبط. <span className="underline font-bold text-rose-700">ممنوع تغيير البريد الإلكتروني داخل Figma</span> حفاظاً على استمرار الخطة التعليمية وضمان السنتين.
             </p>
           </div>
 
           <div className="flex items-start gap-2">
-            <span className="text-amber-400 font-bold">•</span>
+            <span className="text-amazon-orange font-bold">•</span>
             <p>
-              <strong className="text-amber-300">اشتراك جيميني (Gemini Pro):</strong> يتم التفعيل على إيميلك الشخصي مباشرة، مما يضمن لك خصوصية 100% وحماية كاملة لملفاتك وصورك على مساحة الـ 5 تيرابايت.
+              <strong>اشتراك جيميني (Gemini Pro):</strong> يتم التفعيل على إيميلك الشخصي مباشرة، مما يضمن لك خصوصية 100% وحماية كاملة لملفاتك وصورك على مساحة الـ 5 تيرابايت.
             </p>
           </div>
 
           <div className="flex items-start gap-2">
-            <span className="text-amber-400 font-bold">•</span>
+            <span className="text-amazon-orange font-bold">•</span>
             <p>
-              <strong className="text-amber-300">برنامج واتساب سندر (WhatsApp Sender):</strong> يتم إرسال كود التفعيل ورابط التحميل، والتواصل مع دعم واتساب للمساعدة في تثبيت البرنامج وتشغيل الشات بوت وميزة تسخين الحسابات لتقليل احتمالية الحظر.
+              <strong>برنامج واتساب سندر (WhatsApp Sender):</strong> يتم إرسال كود التفعيل ورابط التحميل، والتواصل مع دعم واتساب للمساعدة في تثبيت البرنامج وتشغيل الشات بوت وميزة تسخين الحسابات لتقليل احتمالية الحظر.
             </p>
           </div>
         </div>
       </div>
 
-      {/* Warranty Details per Category Table */}
-      <div className="p-6 rounded-3xl bg-bazaar-card border border-white/10 space-y-4">
-        <h3 className="text-lg font-bold font-cairo text-white">
-          جدول مدد وضمانات الاشتراكات
+      {/* Warranty Details Table */}
+      <div className="p-5 sm:p-6 rounded-sm bg-white border border-slate-200 shadow-sm space-y-4">
+        <h3 className="text-base font-bold font-cairo text-[#0F1111]">
+          جدول مدد وضمانات الاشتراكات الرقمية
         </h3>
         <div className="overflow-x-auto">
-          <table className="w-full text-xs text-right">
+          <table className="w-full text-xs text-right border-collapse">
             <thead>
-              <tr className="border-b border-white/10 text-slate-400 font-bold">
-                <th className="py-3 px-4">الخدمة</th>
-                <th className="py-3 px-4">مدة الاشتراك</th>
-                <th className="py-3 px-4">نوع الحساب</th>
-                <th className="py-3 px-4">مدة الضمان</th>
+              <tr className="bg-slate-50 border-b border-slate-200 text-slate-700 font-bold">
+                <th className="py-2.5 px-3">الخدمة</th>
+                <th className="py-2.5 px-3">مدة الاشتراك</th>
+                <th className="py-2.5 px-3">نوع الحساب</th>
+                <th className="py-2.5 px-3">مدة الضمان</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5 text-slate-200">
-              <tr>
-                <td className="py-3 px-4 font-bold text-white">ChatGPT Plus</td>
-                <td className="py-3 px-4">شهر كامل</td>
-                <td className="py-3 px-4">حساب جاهز مفعل</td>
-                <td className="py-3 px-4 text-emerald-400 font-semibold">طوال فترة الاشتراك (25-30 يوم)</td>
+            <tbody className="divide-y divide-slate-100 text-[#0F1111]">
+              <tr className="hover:bg-slate-50">
+                <td className="py-2.5 px-3 font-semibold">ChatGPT Plus</td>
+                <td className="py-2.5 px-3">شهر كامل</td>
+                <td className="py-2.5 px-3">حساب جاهز مفعل</td>
+                <td className="py-2.5 px-3 text-emerald-700 font-bold">طوال فترة الاشتراك (25-30 يوم)</td>
               </tr>
-              <tr>
-                <td className="py-3 px-4 font-bold text-white">Gemini Pro (Google AI)</td>
-                <td className="py-3 px-4">18 شهر</td>
-                <td className="py-3 px-4">تفعيل شخصي على إيميلك</td>
-                <td className="py-3 px-4 text-emerald-400 font-semibold">18 شهر كاملة</td>
+              <tr className="hover:bg-slate-50">
+                <td className="py-2.5 px-3 font-semibold">Gemini Pro (Google AI)</td>
+                <td className="py-2.5 px-3">18 شهر</td>
+                <td className="py-2.5 px-3">تفعيل شخصي على إيميلك</td>
+                <td className="py-2.5 px-3 text-emerald-700 font-bold">18 شهر كاملة</td>
               </tr>
-              <tr>
-                <td className="py-3 px-4 font-bold text-white">Claude Pro 5X</td>
-                <td className="py-3 px-4">اشتراك كامل</td>
-                <td className="py-3 px-4">حساب جاهز</td>
-                <td className="py-3 px-4 text-emerald-400 font-semibold">كامل المدة المحددة</td>
+              <tr className="hover:bg-slate-50">
+                <td className="py-2.5 px-3 font-semibold">Claude Pro 5X</td>
+                <td className="py-2.5 px-3">اشتراك كامل</td>
+                <td className="py-2.5 px-3">حساب جاهز</td>
+                <td className="py-2.5 px-3 text-emerald-700 font-bold">كامل المدة المحددة</td>
               </tr>
-              <tr>
-                <td className="py-3 px-4 font-bold text-white">Canva Pro</td>
-                <td className="py-3 px-4">سنة / 3 سنوات</td>
-                <td className="py-3 px-4">انضمام لفريق بريميوم</td>
-                <td className="py-3 px-4 text-emerald-400 font-semibold">كامل مدة الاشتراك</td>
+              <tr className="hover:bg-slate-50">
+                <td className="py-2.5 px-3 font-semibold">Canva Pro</td>
+                <td className="py-2.5 px-3">سنة / 3 سنوات</td>
+                <td className="py-2.5 px-3">انضمام لفريق بريميوم</td>
+                <td className="py-2.5 px-3 text-emerald-700 font-bold">كامل مدة الاشتراك</td>
               </tr>
-              <tr>
-                <td className="py-3 px-4 font-bold text-white">CapCut Pro</td>
-                <td className="py-3 px-4">7 أيام / 30 يوم / 6 شهور</td>
-                <td className="py-3 px-4">حساب جاهز</td>
-                <td className="py-3 px-4 text-emerald-400 font-semibold">كامل مدة الباقة المختارة</td>
+              <tr className="hover:bg-slate-50">
+                <td className="py-2.5 px-3 font-semibold">CapCut Pro</td>
+                <td className="py-2.5 px-3">7 أيام / 30 يوم / 6 شهور</td>
+                <td className="py-2.5 px-3">حساب جاهز</td>
+                <td className="py-2.5 px-3 text-emerald-700 font-bold">كامل مدة الباقة المختارة</td>
               </tr>
-              <tr>
-                <td className="py-3 px-4 font-bold text-white">Netflix 4K</td>
-                <td className="py-3 px-4">30 يوم</td>
-                <td className="py-3 px-4">حساب خاص كامل</td>
-                <td className="py-3 px-4 text-emerald-400 font-semibold">25 يوم استبدال</td>
+              <tr className="hover:bg-slate-50">
+                <td className="py-2.5 px-3 font-semibold">Netflix 4K</td>
+                <td className="py-2.5 px-3">30 يوم</td>
+                <td className="py-2.5 px-3">حساب خاص كامل</td>
+                <td className="py-2.5 px-3 text-emerald-700 font-bold">25 يوم استبدال</td>
               </tr>
-              <tr>
-                <td className="py-3 px-4 font-bold text-white">Office 365</td>
-                <td className="py-3 px-4">12 شهر</td>
-                <td className="py-3 px-4">حساب جاهز + 1TB</td>
-                <td className="py-3 px-4 text-emerald-400 font-semibold">سنة كاملة</td>
+              <tr className="hover:bg-slate-50">
+                <td className="py-2.5 px-3 font-semibold">Office 365</td>
+                <td className="py-2.5 px-3">12 شهر</td>
+                <td className="py-2.5 px-3">حساب جاهز + 1TB</td>
+                <td className="py-2.5 px-3 text-emerald-700 font-bold">سنة كاملة</td>
               </tr>
             </tbody>
           </table>

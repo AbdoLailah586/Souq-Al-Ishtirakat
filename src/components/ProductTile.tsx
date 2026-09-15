@@ -13,7 +13,11 @@ export const ProductTile: React.FC<{ service: Service; compact?: boolean }> = ({
   const offer = hasAnyOffer(service.variants);
 
   return (
-    <article className={`bg-white border border-transparent hover:border-slate-200 rounded-sm p-3 flex flex-col ${compact ? 'min-w-[180px] w-[180px]' : 'h-full'}`}>
+    <article className={`bg-white rounded-sm p-3.5 flex flex-col justify-between transition-all ${
+      compact 
+        ? 'min-w-[180px] w-[180px] border border-transparent hover:border-slate-200' 
+        : 'h-full border border-slate-200 hover:border-slate-300 shadow-sm hover:shadow'
+    }`}>
       <button type="button" onClick={() => openProduct(service)} className="text-right">
         <div className={`${compact ? 'h-36' : 'h-44'} bg-white flex items-center justify-center mb-2`}>
           {service.imageUrl ? (

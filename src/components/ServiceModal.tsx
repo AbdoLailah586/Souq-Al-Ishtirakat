@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 
 export const ServiceModal: React.FC = () => {
-  const { selectedService, closeServiceModal, purchaseItem, openTopUpModal, openAuthModal, navigate } = useStore();
+  const { selectedService, isServiceModalOpen, closeServiceModal, purchaseItem, openTopUpModal, openAuthModal, navigate } = useStore();
   const { user } = useAuth();
 
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
@@ -47,7 +47,7 @@ export const ServiceModal: React.FC = () => {
     setActiveTab('features');
   }, [selectedService?.id]);
 
-  if (!selectedService) return null;
+  if (!isServiceModalOpen || !selectedService) return null;
 
   const currentVariant = selectedService.variants[selectedVariantIndex] || selectedService.variants[0];
   const finalPrice = effectivePrice(currentVariant);

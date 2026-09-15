@@ -2,13 +2,11 @@ import React, { useState, useMemo } from 'react';
 import { useStore } from '../context/StoreContext';
 import { CATEGORIES } from '../data/services';
 import { minEffectivePrice, hasAnyOffer } from '../utils/pricing';
-import { ServiceCard } from '../components/ServiceCard';
+import { ProductTile } from '../components/ProductTile';
 import { Search, SlidersHorizontal, Sparkles, X } from 'lucide-react';
 
-
-
 export const Services: React.FC = () => {
-  const { services, selectedCategory, setSelectedCategory } = useStore();
+  const { services, selectedCategory, setSelectedCategory, navigate } = useStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'default' | 'price-asc' | 'price-desc' | 'offers'>('default');
 
@@ -40,39 +38,59 @@ export const Services: React.FC = () => {
     });
   }, [services, selectedCategory, searchQuery, sortBy]);
 
+  const activeCategoryInfo = CATEGORIES.find(c => c.id === selectedCategory);
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+    <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-6 space-y-5">
+      {/* Breadcrumbs */}
+      <div className="text-xs text-amazon-muted flex items-center gap-1.5">
+        <button onClick={() => navigate('home')} className="amazon-link">الرئيسية</button>
+        <span>›</span>
+        <span className="text-[#0F1111] font-semibold">
+          {selectedCategory === 'all' ? 'جميع الاشتراكات' : (activeCategoryInfo?.name || 'الاشتراكات')}
+        </span>
+      </div>
+
       {/* Page Header */}
-      <div className="text-center max-w-3xl mx-auto space-y-3">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-bazaar-gold/15 text-bazaar-gold text-xs font-bold border border-bazaar-gold/30">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>كتالوج الاشتراكات الرقمية الكامل</span>
+      <div className="bg-white p-4 sm:p-6 border border-slate-200 shadow-sm rounded-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="space-y-1 text-right">
+          <div className="inline-flex items-center gap-1.5 text-xs font-bold text-amazon-orange">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>كتالوج الاشتراكات الرسمية بالجملة</span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold font-cairo text-[#0F1111]">
+            {selectedCategory === 'all' ? 'جميع الاشتراكات والخدمات الرقمية' : activeCategoryInfo?.name}
+          </h1>
+          <p className="text-xs text-amazon-muted max-w-xl">
+            {selectedCategory === 'all'
+              ? 'تصفح حسابات الذكاء الاصطناعي، التصميم، المونتاج، الإنتاجية، والتسويق بأسعار مخفضة وتسليم فوري.'
+              : (activeCategoryInfo?.description || 'خدمات واشتراكات متخصصة بضمان كامل وتسليم رقمي سريع.')}
+          </p>
         </div>
-        <h1 className="text-3xl sm:text-5xl font-black font-cairo text-white">
-          جميع الاشتراكات والخدمات المتاحة
-        </h1>
-        <p className="text-xs sm:text-sm text-slate-300">
-          تصفح حسابات الذكاء الاصطناعي، التصميم، المونتاج، الإنتاجية، والتسويق بأسعار مخفضة وتسليم فوري.
-        </p>
+
+        <div className="text-xs text-amazon-muted bg-slate-50 p-3 rounded border border-slate-200 text-center shrink-0">
+          <span className="block font-bold text-[#0F1111] text-base">{filteredServices.length}</span>
+          <span>خدمة متاحة حالياً</span>
+        </div>
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="bg-bazaar-card/80 border border-bazaar-border p-4 rounded-3xl space-y-4 shadow-xl backdrop-blur-md">
+      <div className="bg-white border border-slate-200 p-4 rounded-sm shadow-sm space-y-3">
         <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
           {/* Search Input */}
           <div className="relative flex-1">
-            <Search className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
               type="text"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               placeholder="ابحث بالاسم (ChatGPT, Canva, CapCut...) أو الكود (10208, 10415)..."
-              className="w-full bg-bazaar-bg/90 border border-white/10 focus:border-bazaar-gold rounded-2xl pr-10 pl-10 py-3 text-xs sm:text-sm text-white focus:outline-none transition-colors"
+              className="w-full bg-slate-50 border border-slate-300 focus:border-amazon-orange focus:bg-white rounded-sm pr-9 pl-9 py-2 text-xs sm:text-sm text-[#0F1111] focus:outline-none transition-colors"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#0F1111]"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -81,13 +99,13 @@ export const Services: React.FC = () => {
 
           {/* Sort Dropdown */}
           <div className="flex items-center gap-2 shrink-0">
-            <SlidersHorizontal className="w-4 h-4 text-slate-400 hidden sm:block" />
+            <SlidersHorizontal className="w-4 h-4 text-slate-500 hidden sm:block" />
             <select
               value={sortBy}
               onChange={e => setSortBy(e.target.value as any)}
-              className="bg-bazaar-bg/90 border border-white/10 rounded-2xl px-4 py-3 text-xs sm:text-sm text-white focus:outline-none focus:border-bazaar-gold cursor-pointer"
+              className="bg-slate-50 border border-slate-300 rounded-sm px-3 py-2 text-xs sm:text-sm text-[#0F1111] focus:outline-none focus:border-amazon-orange cursor-pointer"
             >
-              <option value="default">الترتيب الافتراضي</option>
+              <option value="default">الترتيب: الافتراضي</option>
               <option value="price-asc">السعر: من الأقل للأعلى</option>
               <option value="price-desc">السعر: من الأعلى للأقل</option>
               <option value="offers">العروض والخصومات أولاً</option>
@@ -96,16 +114,16 @@ export const Services: React.FC = () => {
         </div>
 
         {/* Category Tabs */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 pt-1 no-scrollbar">
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 pt-1 no-scrollbar border-t border-slate-100">
           <button
             onClick={() => setSelectedCategory('all')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+            className={`px-3 py-1.5 rounded text-xs font-semibold whitespace-nowrap transition-all ${
               selectedCategory === 'all'
-                ? 'bg-bazaar-gold text-bazaar-bg shadow-md'
-                : 'bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white'
+                ? 'bg-[#131921] text-white shadow-sm'
+                : 'bg-slate-100 hover:bg-slate-200 text-[#0F1111]'
             }`}
           >
-            جميع الأقسام ({services.length})
+            الكل ({services.length})
           </button>
 
           {CATEGORIES.map(cat => {
@@ -115,15 +133,15 @@ export const Services: React.FC = () => {
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.id)}
-                className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 ${
+                className={`px-3 py-1.5 rounded text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 ${
                   isSelected
-                    ? 'bg-bazaar-gold text-bazaar-bg shadow-md'
-                    : 'bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white'
+                    ? 'bg-[#131921] text-white shadow-sm'
+                    : 'bg-slate-100 hover:bg-slate-200 text-[#0F1111]'
                 }`}
               >
                 <span>{cat.name}</span>
                 <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${
-                  isSelected ? 'bg-bazaar-bg/20 text-bazaar-bg font-black' : 'bg-white/10 text-slate-400'
+                  isSelected ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-600'
                 }`}>
                   {count}
                 </span>
@@ -133,18 +151,18 @@ export const Services: React.FC = () => {
         </div>
       </div>
 
-      {/* Services Grid */}
+      {/* Services Grid in Authentic Amazon Layout */}
       {filteredServices.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
           {filteredServices.map(service => (
-            <ServiceCard key={service.id} service={service} />
+            <ProductTile key={service.id} service={service} />
           ))}
         </div>
       ) : (
-        <div className="text-center py-20 p-8 rounded-3xl bg-bazaar-card/40 border border-white/5 space-y-3">
+        <div className="text-center py-16 p-8 rounded-sm bg-white border border-slate-200 space-y-3 shadow-sm">
           <div className="text-4xl">🔍</div>
-          <h3 className="text-lg font-bold font-cairo text-white">لم يتم العثور على أي نتائج</h3>
-          <p className="text-xs text-slate-400 max-w-sm mx-auto">
+          <h3 className="text-lg font-bold font-cairo text-[#0F1111]">لم يتم العثور على أي نتائج</h3>
+          <p className="text-xs text-amazon-muted max-w-sm mx-auto">
             تأكد من كتابة الكلمة بشكل صحيح، أو قم بإلغاء التصفية للبحث في جميع الأقسام.
           </p>
           <button
@@ -152,7 +170,7 @@ export const Services: React.FC = () => {
               setSearchQuery('');
               setSelectedCategory('all');
             }}
-            className="px-4 py-2 rounded-xl bg-bazaar-gold text-bazaar-bg text-xs font-bold mt-2"
+            className="px-5 py-2 rounded-full btn-cart text-xs font-bold mt-2"
           >
             إعادة تعيين الفلاتر
           </button>

@@ -1,226 +1,199 @@
 import React from 'react';
 import { useStore } from '../context/StoreContext';
-import { ShieldCheck, Zap, Headphones, Sparkles, MessageCircle, Lock } from 'lucide-react';
-
-
+import { CATEGORIES } from '../data/services';
+import { MessageCircle, ShieldCheck, Zap, Lock, Headphones, ArrowUp } from 'lucide-react';
 
 export const Footer: React.FC = () => {
-  const { settings, navigate: setCurrentTab } = useStore();
+  const { settings, navigate: setCurrentTab, setSelectedCategory, openTopUpModal } = useStore();
 
-  const handleNav = (tab: string) => {
+  const handleNav = (tab: string, cat?: string) => {
+    if (cat) setSelectedCategory(cat);
     setCurrentTab(tab);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
-    <footer className="bg-[#0b0a1a] border-t border-bazaar-border text-slate-400 text-sm mt-20 relative overflow-hidden">
-      {/* Background Decorative Glow */}
-      <div className="bazaar-glow-blob w-96 h-96 bg-bazaar-purple/10 -bottom-20 -right-20"></div>
-      <div className="bazaar-glow-blob w-96 h-96 bg-bazaar-gold/5 -top-20 -left-20"></div>
+    <footer className="mt-12 text-sm">
+      {/* 1. Amazon Back to Top Bar */}
+      <button
+        type="button"
+        onClick={scrollToTop}
+        className="w-full bg-[#37475A] hover:bg-[#485769] text-white text-center py-3.5 text-xs sm:text-sm font-semibold transition-colors flex items-center justify-center gap-2"
+      >
+        <ArrowUp className="w-4 h-4" />
+        <span>العودة إلى الأعلى</span>
+      </button>
 
-      {/* Trust Badges Banner */}
-      <div className="border-b border-bazaar-border/60 py-8 bg-bazaar-card/20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="flex items-center gap-3.5 p-3 rounded-2xl bg-bazaar-card/40 border border-white/5">
-            <div className="w-11 h-11 rounded-xl bg-bazaar-gold/15 text-bazaar-gold flex items-center justify-center shrink-0">
-              <Zap className="w-5 h-5" />
-            </div>
-            <div>
-              <h4 className="text-white font-bold text-sm">تسليم سريع وفوري</h4>
-              <p className="text-xs text-slate-400">تصلك بيانات الحساب مباشرة على لوحة تحكمك</p>
+      {/* 2. Amazon Multi-tier Directory Section */}
+      <div className="bg-[#232F3E] text-slate-300 py-10 px-4 sm:px-6 lg:px-8 border-b border-[#3a4553]">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 text-right">
+          {/* Col 1: About */}
+          <div className="space-y-3">
+            <h3 className="text-white font-bold text-sm sm:text-base font-cairo">
+              عن سوق الاشتراكات
+            </h3>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              المنصة الأولى الموثوقة لتوفير اشتراكات الذكاء الاصطناعي (ChatGPT, Claude, Gemini)، برامج التصميم والمونتاج (Adobe, Canva, CapCut) وخدمات التسويق بأفضل أسعار الجملة في مصر.
+            </p>
+            <div className="pt-2">
+              <a
+                href={`https://wa.me/${settings.whatsappSupportNumber}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 bg-[#25D366]/20 hover:bg-[#25D366]/30 text-[#25D366] border border-[#25D366]/40 px-3 py-1.5 rounded text-xs font-bold transition-all"
+              >
+                <MessageCircle className="w-3.5 h-3.5" />
+                <span>دعم واتساب: {settings.whatsappSupportNumber}</span>
+              </a>
             </div>
           </div>
 
-          <div className="flex items-center gap-3.5 p-3 rounded-2xl bg-bazaar-card/40 border border-white/5">
-            <div className="w-11 h-11 rounded-xl bg-bazaar-teal/15 text-bazaar-teal flex items-center justify-center shrink-0">
-              <ShieldCheck className="w-5 h-5" />
-            </div>
-            <div>
-              <h4 className="text-white font-bold text-sm">ضمان ذهبي كامل</h4>
-              <p className="text-xs text-slate-400">حسابات رسمية مدعومة بضمان استبدال حقيقي</p>
-            </div>
+          {/* Col 2: Categories */}
+          <div className="space-y-3">
+            <h3 className="text-white font-bold text-sm sm:text-base font-cairo">
+              تسوق حسب القسم
+            </h3>
+            <ul className="space-y-2 text-xs text-slate-300">
+              {CATEGORIES.map(cat => (
+                <li key={cat.id}>
+                  <button
+                    onClick={() => handleNav('services', cat.id)}
+                    className="hover:underline hover:text-white transition-colors"
+                  >
+                    {cat.name} ({cat.badgeCount} خدمة)
+                  </button>
+                </li>
+              ))}
+              <li>
+                <button
+                  onClick={() => handleNav('bundles')}
+                  className="text-amazon-yellow font-semibold hover:underline"
+                >
+                  عروض اليوم والباقات المجمعة
+                </button>
+              </li>
+            </ul>
           </div>
 
-          <div className="flex items-center gap-3.5 p-3 rounded-2xl bg-bazaar-card/40 border border-white/5">
-            <div className="w-11 h-11 rounded-xl bg-bazaar-green/15 text-bazaar-green flex items-center justify-center shrink-0">
-              <Lock className="w-5 h-5" />
-            </div>
-            <div>
-              <h4 className="text-white font-bold text-sm">دفع محلي آمن</h4>
-              <p className="text-xs text-slate-400">شحن فوري عبر تطبيق انستاباي والمحافظ</p>
-            </div>
+          {/* Col 3: Customer Care & Warranty */}
+          <div className="space-y-3">
+            <h3 className="text-white font-bold text-sm sm:text-base font-cairo">
+              الدعم وسياسة الضمان
+            </h3>
+            <ul className="space-y-2 text-xs text-slate-300">
+              <li>
+                <button
+                  onClick={() => handleNav('payment')}
+                  className="hover:underline hover:text-white transition-colors"
+                >
+                  طرق الدفع والشحن (انستاباي / كاش)
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => handleNav('warranty')}
+                  className="hover:underline hover:text-white transition-colors"
+                >
+                  سياسة الضمان والاستبدال الذهبي
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => handleNav('support')}
+                  className="hover:underline hover:text-white transition-colors"
+                >
+                  الأسئلة الشائعة وخدمة العملاء
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={openTopUpModal}
+                  className="text-amazon-search font-semibold hover:underline"
+                >
+                  شحن رصيد المحفظة الفوري
+                </button>
+              </li>
+            </ul>
           </div>
 
-          <div className="flex items-center gap-3.5 p-3 rounded-2xl bg-bazaar-card/40 border border-white/5">
-            <div className="w-11 h-11 rounded-xl bg-bazaar-purple/15 text-bazaar-purple flex items-center justify-center shrink-0">
-              <Headphones className="w-5 h-5" />
-            </div>
-            <div>
-              <h4 className="text-white font-bold text-sm">دعم فني متخصص</h4>
-              <p className="text-xs text-slate-400">مساعدتك في التفعيل عبر الواتساب على مدار الساعة</p>
-            </div>
+          {/* Col 4: Account & Orders */}
+          <div className="space-y-3">
+            <h3 className="text-white font-bold text-sm sm:text-base font-cairo">
+              حسابك ومشترياتك
+            </h3>
+            <ul className="space-y-2 text-xs text-slate-300">
+              <li>
+                <button
+                  onClick={() => handleNav('dashboard')}
+                  className="hover:underline hover:text-white transition-colors"
+                >
+                  لوحة التحكم الرئيسية
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => handleNav('dashboard-orders')}
+                  className="hover:underline hover:text-white transition-colors"
+                >
+                  طلباتي وبيانات الحسابات المستلمة
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => handleNav('dashboard-wallet')}
+                  className="hover:underline hover:text-white transition-colors"
+                >
+                  المحفظة وحركات الشحن
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => handleNav('cart')}
+                  className="hover:underline hover:text-white transition-colors"
+                >
+                  سلة التسوق ومتابعة الشراء
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => handleNav('dashboard-profile')}
+                  className="hover:underline hover:text-white transition-colors"
+                >
+                  الملف الشخصي وكلمة المرور
+                </button>
+              </li>
+            </ul>
           </div>
         </div>
       </div>
 
-      {/* Main Footer Links */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
-        {/* Brand Col */}
-        <div className="lg:col-span-2 space-y-4">
-          <div className="flex items-center gap-3 cursor-pointer" onClick={() => handleNav('home')}>
-            <span className="text-2xl">🏮</span>
-            <span className="text-2xl font-black font-cairo gold-gradient-text">
-              {settings.siteName}
-            </span>
-          </div>
-          <p className="text-xs sm:text-sm text-slate-400 leading-relaxed max-w-sm">
-            المنصة الأولى الموثوقة لتوفير اشتراكات الذكاء الاصطناعي (ChatGPT, Claude, Gemini)، برامج التصميم والمونتاج (Adobe, Canva, CapCut) وخدمات التسويق بأفضل الأسعار وبنظام المحفظة السريعة.
-          </p>
-
-          <div className="flex items-center gap-3 pt-2">
-            <a
-              href={`https://wa.me/${settings.whatsappSupportNumber}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 px-3.5 py-2 rounded-xl text-xs font-bold transition-all"
-            >
-              <MessageCircle className="w-4 h-4" />
-              <span>تواصل مع الدعم عبر واتساب</span>
-            </a>
-          </div>
+      {/* 3. Amazon Bottom Bar */}
+      <div className="bg-[#131A22] text-slate-400 py-6 px-4 text-center text-xs space-y-3">
+        <div className="flex flex-wrap items-center justify-center gap-4 text-xs font-semibold text-slate-300">
+          <button onClick={() => handleNav('home')} className="hover:underline">الرئيسية</button>
+          <span>•</span>
+          <button onClick={() => handleNav('services')} className="hover:underline">كل الاشتراكات</button>
+          <span>•</span>
+          <button onClick={() => handleNav('bundles')} className="hover:underline">باقات التوفير</button>
+          <span>•</span>
+          <button onClick={() => handleNav('payment')} className="hover:underline">انستاباي والمحافظ</button>
+          <span>•</span>
+          <button onClick={() => handleNav('warranty')} className="hover:underline">الضمان والاسترجاع</button>
+          <span>•</span>
+          <button onClick={() => handleNav('support')} className="hover:underline">اتصل بنا</button>
         </div>
 
-        {/* Links Col 1 */}
-        <div className="space-y-3">
-          <h4 className="text-white font-bold font-cairo text-sm">الروابط السريعة</h4>
-          <ul className="space-y-2 text-xs">
-            <li>
-              <button onClick={() => handleNav('home')} className="hover:text-bazaar-gold transition-colors">
-                الرئيسية
-              </button>
-            </li>
-            <li>
-              <button onClick={() => handleNav('services')} className="hover:text-bazaar-gold transition-colors">
-                جميع الخدمات والاشتراكات
-              </button>
-            </li>
-            <li>
-              <button onClick={() => handleNav('bundles')} className="hover:text-bazaar-gold transition-colors">
-                الباقات والعروض المدمجة
-              </button>
-            </li>
-            <li>
-              <button onClick={() => handleNav('payment')} className="hover:text-bazaar-gold transition-colors">
-                طرق الشحن والدفع
-              </button>
-            </li>
-          </ul>
+        <div className="flex flex-wrap items-center justify-center gap-2 pt-1 text-[11px] text-slate-500">
+          <span>طرق الدفع المدعومة: InstaPay • فودافون كاش • اتصالات كاش • وي باي • أورنج كاش</span>
         </div>
 
-        {/* Links Col 2 */}
-        <div className="space-y-3">
-          <h4 className="text-white font-bold font-cairo text-sm">السياسات والضمان</h4>
-          <ul className="space-y-2 text-xs">
-            <li>
-              <button onClick={() => handleNav('warranty')} className="hover:text-bazaar-gold transition-colors">
-                سياسة الضمان والاستبدال
-              </button>
-            </li>
-            <li>
-              <button onClick={() => handleNav('support')} className="hover:text-bazaar-gold transition-colors">
-                الأسئلة الشائعة (FAQ)
-              </button>
-            </li>
-            <li>
-              <button onClick={() => handleNav('payment')} className="hover:text-bazaar-gold transition-colors">
-                تعليمات التحويل والتحقق
-              </button>
-            </li>
-          </ul>
-        </div>
-
-        {/* Payment Methods Badges */}
-        <div className="space-y-4">
-          <h4 className="text-white font-bold font-cairo text-sm">طرق الدفع المدعومة</h4>
-          
-          <div className="space-y-3 pt-1">
-            {/* Row 1: InstaPay */}
-            <div 
-              onClick={() => handleNav('payment')}
-              className="cursor-pointer group flex items-center justify-start transition-all"
-              title="انستاباي - تحويل فوري ولحظي"
-            >
-              <img 
-                src="/images/payment/instapay.png?v=3" 
-                alt="انستاباي InstaPay" 
-                className="h-8 w-auto max-w-[170px] object-contain filter drop-shadow hover:scale-105 transition-transform duration-200" 
-              />
-            </div>
-
-            {/* Row 2: Vodafone Cash & Etisalat Cash */}
-            <div className="grid grid-cols-2 gap-3 items-center">
-              <div 
-                onClick={() => handleNav('payment')}
-                className="cursor-pointer group flex items-center justify-start transition-all"
-                title="فودافون كاش"
-              >
-                <img 
-                  src="/images/payment/vodafone-cash.png?v=3" 
-                  alt="فودافون كاش Vodafone Cash" 
-                  className="h-9 w-auto max-w-full object-contain filter drop-shadow hover:scale-105 transition-transform duration-200" 
-                />
-              </div>
-
-              <div 
-                onClick={() => handleNav('payment')}
-                className="cursor-pointer group flex items-center justify-start transition-all"
-                title="اتصالات كاش"
-              >
-                <img 
-                  src="/images/payment/etisalat-cash.png?v=3" 
-                  alt="اتصالات كاش Etisalat Cash" 
-                  className="h-9 w-auto max-w-full object-contain filter drop-shadow hover:scale-105 transition-transform duration-200" 
-                />
-              </div>
-            </div>
-
-            {/* Row 3: WE Pay & Orange Europe */}
-            <div className="grid grid-cols-2 gap-3 items-center">
-              <div 
-                onClick={() => handleNav('payment')}
-                className="cursor-pointer group flex items-center justify-start transition-all"
-                title="وي باي WE Pay"
-              >
-                <img 
-                  src="/images/payment/we-pay.png?v=3" 
-                  alt="وي باي WE Pay" 
-                  className="h-9 w-auto max-w-full object-contain filter drop-shadow hover:scale-105 transition-transform duration-200" 
-                />
-              </div>
-
-              <div 
-                onClick={() => handleNav('payment')}
-                className="cursor-pointer group flex items-center justify-start transition-all"
-                title="أورنج كاش وتحويلات أوروبا والدولية"
-              >
-                <img 
-                  src="/images/payment/orange-europe.png?v=3" 
-                  alt="أورنج كاش Orange Europe" 
-                  className="h-9 w-auto max-w-full object-contain filter drop-shadow hover:scale-105 transition-transform duration-200" 
-                />
-              </div>
-            </div>
-          </div>
-
-          <p className="text-[11px] text-slate-400 pt-1 leading-relaxed">
-            مواعيد التحويل والتسليم: {settings.workingHours}
-          </p>
-        </div>
-      </div>
-
-      {/* Bottom Copyright */}
-      <div className="border-t border-bazaar-border/60 py-6 text-center text-xs text-slate-500">
-        <p>© {new Date().getFullYear()} {settings.siteName}. جميع الحقوق محفوظة — بازار الاشتراكات الرقمية الأول.</p>
+        <p className="text-[11px] text-slate-500">
+          جميع الحقوق محفوظة © {new Date().getFullYear()} {settings.siteName} .eg — منصة الاشتراكات الرقمية الأولى في مصر
+        </p>
       </div>
     </footer>
   );

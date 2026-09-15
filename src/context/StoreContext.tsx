@@ -25,6 +25,7 @@ interface StoreContextType {
 
   selectedService: Service | null;
   selectedBundle: Bundle | null;
+  isServiceModalOpen: boolean;
   openServiceModal: (service: Service) => void;
   openProduct: (service: Service) => void;
   openBundleProduct: (bundle: Bundle) => void;
@@ -278,6 +279,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [cart, setCart] = useState<CartItem[]>(() => loadCart());
   const [cartToast, setCartToast] = useState<string | null>(null);
   const [isTopUpModalOpen, setIsTopUpModalOpen] = useState(false);
+  const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authModalReason, setAuthModalReason] = useState<string | null>(null);
   const [authModalMode, setAuthModalMode] = useState<'login' | 'register'>('login');
@@ -477,23 +479,58 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return () => { void supabase.removeChannel(channel); };
   }, [isAuthenticated, refreshOrders, refreshTransactions]);
 
-  const openServiceModal = (s: Service) => {
+  const openProduct = useCallback((s: Service) => {
     setSelectedService(s);
     setSelectedBundle(null);
+    setIsServiceModalOpen(false);
     setCurrentTab('product');
+    try {
+      sessionStorage.setItem('souq_active_service_id', s.id);
+      sessionStorage.removeItem('souq_active_bundle_id');
+    } catch {}
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-  const openProduct = openServiceModal;
-  const openBundleProduct = (b: Bundle) => {
+  }, []);
+
+  const openBundleProduct = useCallback((b: Bundle) => {
     setSelectedBundle(b);
     setSelectedService(null);
+    setIsServiceModalOpen(false);
     setCurrentTab('product');
+    try {
+      sessionStorage.setItem('souq_active_bundle_id', b.id);
+      sessionStorage.removeItem('souq_active_service_id');
+    } catch {}
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-  const closeServiceModal = () => {
-    setSelectedService(null);
-    setSelectedBundle(null);
-  };
+  }, []);
+
+  const openServiceModal = useCallback((s: Service) => {
+    openProduct(s);
+  }, [openProduct]);
+
+  const closeServiceModal = useCallback(() => {
+    setIsServiceModalOpen(false);
+  }, []);
+
+  // استعادة المنتج المختار تلقائياً عند الدخول على صفحة المنتج أو تحديث الصفحة لمنع أي شاشة فارغة
+  useEffect(() => {
+    if (currentTab === 'product' && !selectedService && !selectedBundle) {
+      try {
+        const sId = sessionStorage.getItem('souq_active_service_id');
+        const bId = sessionStorage.getItem('souq_active_bundle_id');
+        if (sId) {
+          const found = services.find(s => s.id === sId);
+          if (found) { setSelectedService(found); return; }
+        }
+        if (bId) {
+          const foundB = bundles.find(b => b.id === bId);
+          if (foundB) { setSelectedBundle(foundB); return; }
+        }
+        if (services.length > 0) {
+          setSelectedService(services[0]);
+        }
+      } catch {}
+    }
+  }, [currentTab, selectedService, selectedBundle, services, bundles]);
 
   const openTopUpModal = useCallback(() => {
     if (!user) {
@@ -797,7 +834,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const value = useMemo<StoreContextType>(() => ({
     services, bundles, orders, transactions, settings, isLoadingData,
     currentTab, navigate, selectedCategory, setSelectedCategory,
-    selectedService, selectedBundle, openServiceModal, openProduct, openBundleProduct, closeServiceModal,
+    selectedService, selectedBundle, isServiceModalOpen, openServiceModal, openProduct, openBundleProduct, closeServiceModal,
     isTopUpModalOpen, openTopUpModal, closeTopUpModal,
     searchQuery, setSearchQuery, submitSearch,
     cart, cartCount, addToCart, removeFromCart, updateCartQty, updateCartNote, clearCart, cartToast, dismissCartToast,
@@ -809,7 +846,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     saveService, updateService, deleteService,
     saveBundle, updateBundle, deleteBundle, updateSettings
   }), [services, bundles, orders, transactions, settings, isLoadingData,
-       currentTab, selectedCategory, selectedService, selectedBundle, isTopUpModalOpen,
+       currentTab, selectedCategory, selectedService, selectedBundle, isTopUpModalOpen, isServiceModalOpen,
        searchQuery, cart, cartCount, cartToast,
        isAuthModalOpen, authModalReason, authModalMode, openAuthModal, closeAuthModal,
        navigate, refreshAll, refreshOrders, refreshTransactions, refreshCatalog, user, isAdmin, openTopUpModal,

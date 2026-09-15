@@ -2,416 +2,646 @@ import React from 'react';
 import { useStore } from '../context/StoreContext';
 import { useAuth } from '../context/AuthContext';
 import { CATEGORIES } from '../data/services';
-import { ServiceCard } from '../components/ServiceCard';
-import { BundleCard } from '../components/BundleCard';
+import { minEffectivePrice, hasAnyOffer, effectivePrice, isOfferActive, discountPercent } from '../utils/pricing';
+import { productRating, formatCount } from '../utils/productMeta';
+import { ProductCarousel } from '../components/ProductCarousel';
+import { ProductTile } from '../components/ProductTile';
+import { StarRating } from '../components/StarRating';
 import { 
   Sparkles, 
   ArrowLeft, 
   Wallet, 
   ShieldCheck, 
   Zap, 
-  CheckCircle2, 
   Gift, 
-  Users, 
-  Star,
+  Star, 
+  CheckCircle2, 
+  ChevronLeft,
   ChevronRight,
-  Search
+  Lock,
+  Headphones,
+  CreditCard,
+  ExternalLink,
+  Tag
 } from 'lucide-react';
 
-
-
 export const Home: React.FC = () => {
-  const { services, bundles, openTopUpModal, navigate: setCurrentTab, setSelectedCategory } = useStore();
+  const { 
+    services, 
+    bundles, 
+    openTopUpModal, 
+    openAuthModal,
+    navigate, 
+    setSelectedCategory,
+    openProduct,
+    openBundleProduct,
+    addToCart
+  } = useStore();
+
   const { user } = useAuth();
 
   const visibleServices = services.filter(s => !s.isHidden);
   const visibleBundles = bundles.filter(b => !b.isHidden);
-  const featuredServices = visibleServices.filter(s => s.featured).slice(0, 6);
-  const featuredBundles = visibleBundles.slice(0, 3);
+
+  // تصنيفات المنتجات للسلايدرات
+  const aiServices = visibleServices.filter(s => s.category === 'ai');
+  const designAndMediaServices = visibleServices.filter(s => s.category === 'design' || s.category === 'video');
+  const dealServices = visibleServices.filter(s => hasAnyOffer(s.variants));
+
+  // بطاقات 4-في-1 للأقسام الرئيسية
+  const topAi = aiServices.slice(0, 4);
+  const topDesign = designAndMediaServices.slice(0, 4);
+  const topBundle = visibleBundles[0];
 
   const handleCategoryClick = (catId: string) => {
     setSelectedCategory(catId);
-    setCurrentTab('services');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    navigate('services');
   };
 
   return (
-    <div className="space-y-24 pb-12">
-      {/* Hero Section */}
-      <section className="relative pt-12 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto overflow-hidden">
-        {/* Glow Blobs */}
-        <div className="bazaar-glow-blob w-[500px] h-[500px] bg-bazaar-gold/10 -top-24 -right-24"></div>
-        <div className="bazaar-glow-blob w-[500px] h-[500px] bg-bazaar-purple/15 top-1/2 -left-32"></div>
+    <div className="space-y-5 pb-10">
+      {/* 1. Amazon Hero Promotional Banner */}
+      <section className="relative bg-gradient-to-b from-[#131921] via-[#232F3E] to-transparent text-white pt-8 pb-32 sm:pb-40 px-4 sm:px-6 lg:px-8 overflow-hidden">
+        {/* Subtle background graphic pattern */}
+        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#febd69_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none" />
 
-        <div className="relative z-10 text-center max-w-4xl mx-auto space-y-8">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-bazaar-gold/15 to-bazaar-teal/15 border border-bazaar-gold/30 shadow-glow-gold">
-            <span className="text-base">🏮</span>
-            <span className="text-xs sm:text-sm font-bold text-amber-300">
-              أول بازار رقمي مصري للاشتراكات الرسمية بأسعار الجملة
-            </span>
-          </div>
-
-          {/* Heading */}
-          <h1 className="text-4xl sm:text-6xl font-black font-cairo text-white leading-tight tracking-tight">
-            امتلك أقوى اشتراكات <br />
-            <span className="gold-gradient-text">الذكاء الاصطناعي والتصميم</span> <br />
-            مع تسليم فوري وضمان كامل
-          </h1>
-
-          {/* Subtitle */}
-          <p className="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed">
-            وفّر حتى 70% من تكلفة اشتراكاتك الرقمية: ChatGPT Plus، Gemini Pro 5TB، Claude Pro، Canva Pro، CapCut، وباقات أدوبي، بنظام محفظة ذكي ودفع عبر Instapay والمحافظ الإلكترونية.
-          </p>
-
-          {/* Action CTAs */}
-          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 pt-2">
-            <button
-              onClick={() => {
-                setSelectedCategory('all');
-                setCurrentTab('services');
-              }}
-              className="px-8 py-4 rounded-2xl bg-gradient-to-r from-bazaar-gold via-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-bazaar-bg font-black text-sm sm:text-base shadow-xl shadow-bazaar-gold/25 active:scale-95 transition-all flex items-center gap-2"
-            >
-              <span>تصفح جميع الاشتراكات</span>
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-
-            <button
-              onClick={openTopUpModal}
-              className="px-6 py-4 rounded-2xl bg-bazaar-card hover:bg-bazaar-cardHover text-white border border-bazaar-gold/30 hover:border-bazaar-gold font-bold text-sm sm:text-base transition-all flex items-center gap-2 active:scale-95 shadow-md"
-            >
-              <Wallet className="w-5 h-5 text-bazaar-gold" />
-              <span>شحن المحفظة (انستاباي / كاش)</span>
-            </button>
-
-            <button
-              onClick={() => setCurrentTab('bundles')}
-              className="px-6 py-4 rounded-2xl bg-white/5 hover:bg-white/10 text-bazaar-teal border border-bazaar-teal/30 font-bold text-sm sm:text-base transition-all flex items-center gap-2 active:scale-95"
-            >
-              <Gift className="w-5 h-5" />
-              <span>عروض الباقات الموفرة</span>
-            </button>
-          </div>
-
-          {/* Stats Bar */}
-          <div className="pt-10 grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-3xl mx-auto">
-            <div className="p-4 rounded-2xl bg-bazaar-card/60 border border-white/5 backdrop-blur-sm">
-              <div className="text-2xl sm:text-3xl font-black text-amber-300 font-cairo">13+</div>
-              <div className="text-xs text-slate-400 mt-0.5">خدمة واشتراك رقمي</div>
+        <div className="max-w-7xl mx-auto relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="space-y-3.5 text-right max-w-2xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-amazon-yellow text-xs font-bold border border-white/15">
+              <span>🏮</span>
+              <span>سوق الاشتراكات الرقمية — حسابات رسمية بأسعار الجملة</span>
             </div>
-            <div className="p-4 rounded-2xl bg-bazaar-card/60 border border-white/5 backdrop-blur-sm">
-              <div className="text-2xl sm:text-3xl font-black text-bazaar-teal font-cairo">100%</div>
-              <div className="text-xs text-slate-400 mt-0.5">ضمان ذهبي واستبدال</div>
-            </div>
-            <div className="p-4 rounded-2xl bg-bazaar-card/60 border border-white/5 backdrop-blur-sm">
-              <div className="text-2xl sm:text-3xl font-black text-bazaar-purple font-cairo">دقائق</div>
-              <div className="text-xs text-slate-400 mt-0.5">متوسط سرعة التسليم</div>
-            </div>
-            <div className="p-4 rounded-2xl bg-bazaar-card/60 border border-white/5 backdrop-blur-sm">
-              <div className="text-2xl sm:text-3xl font-black text-emerald-400 font-cairo">Instapay</div>
-              <div className="text-xs text-slate-400 mt-0.5">دفع محلي فوري وآمن</div>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      {/* Categories Grid */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-2xl mx-auto mb-10 space-y-2">
-          <span className="text-xs font-bold text-bazaar-gold uppercase tracking-wider">
-            أقسام السوق الرقمي
-          </span>
-          <h2 className="text-3xl font-black font-cairo text-white">
-            اختر مجالك وتصفح الاشتراكات المتخصصة
-          </h2>
-        </div>
+            <h1 className="text-3xl sm:text-5xl font-black font-cairo leading-tight">
+              امتلك أقوى اشتراكات <br />
+              <span className="text-amazon-search">الذكاء الاصطناعي والتصميم</span> <br />
+              بتسليم فوري وضمان ذهبي كامل
+            </h1>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
-          {CATEGORIES.map(cat => (
-            <button
-              key={cat.id}
-              onClick={() => handleCategoryClick(cat.id)}
-              className="p-5 rounded-3xl bg-bazaar-card/70 hover:bg-bazaar-cardHover border border-white/5 hover:border-bazaar-gold/50 transition-all text-center flex flex-col items-center justify-between group shadow-lg"
-            >
-              <div 
-                className="w-14 h-14 rounded-2xl flex items-center justify-center mb-3 transition-transform group-hover:scale-110 shadow-inner"
-                style={{ backgroundColor: `${cat.color}15`, color: cat.color }}
+            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-xl">
+              وفّر حتى 70% على ChatGPT Plus، Gemini Pro 5TB، Claude 3.5، Canva Pro، وCapCut Pro. دفع محلي مباشر بالجنيه المصري عبر تطبيق انستاباي وجميع المحافظ الإلكترونية.
+            </p>
+
+            <div className="flex flex-wrap items-center gap-2.5 pt-2">
+              <button
+                onClick={() => {
+                  setSelectedCategory('all');
+                  navigate('services');
+                }}
+                className="btn-buy px-6 py-2.5 rounded-full text-xs sm:text-sm font-bold shadow-sm active:scale-95 transition-all flex items-center gap-1.5"
               >
-                <Sparkles className="w-6 h-6" />
-              </div>
-              <h3 className="text-sm font-bold font-cairo text-white group-hover:text-bazaar-gold transition-colors">
-                {cat.name}
-              </h3>
-              <span className="text-[11px] text-slate-400 mt-1">
-                {cat.badgeCount} خدمات متاحة
-              </span>
-            </button>
-          ))}
+                <span>تصفح جميع الاشتراكات</span>
+                <ArrowLeft className="w-4 h-4" />
+              </button>
+
+              <button
+                onClick={openTopUpModal}
+                className="bg-white/10 hover:bg-white/20 text-white border border-white/30 px-5 py-2.5 rounded-full text-xs sm:text-sm font-semibold transition-all flex items-center gap-2"
+              >
+                <Wallet className="w-4 h-4 text-amazon-yellow" />
+                <span>شحن المحفظة (InstaPay / كاش)</span>
+              </button>
+
+              <button
+                onClick={() => navigate('bundles')}
+                className="bg-amazon-yellow text-[#0F1111] hover:bg-amazon-yellowHover px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all flex items-center gap-1.5"
+              >
+                <Gift className="w-4 h-4" />
+                <span>عروض الباقات الموفرة</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Hero Quick Highlights Box */}
+          <div className="hidden lg:grid grid-cols-2 gap-3 w-80 shrink-0">
+            <div className="bg-white/10 backdrop-blur-md p-3.5 rounded-sm border border-white/10 text-right">
+              <div className="text-2xl font-black text-amazon-yellow font-cairo">13+</div>
+              <div className="text-xs text-slate-300 mt-0.5">خدمة واشتراك رقمي</div>
+            </div>
+            <div className="bg-white/10 backdrop-blur-md p-3.5 rounded-sm border border-white/10 text-right">
+              <div className="text-2xl font-black text-emerald-400 font-cairo">100%</div>
+              <div className="text-xs text-slate-300 mt-0.5">ضمان ذهبي واستبدال</div>
+            </div>
+            <div className="bg-white/10 backdrop-blur-md p-3.5 rounded-sm border border-white/10 text-right">
+              <div className="text-2xl font-black text-amazon-search font-cairo">فوري ⚡</div>
+              <div className="text-xs text-slate-300 mt-0.5">سرعة تسليم الحسابات</div>
+            </div>
+            <div className="bg-white/10 backdrop-blur-md p-3.5 rounded-sm border border-white/10 text-right">
+              <div className="text-2xl font-black text-purple-300 font-cairo">Instapay</div>
+              <div className="text-xs text-slate-300 mt-0.5">دفع لحظي بدون فيزا</div>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Featured Bundles Showcase */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 mb-10">
-          <div>
-            <div className="inline-flex items-center gap-2 text-xs font-bold text-bazaar-teal px-2.5 py-1 rounded-full bg-bazaar-teal/10 border border-bazaar-teal/20 mb-2">
-              <Gift className="w-3.5 h-3.5" />
-              <span>عروض مدمجة بأعلى توفير</span>
+      {/* 2. Iconic Amazon 4-Tile Showcase Grid (Overlapping the Hero) */}
+      <section className="-mt-24 sm:-mt-32 relative z-20 max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Tile 1: AI 4-in-1 Quad Card */}
+          <div className="bg-white p-4 border border-slate-200 shadow-sm rounded-sm flex flex-col justify-between">
+            <div>
+              <h2 className="text-lg font-bold text-[#0F1111] mb-1 font-cairo">
+                أشهر اشتراكات الذكاء الاصطناعي
+              </h2>
+              <p className="text-[11px] text-amazon-muted mb-3">
+                حسابات مميزة بأعلى سقف استخدام
+              </p>
+              <div className="grid grid-cols-2 gap-2.5">
+                {topAi.map(service => {
+                  const p = minEffectivePrice(service.variants);
+                  return (
+                    <button
+                      key={service.id}
+                      type="button"
+                      onClick={() => openProduct(service)}
+                      className="text-right group"
+                    >
+                      <div className="h-20 bg-slate-50 border border-slate-100 rounded-sm p-2 flex items-center justify-center mb-1 group-hover:bg-slate-100 transition-colors">
+                        {service.imageUrl ? (
+                          <img src={service.imageUrl} alt={service.name} className="max-h-full max-w-full object-contain" />
+                        ) : (
+                          <span className="text-2xl">🤖</span>
+                        )}
+                      </div>
+                      <div className="text-xs font-semibold text-[#0F1111] truncate group-hover:text-amazon-linkHover">
+                        {service.name}
+                      </div>
+                      <div className="text-[11px] amazon-price font-bold">
+                        {p} ج.م
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-            <h2 className="text-3xl font-black font-cairo text-white">
+            <button
+              onClick={() => handleCategoryClick('ai')}
+              className="mt-4 text-xs font-bold amazon-link text-right block"
+            >
+              استكشف كل أدوات الذكاء الاصطناعي ›
+            </button>
+          </div>
+
+          {/* Tile 2: Design & Content 4-in-1 Quad Card */}
+          <div className="bg-white p-4 border border-slate-200 shadow-sm rounded-sm flex flex-col justify-between">
+            <div>
+              <h2 className="text-lg font-bold text-[#0F1111] mb-1 font-cairo">
+                أدوات التصميم والمونتاج
+              </h2>
+              <p className="text-[11px] text-amazon-muted mb-3">
+                برامج احترافية لصناع المحتوى
+              </p>
+              <div className="grid grid-cols-2 gap-2.5">
+                {topDesign.map(service => {
+                  const p = minEffectivePrice(service.variants);
+                  return (
+                    <button
+                      key={service.id}
+                      type="button"
+                      onClick={() => openProduct(service)}
+                      className="text-right group"
+                    >
+                      <div className="h-20 bg-slate-50 border border-slate-100 rounded-sm p-2 flex items-center justify-center mb-1 group-hover:bg-slate-100 transition-colors">
+                        {service.imageUrl ? (
+                          <img src={service.imageUrl} alt={service.name} className="max-h-full max-w-full object-contain" />
+                        ) : (
+                          <span className="text-2xl">🎨</span>
+                        )}
+                      </div>
+                      <div className="text-xs font-semibold text-[#0F1111] truncate group-hover:text-amazon-linkHover">
+                        {service.name}
+                      </div>
+                      <div className="text-[11px] amazon-price font-bold">
+                        {p} ج.م
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            <button
+              onClick={() => handleCategoryClick('design')}
+              className="mt-4 text-xs font-bold amazon-link text-right block"
+            >
+              استكشف كل برامج التصميم ›
+            </button>
+          </div>
+
+          {/* Tile 3: Top Savings Bundle Spotlight Card */}
+          <div className="bg-white p-4 border border-slate-200 shadow-sm rounded-sm flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between gap-1 mb-1">
+                <h2 className="text-lg font-bold text-[#0F1111] font-cairo">
+                  أقوى باقات التوفير
+                </h2>
+                <span className="bg-[#CC0C39] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-sm">
+                  خصم مجمع
+                </span>
+              </div>
+              <p className="text-[11px] text-amazon-muted mb-3">
+                اشتراكات مجمعة في باقة واحدة
+              </p>
+
+              {topBundle && (
+                <div 
+                  onClick={() => openBundleProduct(topBundle)}
+                  className="cursor-pointer group space-y-2.5"
+                >
+                  <div className="h-32 bg-[#F7F7F7] border border-slate-200 rounded-sm p-3 flex flex-col items-center justify-center text-center group-hover:border-slate-300">
+                    <span className="text-4xl mb-1">🎁</span>
+                    <span className="text-xs font-bold text-[#0F1111] group-hover:text-amazon-linkHover">
+                      {topBundle.name}
+                    </span>
+                    <span className="text-[10px] text-emerald-700 font-bold">
+                      وفر {topBundle.savings} ج.م مقابل الشراء المنفصل
+                    </span>
+                  </div>
+
+                  <div className="space-y-1 text-xs">
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="text-xs text-amazon-muted">ج.م</span>
+                      <span className="text-2xl font-bold amazon-price leading-none">
+                        {effectivePrice(topBundle)}
+                      </span>
+                      <span className="text-xs text-amazon-muted line-through">
+                        {topBundle.price} ج.م
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-amazon-muted line-clamp-2">
+                      {topBundle.description}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <button
+              onClick={() => navigate('bundles')}
+              className="mt-4 text-xs font-bold amazon-link text-right block"
+            >
+              عرض جميع الباقات (6 باقات) ›
+            </button>
+          </div>
+
+          {/* Tile 4: Instant Wallet & Top Up Card */}
+          <div className="bg-white p-4 border border-slate-200 shadow-sm rounded-sm flex flex-col justify-between">
+            <div>
+              <h2 className="text-lg font-bold text-[#0F1111] mb-1 font-cairo">
+                محفظتك وطرق الدفع
+              </h2>
+              <p className="text-[11px] text-amazon-muted mb-3">
+                شحن رصيد فوري عبر انستاباي والمحافظ
+              </p>
+
+              {user ? (
+                <div className="space-y-3 bg-slate-50 p-3.5 border border-slate-200 rounded-sm text-right">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-amazon-muted">الرصيد المتاح:</span>
+                    <span className="font-bold text-lg text-emerald-700 font-cairo">
+                      {user.balance.toLocaleString()} ج.م
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-amazon-muted">
+                    رصيدك جاهز لإتمام أي طلب بنقرة واحدة بدون انتظار تأكيد الدفع.
+                  </p>
+                  <button
+                    onClick={openTopUpModal}
+                    className="w-full btn-cart py-2 rounded-full text-xs font-bold shadow-sm"
+                  >
+                    شحن رصيد إضافي
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-3 bg-slate-50 p-3.5 border border-slate-200 rounded-sm text-right">
+                  <p className="text-xs text-[#0F1111] font-semibold leading-relaxed">
+                    سجّل دخولك الآن للوصول إلى لوحة طلباتك، إدارة اشتراكاتك، وشحن محفظتك.
+                  </p>
+                  <button
+                    onClick={() => openAuthModal('يرجى تسجيل الدخول أو إنشاء حساب للاستفادة من كافة الميزات.')}
+                    className="w-full btn-buy py-2 rounded-full text-xs font-bold shadow-sm"
+                  >
+                    تسجيل الدخول / إنشاء حساب
+                  </button>
+                </div>
+              )}
+
+              {/* Payment Partners Icons */}
+              <div className="pt-3 border-t border-slate-100 mt-3">
+                <span className="block text-[10px] text-amazon-muted mb-2">طرق الدفع المعتمدة:</span>
+                <div className="grid grid-cols-3 gap-1.5">
+                  <div className="bg-white border border-slate-200 p-1 rounded text-center">
+                    <span className="text-[10px] font-bold text-purple-700">انستاباي ⚡</span>
+                  </div>
+                  <div className="bg-white border border-slate-200 p-1 rounded text-center">
+                    <span className="text-[10px] font-bold text-rose-700">فودافون كاش</span>
+                  </div>
+                  <div className="bg-white border border-slate-200 p-1 rounded text-center">
+                    <span className="text-[10px] font-bold text-emerald-700">اتصالات كاش</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={() => navigate('payment')}
+              className="mt-4 text-xs font-bold amazon-link text-right block"
+            >
+              عرض دليل الشحن والحسابات البنكية ›
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* 3. Product Carousel 1: AI Services */}
+      <ProductCarousel
+        title="أشهر اشتراكات الذكاء الاصطناعي (AI)"
+        subtitle="حسابات ChatGPT Plus، Gemini Pro 5TB، Claude Pro، والمزيد بتسليم فوري"
+        items={aiServices}
+        onSeeAll={() => handleCategoryClick('ai')}
+      />
+
+      {/* 4. Product Carousel 2: Today's Deals */}
+      {dealServices.length > 0 && (
+        <ProductCarousel
+          title="عروض اليوم والخصومات المحدودة"
+          subtitle="اشتراكات رقمية بأسعار مخفضة وخصومات تصل إلى 50%"
+          items={dealServices}
+          onSeeAll={() => navigate('bundles')}
+        />
+      )}
+
+      {/* 5. Product Carousel 3: Design & Media Services */}
+      <ProductCarousel
+        title="أدوات التصميم الجرافيكي والمونتاج"
+        subtitle="Canva Pro، CapCut Pro، برامج أدوبي، وبنوك التصميم للمحترفين"
+        items={designAndMediaServices}
+        onSeeAll={() => handleCategoryClick('design')}
+      />
+
+      {/* 6. Amazon Bundles Shelf (Full 6 Bundles Showcase) */}
+      <section className="bg-white mx-3 sm:mx-4 lg:mx-6 p-4 sm:p-6 border border-slate-200 shadow-sm rounded-sm space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 pb-3 border-b border-slate-200">
+          <div>
+            <div className="flex items-center gap-1.5 text-xs font-bold text-[#CC0C39] mb-1">
+              <Gift className="w-4 h-4" />
+              <span>عروض التوفير الشاملة</span>
+            </div>
+            <h2 className="text-xl sm:text-2xl font-bold font-cairo text-[#0F1111]">
               باقات التوفير الكبرى (Bundles)
             </h2>
-            <p className="text-xs sm:text-sm text-slate-400 mt-1">
+            <p className="text-xs text-amazon-muted mt-0.5">
               اشتراكات متعددة مجمعة في باقة واحدة بخصم فوري يصل إلى 120 جنيه
             </p>
           </div>
 
           <button
-            onClick={() => setCurrentTab('bundles')}
-            className="text-xs font-bold text-bazaar-gold hover:text-amber-300 flex items-center gap-1.5 transition-colors"
+            onClick={() => navigate('bundles')}
+            className="text-xs font-bold amazon-link whitespace-nowrap self-start sm:self-auto"
           >
-            <span>عرض كل الـ 6 باقات</span>
-            <ArrowLeft className="w-4 h-4" />
+            عرض كافة الباقات (6) ›
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {featuredBundles.map(bundle => (
-            <BundleCard key={bundle.id} bundle={bundle} />
-          ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {visibleBundles.map(bundle => {
+            const price = effectivePrice(bundle);
+            const onOffer = isOfferActive(bundle);
+            const { rating, count } = productRating(bundle.id);
+
+            return (
+              <div
+                key={bundle.id}
+                className="border border-slate-200 hover:border-slate-300 rounded-sm p-4 flex flex-col justify-between bg-white group transition-all"
+              >
+                <div>
+                  <div className="flex items-start justify-between gap-2">
+                    <button
+                      type="button"
+                      onClick={() => openBundleProduct(bundle)}
+                      className="text-right"
+                    >
+                      <h3 className="text-base font-bold text-[#0F1111] group-hover:text-amazon-linkHover leading-snug">
+                        {bundle.name}
+                      </h3>
+                      <span className="text-[11px] text-amazon-muted">كود: {bundle.code}</span>
+                    </button>
+                    <span className="bg-[#CC0C39] text-white text-[10px] font-bold px-2 py-0.5 rounded-sm shrink-0">
+                      وفر {bundle.savings} ج.م
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-1.5 mt-1.5">
+                    <StarRating rating={rating} size="sm" />
+                    <span className="text-xs amazon-link">{formatCount(count)}</span>
+                  </div>
+
+                  <p className="text-xs text-amazon-muted mt-2 line-clamp-2 leading-relaxed">
+                    {bundle.description}
+                  </p>
+
+                  {/* Components List */}
+                  <div className="mt-3 p-2.5 bg-slate-50 border border-slate-100 rounded-sm space-y-1">
+                    <span className="text-[10px] font-bold text-slate-600 block">محتويات الباقة:</span>
+                    <ul className="text-xs text-[#0F1111] space-y-0.5">
+                      {bundle.componentsList.slice(0, 3).map((comp, idx) => (
+                        <li key={idx} className="flex items-center gap-1.5">
+                          <CheckCircle2 className="w-3 h-3 text-emerald-600 shrink-0" />
+                          <span className="truncate">{comp}</span>
+                        </li>
+                      ))}
+                      {bundle.componentsList.length > 3 && (
+                        <li className="text-[10px] text-amazon-link font-medium">
+                          + {bundle.componentsList.length - 3} عناصر إضافية
+                        </li>
+                      )}
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+                  <div>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-xs text-amazon-muted">ج.م</span>
+                      <span className="text-xl font-bold amazon-price leading-none">{price}</span>
+                      <span className="text-xs text-amazon-muted line-through mr-1">{bundle.price} ج.م</span>
+                    </div>
+                    <span className="text-[10px] text-emerald-700 font-bold block mt-0.5">
+                      تسليم فوري موحد
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => openBundleProduct(bundle)}
+                      className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-[#0F1111] rounded-sm text-xs font-semibold"
+                    >
+                      التفاصيل
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => addToCart({ itemType: 'bundle', itemId: bundle.id, quantity: 1 })}
+                      className="btn-cart px-3.5 py-1.5 rounded-full text-xs font-bold shadow-sm"
+                    >
+                      أضف للسلة
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </section>
 
-      {/* Top Services Grid */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 mb-10">
-          <div>
-            <div className="inline-flex items-center gap-2 text-xs font-bold text-bazaar-gold px-2.5 py-1 rounded-full bg-bazaar-gold/10 border border-bazaar-gold/20 mb-2">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>الأكثر طلباً هذا الأسبوع</span>
+      {/* 7. Amazon 4 Value Propositions Strip */}
+      <section className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="bg-white p-4 border border-slate-200 rounded-sm shadow-sm flex items-start gap-3">
+            <div className="w-10 h-10 rounded-full bg-amber-50 text-amazon-orange flex items-center justify-center shrink-0">
+              <Zap className="w-5 h-5" />
             </div>
-            <h2 className="text-3xl font-black font-cairo text-white">
-              أشهر اشتراكات الذكاء الاصطناعي والتصميم
-            </h2>
+            <div className="space-y-0.5">
+              <h4 className="text-sm font-bold text-[#0F1111]">تسليم رقمي فوري</h4>
+              <p className="text-xs text-amazon-muted leading-relaxed">
+                تصلك بيانات الحساب والترخيص فوراً على لوحة طلباتك بدون تأخير.
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-white p-4 border border-slate-200 rounded-sm shadow-sm flex items-start gap-3">
+            <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+              <ShieldCheck className="w-5 h-5" />
+            </div>
+            <div className="space-y-0.5">
+              <h4 className="text-sm font-bold text-[#0F1111]">ضمان ذهبي 100%</h4>
+              <p className="text-xs text-amazon-muted leading-relaxed">
+                دعم فني مستمر واستبدال فوري لأي حساب طوال فترة الاشتراك.
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-white p-4 border border-slate-200 rounded-sm shadow-sm flex items-start gap-3">
+            <div className="w-10 h-10 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+              <CreditCard className="w-5 h-5" />
+            </div>
+            <div className="space-y-0.5">
+              <h4 className="text-sm font-bold text-[#0F1111]">دفع محلي بالجنيه</h4>
+              <p className="text-xs text-amazon-muted leading-relaxed">
+                بدون فيزا دولية — ادفع عبر انستاباي أو المحافظ الإلكترونية.
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-white p-4 border border-slate-200 rounded-sm shadow-sm flex items-start gap-3">
+            <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+              <Headphones className="w-5 h-5" />
+            </div>
+            <div className="space-y-0.5">
+              <h4 className="text-sm font-bold text-[#0F1111]">دعم فني 24/7</h4>
+              <p className="text-xs text-amazon-muted leading-relaxed">
+                فريق متخصص لمساعدتك في التفعيل والرد على استفساراتك عبر واتساب.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 8. Accepted Payment Methods Strip */}
+      <section className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
+        <div className="bg-white p-5 border border-slate-200 rounded-sm shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="space-y-1 text-center md:text-right">
+            <h3 className="text-base font-bold text-[#0F1111] font-cairo">
+              طرق الشحن والدفع المعتمدة لدى سوق الاشتراكات
+            </h3>
+            <p className="text-xs text-amazon-muted">
+              اشحن رصيد محفظتك بسهولة خلال ثوانٍ وبدون أي رسوم إضافية.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            {[
+              { name: 'انستاباي (InstaPay)', color: 'text-purple-700 bg-purple-50 border-purple-200' },
+              { name: 'فودافون كاش', color: 'text-rose-700 bg-rose-50 border-rose-200' },
+              { name: 'اتصالات كاش', color: 'text-emerald-700 bg-emerald-50 border-emerald-200' },
+              { name: 'وي باي (WE Pay)', color: 'text-indigo-700 bg-indigo-50 border-indigo-200' },
+              { name: 'أورنج كاش', color: 'text-amber-700 bg-amber-50 border-amber-200' },
+            ].map(pm => (
+              <span
+                key={pm.name}
+                className={`text-xs font-bold px-3 py-1.5 rounded border ${pm.color}`}
+              >
+                {pm.name}
+              </span>
+            ))}
           </div>
 
           <button
-            onClick={() => {
-              setSelectedCategory('all');
-              setCurrentTab('services');
-            }}
-            className="text-xs font-bold text-bazaar-gold hover:text-amber-300 flex items-center gap-1.5 transition-colors"
+            onClick={openTopUpModal}
+            className="btn-buy px-5 py-2 rounded-full text-xs font-bold shadow-sm whitespace-nowrap"
           >
-            <span>استعراض كل الخدمات (13 خدمة)</span>
-            <ArrowLeft className="w-4 h-4" />
+            شحن رصيد الآن
           </button>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {featuredServices.map(service => (
-            <ServiceCard key={service.id} service={service} />
-          ))}
-        </div>
       </section>
 
-      {/* How It Works (3 Steps) */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-gradient-to-br from-bazaar-card via-bazaar-surface to-bazaar-card rounded-3xl p-8 sm:p-12 border border-bazaar-border relative overflow-hidden">
-          <div className="text-center max-w-2xl mx-auto mb-12">
-            <span className="text-xs font-bold text-bazaar-teal uppercase tracking-wider">
-              بساطة وسرعة
-            </span>
-            <h2 className="text-3xl font-black font-cairo text-white mt-1">
-              كيف تشتري اشتراكك في 3 خطوات بسيطة؟
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
-            {/* Step 1 */}
-            <div className="text-center space-y-3 p-6 rounded-2xl bg-white/[0.02] border border-white/5">
-              <div className="w-14 h-14 rounded-2xl bg-bazaar-gold/15 text-bazaar-gold flex items-center justify-center text-xl font-black font-cairo mx-auto">
-                1
-              </div>
-              <h3 className="text-lg font-bold font-cairo text-white">اختر الخدمة والمدة</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                تصفح كتالوج الخدمات، حدد مدة الاشتراك المناسبة لاحتياجك وميزانيتك، واطلع على كامل الميزات.
-              </p>
-            </div>
-
-            {/* Step 2 */}
-            <div className="text-center space-y-3 p-6 rounded-2xl bg-white/[0.02] border border-white/5">
-              <div className="w-14 h-14 rounded-2xl bg-bazaar-teal/15 text-bazaar-teal flex items-center justify-center text-xl font-black font-cairo mx-auto">
-                2
-              </div>
-              <h3 className="text-lg font-bold font-cairo text-white">اشحن محفظتك محلياً</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                حول المبلغ عبر انستاباي أو فودافون كاش بكل سهولة، وسيتم إضافة الرصيد لحسابك خلال لحظات.
-              </p>
-            </div>
-
-            {/* Step 3 */}
-            <div className="text-center space-y-3 p-6 rounded-2xl bg-white/[0.02] border border-white/5">
-              <div className="w-14 h-14 rounded-2xl bg-bazaar-purple/15 text-bazaar-purple flex items-center justify-center text-xl font-black font-cairo mx-auto">
-                3
-              </div>
-              <h3 className="text-lg font-bold font-cairo text-white">استلم بياناتك فوراً</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                اضغط شراء، وتصلك بيانات الحساب (الإيميل، الباسورد، الإرشادات) مباشرة في لوحة طلباتك مع زر نسخ سريع.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Accepted Payment Methods Showcase */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-gradient-to-br from-bazaar-card via-bazaar-surface to-bazaar-card rounded-3xl p-8 sm:p-10 border border-white/10 relative overflow-hidden shadow-2xl space-y-8">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-            <div className="space-y-2">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-bazaar-gold/15 text-bazaar-gold text-xs font-black border border-bazaar-gold/30">
-                <span>وسائل دفع رسمية 100%</span>
-              </span>
-              <h2 className="text-2xl sm:text-4xl font-black font-cairo text-white">
-                طرق الدفع والشحن المعتمدة
+      {/* 9. Amazon Verified Customer Reviews */}
+      <section className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
+        <div className="bg-white p-5 sm:p-6 border border-slate-200 rounded-sm shadow-sm space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+            <div>
+              <h2 className="text-xl font-bold font-cairo text-[#0F1111]">
+                تقييمات وتجارب العملاء الموثقة
               </h2>
-              <p className="text-xs sm:text-sm text-slate-300 max-w-xl">
-                اشحن رصيد محفظتك بسهولة عبر جميع المحافظ الإلكترونية المصرية، انستاباي اللحظي، أو التحويلات الدولية للمغتربين.
+              <div className="flex items-center gap-1.5 mt-1">
+                <StarRating rating={4.9} size="md" />
+                <span className="text-xs text-amazon-muted">4.9 من 5 بناءً على 480+ تقييم شراء موثق</span>
+              </div>
+            </div>
+            <span className="text-xs text-emerald-700 font-bold bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-sm hidden sm:inline-block">
+              ✓ تقييمات موثقة 100%
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="p-4 bg-slate-50 border border-slate-200 rounded-sm space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-[#0F1111]">محمود حسني</span>
+                <span className="text-[10px] text-emerald-700 font-semibold">شراء موثق ✓</span>
+              </div>
+              <StarRating rating={5} size="sm" />
+              <p className="text-xs text-amazon-muted leading-relaxed">
+                "اشتراك Gemini Pro بـ 150 جنيه مع مساحة 5 تيرابايت كاملة على إيميلي الشخصي صفقة خيالية، والدعم تواصل معايا في دقائق لتأكيد التفعيل."
               </p>
-            </div>
-
-            <button
-              onClick={() => setCurrentTab('payment')}
-              className="px-5 py-2.5 rounded-2xl bg-white/5 hover:bg-white/10 text-bazaar-gold border border-bazaar-gold/30 hover:border-bazaar-gold text-xs font-black transition-all flex items-center gap-2 self-start md:self-auto shrink-0 shadow-md"
-            >
-              <span>عرض الدليل الكامل وأرقام التحويل</span>
-              <ArrowLeft className="w-4 h-4" />
-            </button>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-            {[
-              {
-                id: 'instapay',
-                name: 'انستاباي',
-                tag: 'تحويل لحظي ⚡',
-                sub: 'رسوم 0% - فوري',
-                img: '/images/payment/instapay.png',
-                border: 'hover:border-purple-500/50'
-              },
-              {
-                id: 'vodafone-cash',
-                name: 'فودافون كاش',
-                tag: 'كاش 📱',
-                sub: 'متاح 24/7',
-                img: '/images/payment/vodafone-cash.png',
-                border: 'hover:border-rose-500/50'
-              },
-              {
-                id: 'etisalat-cash',
-                name: 'اتصالات كاش',
-                tag: 'كاش 🟢',
-                sub: 'كود *777#',
-                img: '/images/payment/etisalat-cash.png',
-                border: 'hover:border-emerald-500/50'
-              },
-              {
-                id: 'we-pay',
-                name: 'وي باي (WE Pay)',
-                tag: 'كاش 🟣',
-                sub: 'تطبيق WE Pay',
-                img: '/images/payment/we-pay.png',
-                border: 'hover:border-purple-500/50'
-              },
-              {
-                id: 'orange-europe',
-                name: 'أورنج / أوروبا',
-                tag: 'محلي ودولي 🌍',
-                sub: 'مغتربين وأوروبا',
-                img: '/images/payment/orange-europe.png',
-                border: 'hover:border-amber-500/50'
-              }
-            ].map(m => (
-              <div
-                key={m.id}
-                onClick={() => openTopUpModal()}
-                className={`glass-card p-4 rounded-2xl border border-white/10 ${m.border} transition-all duration-300 hover:-translate-y-1 cursor-pointer flex flex-col items-center text-center space-y-3 group shadow-md`}
-              >
-                <div className="w-full h-20 rounded-xl bg-black/40 border border-white/10 p-2 flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform">
-                  <img src={m.img} alt={m.name} className="max-h-full max-w-full object-contain" />
-                </div>
-                <div>
-                  <h4 className="text-xs font-black font-cairo text-white group-hover:text-bazaar-gold transition-colors">
-                    {m.name}
-                  </h4>
-                  <div className="text-[10px] text-amber-300/90 font-bold mt-0.5">
-                    {m.tag}
-                  </div>
-                  <div className="text-[9px] text-slate-400">
-                    {m.sub}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Customer Trust / Testimonials */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-xl mx-auto mb-10">
-          <div className="flex items-center justify-center gap-1 text-amber-400 mb-2">
-            {[...Array(5)].map((_, i) => (
-              <Star key={i} className="w-4 h-4 fill-amber-400" />
-            ))}
-          </div>
-          <h2 className="text-3xl font-black font-cairo text-white">
-            آراء وتجارب عملائنا المميزين
-          </h2>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="p-6 rounded-3xl bg-bazaar-card border border-white/10 space-y-3">
-            <p className="text-xs text-slate-300 leading-relaxed">
-              "اشتراك Gemini Pro بـ 150 جنيه فقط مع مساحة 5 تيرابايت كاملة على إيميلي الشخصي صفقة خيالية، والدعم الفني تواصل معايا في دقائق لتأكيد التفعيل."
-            </p>
-            <div className="flex items-center gap-3 pt-2 border-t border-white/5">
-              <div className="w-9 h-9 rounded-full bg-bazaar-gold/20 text-bazaar-gold flex items-center justify-center font-bold text-xs">
-                م
-              </div>
-              <div>
-                <h4 className="text-xs font-bold text-white">محمود حسني</h4>
-                <p className="text-[10px] text-slate-400">مهندس برمجيات</p>
+              <div className="text-[10px] text-slate-400 pt-1">
+                المنتج: Gemini Pro 5TB
               </div>
             </div>
-          </div>
 
-          <div className="p-6 rounded-3xl bg-bazaar-card border border-white/10 space-y-3">
-            <p className="text-xs text-slate-300 leading-relaxed">
-              "أنا شغال صناعة محتوى وبستخدم CapCut Pro و Canva Pro، وفرت أكتر من ألف جنيه مقارنة بالأسعار الرسمية، والموقع منظم جداً ببيانات الحسابات."
-            </p>
-            <div className="flex items-center gap-3 pt-2 border-t border-white/5">
-              <div className="w-9 h-9 rounded-full bg-bazaar-teal/20 text-bazaar-teal flex items-center justify-center font-bold text-xs">
-                س
+            <div className="p-4 bg-slate-50 border border-slate-200 rounded-sm space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-[#0F1111]">سارة الجيار</span>
+                <span className="text-[10px] text-emerald-700 font-semibold">شراء موثق ✓</span>
               </div>
-              <div>
-                <h4 className="text-xs font-bold text-white">سارة الجيار</h4>
-                <p className="text-[10px] text-slate-400">صانعة محتوى ديجيتال</p>
+              <StarRating rating={5} size="sm" />
+              <p className="text-xs text-amazon-muted leading-relaxed">
+                "أنا شغالة صناعة محتوى وبستخدم CapCut Pro و Canva Pro، وفرت أكتر من ألف جنيه مقارنة بالأسعار الرسمية، والموقع منظم جداً ببيانات الحسابات."
+              </p>
+              <div className="text-[10px] text-slate-400 pt-1">
+                المنتج: Canva Pro + CapCut Pro
               </div>
             </div>
-          </div>
 
-          <div className="p-6 rounded-3xl bg-bazaar-card border border-white/10 space-y-3">
-            <p className="text-xs text-slate-300 leading-relaxed">
-              "باقة التاجر الرقمي مع داتا الأرقام وواتساب سندر فرقت جداً في حملاتي التسويقية، الداتا مصنفة بدقة والبرنامج اشتغل معايا بكفاءة بدون أي مشاكل."
-            </p>
-            <div className="flex items-center gap-3 pt-2 border-t border-white/5">
-              <div className="w-9 h-9 rounded-full bg-bazaar-purple/20 text-bazaar-purple flex items-center justify-center font-bold text-xs">
-                ع
+            <div className="p-4 bg-slate-50 border border-slate-200 rounded-sm space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-[#0F1111]">علي فاروق</span>
+                <span className="text-[10px] text-emerald-700 font-semibold">شراء موثق ✓</span>
               </div>
-              <div>
-                <h4 className="text-xs font-bold text-white">علي فاروق</h4>
-                <p className="text-[10px] text-slate-400">مدير متجر إلكتروني</p>
+              <StarRating rating={5} size="sm" />
+              <p className="text-xs text-amazon-muted leading-relaxed">
+                "باقة التاجر الرقمي مع داتا الأرقام وواتساب سندر فرقت جداً في حملاتي التسويقية، الداتا مصنفة بدقة والبرنامج اشتغل معايا بكفاءة."
+              </p>
+              <div className="text-[10px] text-slate-400 pt-1">
+                المنتج: باقة التاجر الرقمي
               </div>
             </div>
           </div>
