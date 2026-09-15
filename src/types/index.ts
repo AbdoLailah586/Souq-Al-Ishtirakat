@@ -154,6 +154,15 @@ export interface Order {
   updatedAt?: string;
 }
 
+export interface CartItem {
+  lineId: string;
+  itemType: 'service' | 'bundle';
+  itemId: string;
+  variantId?: string;
+  quantity: number;
+  customerNote?: string;
+}
+
 export interface SiteSettings {
   siteName: string;
   siteTagline: string;

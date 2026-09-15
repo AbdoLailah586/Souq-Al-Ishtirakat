@@ -102,6 +102,8 @@ export const SERVICES: Service[] = [
         duration: 'شهر واحد',
         originalPrice: 819.85,
         price: 900,
+        offerPrice: 350,
+        offerLabel: 'عرض خاص',
         isPopular: true
       },
       {

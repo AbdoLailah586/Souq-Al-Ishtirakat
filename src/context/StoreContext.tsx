@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import {
-  Service, ServiceVariant, Bundle, Order, OrderStatus, WalletTransaction, SiteSettings, CategoryId
+  Service, ServiceVariant, Bundle, Order, OrderStatus, WalletTransaction, SiteSettings, CategoryId, CartItem
 } from '../types';
 import { supabase, translateError, parseInsufficientFunds } from '../lib/supabase';
 import { useAuth } from './AuthContext';
@@ -24,11 +24,28 @@ interface StoreContextType {
   setSelectedCategory: (cat: string) => void;
 
   selectedService: Service | null;
+  selectedBundle: Bundle | null;
   openServiceModal: (service: Service) => void;
+  openProduct: (service: Service) => void;
+  openBundleProduct: (bundle: Bundle) => void;
   closeServiceModal: () => void;
   isTopUpModalOpen: boolean;
   openTopUpModal: () => void;
   closeTopUpModal: () => void;
+
+  searchQuery: string;
+  setSearchQuery: (q: string) => void;
+  submitSearch: (q?: string) => void;
+
+  cart: CartItem[];
+  cartCount: number;
+  addToCart: (item: Omit<CartItem, 'lineId'> & { lineId?: string }) => void;
+  removeFromCart: (lineId: string) => void;
+  updateCartQty: (lineId: string, quantity: number) => void;
+  updateCartNote: (lineId: string, customerNote: string) => void;
+  clearCart: () => void;
+  cartToast: string | null;
+  dismissCartToast: () => void;
 
   isAuthModalOpen: boolean;
   authModalReason: string | null;
@@ -86,6 +103,17 @@ interface StoreContextType {
   deleteBundle: (bundleId: string) => Promise<ActionResult>;
   updateSettings: (newSettings: Partial<SiteSettings>) => Promise<ActionResult>;
 }
+
+const CART_KEY = 'souq_amazon_cart_v1';
+
+const loadCart = (): CartItem[] => {
+  try {
+    const raw = localStorage.getItem(CART_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+};
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
@@ -191,26 +219,126 @@ const rowToSettings = (r: any): SiteSettings => ({
   workingHours: r.working_hours || '', welcomeBonus: Number(r.welcome_bonus) || 0
 });
 
+const CATALOG_CACHE_KEY = 'souq_catalog_cache_v2';
+
+interface CachedCatalog {
+  services: Service[];
+  bundles: Bundle[];
+  settings?: SiteSettings;
+  timestamp: number;
+}
+
+const loadCachedCatalog = (): CachedCatalog | null => {
+  try {
+    const raw = localStorage.getItem(CATALOG_CACHE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed?.services) && parsed.services.length > 0) {
+      return parsed;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+};
+
+const saveCachedCatalog = (services: Service[], bundles: Bundle[], settings?: SiteSettings) => {
+  try {
+    if (!Array.isArray(services) || services.length === 0) return;
+    const data: CachedCatalog = {
+      services,
+      bundles: bundles || [],
+      settings,
+      timestamp: Date.now()
+    };
+    localStorage.setItem(CATALOG_CACHE_KEY, JSON.stringify(data));
+  } catch {}
+};
+
 const ok = (message: string): ActionResult => ({ success: true, message });
 const fail = (e: any): ActionResult => ({ success: false, message: translateError(e?.message || String(e)) });
 
 export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, isAdmin, isAuthenticated } = useAuth();
 
-  const [services, setServices] = useState<Service[]>([]);
-  const [bundles, setBundles] = useState<Bundle[]>([]);
+  const initialCache = useMemo(() => loadCachedCatalog(), []);
+
+  const [services, setServices] = useState<Service[]>(() => initialCache?.services?.length ? initialCache.services : SERVICES);
+  const [bundles, setBundles] = useState<Bundle[]>(() => initialCache?.bundles?.length ? initialCache.bundles : BUNDLES);
   const [orders, setOrders] = useState<Order[]>([]);
   const [transactions, setTransactions] = useState<WalletTransaction[]>([]);
-  const [settings, setSettings] = useState<SiteSettings>(DEFAULT_SETTINGS);
+  const [settings, setSettings] = useState<SiteSettings>(() => initialCache?.settings || DEFAULT_SETTINGS);
   const [isLoadingData, setIsLoadingData] = useState(true);
 
   const [currentTab, setCurrentTab] = useState('home');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedService, setSelectedService] = useState<Service | null>(null);
+  const [selectedBundle, setSelectedBundle] = useState<Bundle | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [cart, setCart] = useState<CartItem[]>(() => loadCart());
+  const [cartToast, setCartToast] = useState<string | null>(null);
   const [isTopUpModalOpen, setIsTopUpModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authModalReason, setAuthModalReason] = useState<string | null>(null);
   const [authModalMode, setAuthModalMode] = useState<'login' | 'register'>('login');
+
+  useEffect(() => {
+    localStorage.setItem(CART_KEY, JSON.stringify(cart));
+  }, [cart]);
+
+  const cartCount = useMemo(() => cart.reduce((n, i) => n + i.quantity, 0), [cart]);
+
+  const addToCart: StoreContextType['addToCart'] = useCallback((item) => {
+    setCart(prev => {
+      const existing = prev.find(
+        p => p.itemType === item.itemType && p.itemId === item.itemId && (p.variantId || '') === (item.variantId || '')
+      );
+      if (existing) {
+        return prev.map(p =>
+          p.lineId === existing.lineId ? { ...p, quantity: p.quantity + (item.quantity || 1) } : p
+        );
+      }
+      return [
+        ...prev,
+        {
+          lineId: item.lineId || `${item.itemType}-${item.itemId}-${item.variantId || 'default'}-${Date.now()}`,
+          itemType: item.itemType,
+          itemId: item.itemId,
+          variantId: item.variantId,
+          quantity: item.quantity || 1,
+          customerNote: item.customerNote
+        }
+      ];
+    });
+    setCartToast('تمت الإضافة إلى السلة');
+    window.setTimeout(() => setCartToast(null), 3500);
+  }, []);
+
+  const removeFromCart = useCallback((lineId: string) => {
+    setCart(prev => prev.filter(i => i.lineId !== lineId));
+  }, []);
+
+  const updateCartQty = useCallback((lineId: string, quantity: number) => {
+    if (quantity < 1) {
+      setCart(prev => prev.filter(i => i.lineId !== lineId));
+      return;
+    }
+    setCart(prev => prev.map(i => (i.lineId === lineId ? { ...i, quantity } : i)));
+  }, []);
+
+  const updateCartNote = useCallback((lineId: string, customerNote: string) => {
+    setCart(prev => prev.map(i => (i.lineId === lineId ? { ...i, customerNote } : i)));
+  }, []);
+
+  const clearCart = useCallback(() => setCart([]), []);
+  const dismissCartToast = useCallback(() => setCartToast(null), []);
+
+  const submitSearch = useCallback((q?: string) => {
+    if (typeof q === 'string') setSearchQuery(q);
+    setSelectedCategory('all');
+    setCurrentTab('services');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
 
   const openAuthModal = useCallback((reason?: string, mode?: 'login' | 'register') => {
     setAuthModalReason(reason || null);
@@ -247,15 +375,44 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         supabase.from('bundles').select('*').order('sort_order'),
         supabase.from('site_settings').select('*').eq('id', 1).maybeSingle()
       ]);
-      if (svc.data && svc.data.length > 0) setServices(svc.data.map(rowToService));
-      else setServices(SERVICES);
-      if (bnd.data && bnd.data.length > 0) setBundles(bnd.data.map(rowToBundle));
-      else setBundles(BUNDLES);
-      if (st.data) setSettings(rowToSettings(st.data));
+
+      const diskCache = loadCachedCatalog();
+
+      let nextServices = SERVICES;
+      if (svc.data && svc.data.length > 0) {
+        nextServices = svc.data.map(rowToService);
+      } else if (diskCache?.services?.length) {
+        nextServices = diskCache.services;
+      }
+      setServices(nextServices);
+
+      let nextBundles = BUNDLES;
+      if (bnd.data && bnd.data.length > 0) {
+        nextBundles = bnd.data.map(rowToBundle);
+      } else if (diskCache?.bundles?.length) {
+        nextBundles = diskCache.bundles;
+      }
+      setBundles(nextBundles);
+
+      let nextSettings = DEFAULT_SETTINGS;
+      if (st.data) {
+        nextSettings = rowToSettings(st.data);
+      } else if (diskCache?.settings) {
+        nextSettings = diskCache.settings;
+      }
+      setSettings(nextSettings);
+
+      // إذا نجح جلب البيانات من السيرفر، نحفظها فوراً في الكاش المحلي لضمان استمرار ظهورها
+      if (svc.data && svc.data.length > 0) {
+        saveCachedCatalog(nextServices, nextBundles, nextSettings);
+      }
     } catch (e) {
       console.error('Failed to load catalog:', e);
-      setServices(SERVICES);
-      setBundles(BUNDLES);
+      const diskCache = loadCachedCatalog();
+      if (diskCache?.services?.length) setServices(diskCache.services);
+      else setServices(SERVICES);
+      if (diskCache?.bundles?.length) setBundles(diskCache.bundles);
+      else setBundles(BUNDLES);
     }
   }, []);
 
@@ -286,6 +443,13 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     void refreshCatalog();
   }, [refreshCatalog]);
 
+  // إعادة تحميل الكتالوج فور تسجيل الدخول لتحديث أحدث بيانات وقيم السيرفر والكاش
+  useEffect(() => {
+    if (isAuthenticated) {
+      void refreshCatalog();
+    }
+  }, [isAuthenticated, refreshCatalog]);
+
   // تحميل الطلبات والمعاملات الخاصة بالمستخدم فقط عند تسجيل الدخول
   useEffect(() => {
     if (isAuthenticated) {
@@ -313,8 +477,23 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return () => { void supabase.removeChannel(channel); };
   }, [isAuthenticated, refreshOrders, refreshTransactions]);
 
-  const openServiceModal = (s: Service) => setSelectedService(s);
-  const closeServiceModal = () => setSelectedService(null);
+  const openServiceModal = (s: Service) => {
+    setSelectedService(s);
+    setSelectedBundle(null);
+    setCurrentTab('product');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+  const openProduct = openServiceModal;
+  const openBundleProduct = (b: Bundle) => {
+    setSelectedBundle(b);
+    setSelectedService(null);
+    setCurrentTab('product');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+  const closeServiceModal = () => {
+    setSelectedService(null);
+    setSelectedBundle(null);
+  };
 
   const openTopUpModal = useCallback(() => {
     if (!user) {
@@ -618,8 +797,10 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const value = useMemo<StoreContextType>(() => ({
     services, bundles, orders, transactions, settings, isLoadingData,
     currentTab, navigate, selectedCategory, setSelectedCategory,
-    selectedService, openServiceModal, closeServiceModal,
+    selectedService, selectedBundle, openServiceModal, openProduct, openBundleProduct, closeServiceModal,
     isTopUpModalOpen, openTopUpModal, closeTopUpModal,
+    searchQuery, setSearchQuery, submitSearch,
+    cart, cartCount, addToCart, removeFromCart, updateCartQty, updateCartNote, clearCart, cartToast, dismissCartToast,
     isAuthModalOpen, authModalReason, authModalMode, openAuthModal, closeAuthModal,
     refreshAll, refreshOrders, refreshTransactions, refreshCatalog,
     purchaseItem, requestTopUp,
@@ -628,9 +809,11 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     saveService, updateService, deleteService,
     saveBundle, updateBundle, deleteBundle, updateSettings
   }), [services, bundles, orders, transactions, settings, isLoadingData,
-       currentTab, selectedCategory, selectedService, isTopUpModalOpen,
+       currentTab, selectedCategory, selectedService, selectedBundle, isTopUpModalOpen,
+       searchQuery, cart, cartCount, cartToast,
        isAuthModalOpen, authModalReason, authModalMode, openAuthModal, closeAuthModal,
-       navigate, refreshAll, refreshOrders, refreshTransactions, refreshCatalog, user, isAdmin, openTopUpModal]);
+       navigate, refreshAll, refreshOrders, refreshTransactions, refreshCatalog, user, isAdmin, openTopUpModal,
+       addToCart, removeFromCart, updateCartQty, updateCartNote, clearCart, dismissCartToast, submitSearch]);
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
 };

@@ -1,326 +1,206 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useStore } from '../context/StoreContext';
-import {
-  Sparkles, Wallet, Plus, User, ShoppingBag, Menu, X,
-  Layers, Sliders, ChevronDown, LogOut, UserCog, LogIn, UserPlus
-} from 'lucide-react';
+import { CATEGORIES } from '../data/services';
+import { Search, ShoppingCart, MapPin, Menu, ChevronDown, X } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
   const { user, isAdmin, logout } = useAuth();
-  const { openTopUpModal, openAuthModal, settings, orders, transactions, currentTab, navigate } = useStore();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const {
+    settings, orders, transactions, navigate, openAuthModal, openTopUpModal,
+    cartCount, searchQuery, setSearchQuery, submitSearch, setSelectedCategory, services,
+    openProduct, cartToast, dismissCartToast
+  } = useStore();
+
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
+  const [suggestOpen, setSuggestOpen] = useState(false);
+  const [draft, setDraft] = useState(searchQuery);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // إغلاق القائمة عند الضغط خارجها
+  useEffect(() => { setDraft(searchQuery); }, [searchQuery]);
+
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setIsProfileMenuOpen(false);
-      }
+    const onDoc = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setAccountOpen(false);
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('mousedown', onDoc);
+    return () => document.removeEventListener('mousedown', onDoc);
   }, []);
+
+  const suggestions = useMemo(() => {
+    const q = draft.trim().toLowerCase();
+    if (q.length < 1) return [];
+    return services.filter(s => !s.isHidden).filter(s =>
+      s.name.toLowerCase().includes(q) || (s.englishName || '').toLowerCase().includes(q)
+    ).slice(0, 8);
+  }, [draft, services]);
 
   const adminTaskCount =
     orders.filter(o => o.status === 'pending' || o.status === 'processing').length +
     transactions.filter(t => t.type === 'deposit' && t.status === 'pending').length;
 
-  const navLinks = [
-    { id: 'home', label: 'الرئيسية' },
-    { id: 'services', label: 'جميع الخدمات' },
-    { id: 'bundles', label: 'العروض والباقات' },
-    { id: 'payment', label: 'طرق الدفع والشحن' },
-    { id: 'warranty', label: 'الضمان والشروط' },
-    { id: 'support', label: 'الدعم الفني' }
-  ];
-
-  const handleNavClick = (tabId: string) => {
-    navigate(tabId);
-    setIsMobileMenuOpen(false);
-    setIsProfileMenuOpen(false);
+  const go = (tab: string, cat?: string) => {
+    if (cat) setSelectedCategory(cat);
+    navigate(tab);
+    setMobileOpen(false);
+    setAccountOpen(false);
   };
 
-  const handleLogout = () => {
-    if (window.confirm('هل تريد تسجيل الخروج من حسابك؟')) {
-      logout();
-    }
+  const onSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSearchQuery(draft);
+    submitSearch(draft);
+    setSuggestOpen(false);
   };
+
+  const firstName = user?.name?.split(' ')[0] || '';
 
   return (
-    <header className="sticky top-0 z-40 bg-bazaar-bg/90 backdrop-blur-md border-b border-bazaar-border shadow-xl">
+    <header className="sticky top-0 z-40">
       {settings.showBanner && settings.bannerText && (
-        <div className="bg-gradient-to-r from-bazaar-purple/30 via-bazaar-gold/20 to-bazaar-teal/30 border-b border-bazaar-border py-1.5 px-4 text-center text-xs sm:text-sm font-medium text-amber-200 flex items-center justify-center gap-2">
-          <Sparkles className="w-3.5 h-3.5 text-bazaar-gold" />
-          <span>{settings.bannerText}</span>
-        </div>
+        <div className="bg-[#37475A] text-white text-center text-xs py-1.5 px-3">{settings.bannerText}</div>
       )}
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
-        {/* الشعار */}
-        <div
-          onClick={() => handleNavClick('home')}
-          className="flex items-center gap-3 cursor-pointer group select-none"
-        >
-          <div className="relative w-11 h-11 rounded-2xl bg-gradient-to-br from-bazaar-card to-bazaar-surface border border-bazaar-gold/40 flex items-center justify-center shadow-glow-gold transition-all duration-300 group-hover:scale-105 group-hover:border-bazaar-gold">
-            <span className="text-2xl">🏮</span>
-          </div>
-          <div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-xl sm:text-2xl font-black font-cairo tracking-tight gold-gradient-text">
-                {settings.siteName}
-              </span>
-              {isAdmin && (
-                <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-bazaar-gold/15 text-bazaar-gold font-bold border border-bazaar-gold/30">
-                  ADMIN
-                </span>
-              )}
+      <div className="bg-amazon-header text-white">
+        <div className="flex items-center gap-2 px-2 sm:px-3 py-2">
+          <button type="button" className="lg:hidden p-2 border border-transparent hover:border-white rounded-sm" onClick={() => setMobileOpen(v => !v)}>
+            {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+
+          <button type="button" onClick={() => go('home')} className="shrink-0 px-1.5 py-1 border border-transparent hover:border-white rounded-sm">
+            <div className="leading-tight text-right">
+              <div className="text-lg sm:text-xl font-black font-cairo tracking-tight">{settings.siteName}</div>
+              <div className="text-[10px] text-slate-300 hidden sm:block">.eg</div>
             </div>
-            <p className="text-[11px] text-slate-400 -mt-1 hidden sm:block">{settings.siteTagline}</p>
-          </div>
-        </div>
+          </button>
 
-        {/* روابط سطح المكتب */}
-        <nav className="hidden lg:flex items-center gap-1 xl:gap-2">
-          {navLinks.map(link => (
-            <button
-              key={link.id}
-              onClick={() => handleNavClick(link.id)}
-              className={`px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                currentTab === link.id
-                  ? 'bg-bazaar-card text-bazaar-gold shadow-sm border border-bazaar-gold/30 font-bold'
-                  : 'text-slate-300 hover:text-white hover:bg-white/5'
-              }`}
-            >
-              {link.label}
-            </button>
-          ))}
-        </nav>
+          <button type="button" onClick={() => go('dashboard-profile')} className="hidden md:flex items-center gap-1 px-2 py-1 border border-transparent hover:border-white rounded-sm text-right">
+            <MapPin className="w-4 h-4 text-slate-300" />
+            <span className="leading-tight">
+              <span className="block text-[11px] text-slate-300">التوصيل إلى</span>
+              <span className="block text-xs font-bold">{user?.city || 'مصر'} — رقمي</span>
+            </span>
+          </button>
 
-        <div className="flex items-center gap-2 sm:gap-3">
-          {/* زر لوحة الإدارة (للأدمن فقط) */}
-          {isAdmin && (
-            <button
-              onClick={() => handleNavClick('admin')}
-              className={`hidden md:flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all border ${
-                currentTab === 'admin'
-                  ? 'bg-bazaar-gold text-bazaar-bg border-bazaar-gold'
-                  : 'bg-bazaar-card text-bazaar-gold border-bazaar-gold/30 hover:bg-bazaar-gold/10'
-              }`}
-            >
-              <Sliders className="w-3.5 h-3.5" />
-              <span>لوحة الإدارة</span>
-              {adminTaskCount > 0 && (
-                <span className="w-4 h-4 rounded-full bg-bazaar-pink text-white text-[10px] flex items-center justify-center">
-                  {adminTaskCount}
-                </span>
-              )}
-            </button>
-          )}
-
-          {/* أزرار تسجيل الدخول وحساب جديد للزائر أو بيانات العميل */}
-          {!user ? (
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => openAuthModal(undefined, 'login')}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold bg-gradient-to-r from-bazaar-gold to-amber-500 hover:from-amber-400 hover:to-amber-500 text-bazaar-bg shadow-md shadow-bazaar-gold/20 active:scale-95 transition-all"
+          <form onSubmit={onSearch} className="flex-1 relative min-w-0">
+            <div className="flex h-10 rounded-md overflow-hidden focus-within:ring-2 focus-within:ring-amazon-orange">
+              <select
+                className="hidden sm:block bg-[#e6e6e6] text-[#0F1111] text-xs px-2 border-l border-slate-300 max-w-[120px]"
+                defaultValue="all"
+                onChange={e => setSelectedCategory(e.target.value)}
               >
-                <LogIn className="w-4 h-4" />
-                <span>تسجيل الدخول</span>
-              </button>
-              <button
-                onClick={() => openAuthModal(undefined, 'register')}
-                className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-bazaar-card hover:bg-white/10 text-slate-200 border border-white/10 transition-all"
-              >
-                <UserPlus className="w-3.5 h-3.5 text-bazaar-teal" />
-                <span>حساب جديد</span>
+                <option value="all">الكل</option>
+                {CATEGORIES.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+              <input
+                value={draft}
+                onChange={e => { setDraft(e.target.value); setSuggestOpen(true); }}
+                onFocus={() => setSuggestOpen(true)}
+                placeholder="ابحث في سوق الاشتراكات"
+                className="flex-1 min-w-0 px-3 text-sm text-[#0F1111] outline-none"
+              />
+              <button type="submit" className="bg-amazon-search hover:bg-amazon-searchHover px-3 text-[#0F1111]">
+                <Search className="w-5 h-5" />
               </button>
             </div>
-          ) : (
-            <>
-              {/* المحفظة (للعملاء) */}
-              {!isAdmin && (
-                <div className="flex items-center bg-bazaar-card border border-bazaar-border hover:border-bazaar-gold/40 rounded-xl p-1 sm:px-3 sm:py-1.5 transition-all shadow-inner">
-                  <div
-                    onClick={() => handleNavClick('dashboard-wallet')}
-                    className="flex items-center gap-2 cursor-pointer pl-2 select-none"
-                    title="اضغط لفتح المحفظة"
-                  >
-                    <div className="w-7 h-7 rounded-lg bg-bazaar-gold/15 text-bazaar-gold flex items-center justify-center">
-                      <Wallet className="w-4 h-4" />
-                    </div>
-                    <div className="hidden sm:block text-right">
-                      <div className="text-[10px] text-slate-400 leading-none">رصيد المحفظة</div>
-                      <div className="text-xs sm:text-sm font-black text-amber-300 leading-tight">
-                        {user.balance.toLocaleString()} <span className="text-[10px] font-normal text-slate-300">ج.م</span>
-                      </div>
-                    </div>
-                  </div>
-                  <button
-                    onClick={openTopUpModal}
-                    className="bg-gradient-to-r from-bazaar-gold to-amber-500 hover:from-amber-400 hover:to-amber-500 text-bazaar-bg font-bold px-2 sm:px-2.5 py-1 rounded-lg text-xs flex items-center gap-1 transition-transform active:scale-95 shadow-sm"
-                    title="شحن الرصيد الآن"
-                  >
-                    <Plus className="w-3.5 h-3.5 stroke-[3]" />
-                    <span className="hidden sm:inline">شحن</span>
+            {suggestOpen && suggestions.length > 0 && (
+              <ul className="absolute top-full right-0 left-0 bg-white text-[#0F1111] shadow-xl z-50 border border-slate-200">
+                {suggestions.map(s => (
+                  <li key={s.id}>
+                    <button
+                      type="button"
+                      className="w-full text-right px-3 py-2 text-sm hover:bg-slate-100"
+                      onClick={() => { setSuggestOpen(false); setDraft(s.name); openProduct(s); }}
+                    >
+                      {s.name}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </form>
+
+          <div className="relative" ref={menuRef}>
+            <button
+              type="button"
+              onClick={() => user ? setAccountOpen(v => !v) : openAuthModal(undefined, 'login')}
+              className="px-2 py-1 border border-transparent hover:border-white rounded-sm text-right leading-tight min-w-[90px]"
+            >
+              <span className="block text-[11px]">{user ? `مرحباً، ${firstName}` : 'مرحباً، سجّل الدخول'}</span>
+              <span className="text-xs font-bold flex items-center gap-0.5">الحساب والقوائم <ChevronDown className="w-3 h-3" /></span>
+            </button>
+            {accountOpen && user && (
+              <div className="absolute left-0 mt-1 w-64 bg-white text-[#0F1111] shadow-2xl border border-slate-200 z-50 p-3">
+                <p className="text-sm font-bold mb-2">{user.name}</p>
+                <button className="block w-full text-right py-1.5 text-sm amazon-link" onClick={() => go('dashboard')}>حسابك</button>
+                <button className="block w-full text-right py-1.5 text-sm amazon-link" onClick={() => go('dashboard-orders')}>طلباتك</button>
+                <button className="block w-full text-right py-1.5 text-sm amazon-link" onClick={() => go('dashboard-wallet')}>المحفظة والمدفوعات</button>
+                <button className="block w-full text-right py-1.5 text-sm amazon-link" onClick={() => go('dashboard-profile')}>تسجيل الدخول والأمان</button>
+                {isAdmin && (
+                  <button className="block w-full text-right py-1.5 text-sm font-bold" onClick={() => go('admin')}>
+                    لوحة الإدارة {adminTaskCount > 0 ? `(${adminTaskCount})` : ''}
                   </button>
-                </div>
-              )}
-
-              {/* قائمة الحساب */}
-              <div className="relative" ref={menuRef}>
-                <button
-                  onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-                  className="flex items-center gap-2 bg-bazaar-card hover:bg-bazaar-cardHover border border-bazaar-border rounded-xl px-2.5 py-1.5 transition-all"
-                >
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-bazaar-purple/30 to-bazaar-teal/30 border border-white/10 flex items-center justify-center text-sm font-bold text-white">
-                    {user.name.slice(0, 1)}
-                  </div>
-                  <span className="text-xs font-semibold text-slate-200 hidden md:inline max-w-[90px] truncate">
-                    {user.name}
-                  </span>
-                  <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
-                </button>
-
-                {isProfileMenuOpen && (
-                  <div className="absolute left-0 mt-2 w-60 rounded-2xl bg-bazaar-card border border-bazaar-border shadow-2xl p-2 z-50">
-                    <div className="p-2 border-b border-bazaar-border/60">
-                      <p className="text-xs font-bold text-white">{user.name}</p>
-                      <p className="text-[11px] text-slate-400 truncate" dir="ltr">{user.email}</p>
-                      <span
-                        className={`inline-block mt-1 text-[10px] px-2 py-0.5 rounded-full font-bold ${
-                          isAdmin ? 'bg-bazaar-gold/20 text-bazaar-gold' : 'bg-bazaar-teal/20 text-bazaar-teal'
-                        }`}
-                      >
-                        {isAdmin ? 'مدير المتجر (Admin)' : 'عميل'}
-                      </span>
-                    </div>
-
-                    <div className="py-1">
-                      <button
-                        onClick={() => handleNavClick('dashboard')}
-                        className="w-full text-right px-3 py-2 rounded-lg text-xs text-slate-200 hover:bg-white/5 flex items-center justify-between"
-                      >
-                        <span>لوحة التحكم الرئيسية</span>
-                        <Layers className="w-3.5 h-3.5 text-slate-400" />
-                      </button>
-                      <button
-                        onClick={() => handleNavClick('dashboard-orders')}
-                        className="w-full text-right px-3 py-2 rounded-lg text-xs text-slate-200 hover:bg-white/5 flex items-center justify-between"
-                      >
-                        <span>طلباتي وحساباتي المسلمة</span>
-                        <ShoppingBag className="w-3.5 h-3.5 text-slate-400" />
-                      </button>
-                      <button
-                        onClick={() => handleNavClick('dashboard-wallet')}
-                        className="w-full text-right px-3 py-2 rounded-lg text-xs text-slate-200 hover:bg-white/5 flex items-center justify-between"
-                      >
-                        <span>محفظتي وحركات الشحن</span>
-                        <Wallet className="w-3.5 h-3.5 text-slate-400" />
-                      </button>
-                      <button
-                        onClick={() => handleNavClick('dashboard-profile')}
-                        className="w-full text-right px-3 py-2 rounded-lg text-xs text-slate-200 hover:bg-white/5 flex items-center justify-between"
-                      >
-                        <span>بياناتي وكلمة المرور</span>
-                        <UserCog className="w-3.5 h-3.5 text-slate-400" />
-                      </button>
-                    </div>
-
-                    {isAdmin && (
-                      <div className="pt-1 border-t border-bazaar-border/60">
-                        <button
-                          onClick={() => handleNavClick('admin')}
-                          className="w-full text-right px-3 py-2 rounded-lg text-xs text-bazaar-gold font-bold hover:bg-bazaar-gold/10 flex items-center justify-between"
-                        >
-                          <span>لوحة تحكم الإدارة الكاملة</span>
-                          <Sliders className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    )}
-
-                    <div className="pt-1 border-t border-bazaar-border/60">
-                      <button
-                        onClick={handleLogout}
-                        className="w-full text-right px-3 py-2 rounded-lg text-xs text-rose-300 font-bold hover:bg-rose-950/40 flex items-center justify-between"
-                      >
-                        <span>تسجيل الخروج</span>
-                        <LogOut className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </div>
                 )}
+                <hr className="my-2" />
+                <button className="block w-full text-right py-1.5 text-sm" onClick={() => { logout(); setAccountOpen(false); }}>تسجيل الخروج</button>
               </div>
-            </>
-          )}
+            )}
+          </div>
 
-          <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="lg:hidden p-2 rounded-xl bg-bazaar-card border border-bazaar-border text-slate-300 hover:text-white"
-          >
-            {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          <button type="button" onClick={() => user ? go('dashboard-orders') : openAuthModal()} className="hidden sm:block px-2 py-1 border border-transparent hover:border-white rounded-sm text-right leading-tight">
+            <span className="block text-[11px]">المرتجعات</span>
+            <span className="text-xs font-bold">&amp; الطلبات</span>
+          </button>
+
+          <button type="button" onClick={() => go('cart')} className="relative flex items-end gap-1 px-2 py-1 border border-transparent hover:border-white rounded-sm">
+            <span className="relative">
+              <ShoppingCart className="w-8 h-8" />
+              <span className="absolute -top-1 right-2 text-amazon-orange font-black text-sm">{cartCount}</span>
+            </span>
+            <span className="hidden sm:inline text-xs font-bold pb-1">السلة</span>
           </button>
         </div>
       </div>
 
-      {/* قائمة الموبايل */}
-      {isMobileMenuOpen && (
-        <div className="lg:hidden bg-bazaar-bg/98 border-b border-bazaar-border px-4 pt-2 pb-6 space-y-1">
-          {navLinks.map(link => (
-            <button
-              key={link.id}
-              onClick={() => handleNavClick(link.id)}
-              className={`w-full text-right px-4 py-2.5 rounded-xl text-sm font-medium ${
-                currentTab === link.id
-                  ? 'bg-bazaar-card text-bazaar-gold font-bold border border-bazaar-gold/30'
-                  : 'text-slate-300 hover:bg-white/5'
-              }`}
-            >
-              {link.label}
-            </button>
+      <nav className="bg-amazon-subnav text-white text-sm px-2 sm:px-3 py-1.5 flex items-center gap-1 overflow-x-auto no-scrollbar">
+        <button type="button" onClick={() => go('services', 'all')} className="flex items-center gap-1 px-2 py-1 hover:outline hover:outline-1 whitespace-nowrap font-bold">
+          <Menu className="w-4 h-4" /> الكل
+        </button>
+        {CATEGORIES.map(c => (
+          <button key={c.id} type="button" onClick={() => go('services', c.id)} className="px-2 py-1 hover:outline hover:outline-1 whitespace-nowrap">
+            {c.name}
+          </button>
+        ))}
+        <button type="button" onClick={() => go('bundles')} className="px-2 py-1 hover:outline hover:outline-1 whitespace-nowrap text-amazon-yellow font-semibold">عروض اليوم</button>
+        <button type="button" onClick={() => go('payment')} className="px-2 py-1 hover:outline hover:outline-1 whitespace-nowrap">إعادة شحن الرصيد</button>
+        <button type="button" onClick={() => go('support')} className="px-2 py-1 hover:outline hover:outline-1 whitespace-nowrap">خدمة العملاء</button>
+        <button type="button" onClick={() => go('warranty')} className="px-2 py-1 hover:outline hover:outline-1 whitespace-nowrap">الضمان</button>
+        {user && !isAdmin && (
+          <button type="button" onClick={openTopUpModal} className="px-2 py-1 hover:outline hover:outline-1 whitespace-nowrap">
+            الرصيد: {user.balance.toLocaleString()} ج.م
+          </button>
+        )}
+      </nav>
+
+      {cartToast && (
+        <div className="bg-[#067D62] text-white text-sm px-4 py-2 flex items-center justify-between">
+          <span>{cartToast}</span>
+          <div className="flex gap-3">
+            <button type="button" className="underline" onClick={() => { dismissCartToast(); go('cart'); }}>الانتقال إلى السلة</button>
+            <button type="button" onClick={dismissCartToast}><X className="w-4 h-4" /></button>
+          </div>
+        </div>
+      )}
+
+      {mobileOpen && (
+        <div className="lg:hidden bg-white text-[#0F1111] border-b shadow-lg p-3 space-y-1">
+          {CATEGORIES.map(c => (
+            <button key={c.id} type="button" onClick={() => go('services', c.id)} className="block w-full text-right py-2 border-b">{c.name}</button>
           ))}
-
-          {isAdmin && (
-            <button
-              onClick={() => handleNavClick('admin')}
-              className="w-full text-right px-4 py-2.5 rounded-xl text-sm font-bold text-bazaar-gold bg-bazaar-gold/10 border border-bazaar-gold/30"
-            >
-              ⚙️ لوحة الإدارة (Admin Panel)
-            </button>
-          )}
-
-          {user ? (
-            <button
-              onClick={handleLogout}
-              className="w-full text-right px-4 py-2.5 rounded-xl text-sm font-bold text-rose-300 bg-rose-950/30 border border-rose-500/20 mt-2"
-            >
-              تسجيل الخروج
-            </button>
-          ) : (
-            <div className="pt-3 mt-2 border-t border-bazaar-border/60 space-y-2">
-              <button
-                onClick={() => {
-                  setIsMobileMenuOpen(false);
-                  openAuthModal(undefined, 'login');
-                }}
-                className="w-full py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-bazaar-gold to-amber-500 text-bazaar-bg flex items-center justify-center gap-2 shadow-md active:scale-95 transition-all"
-              >
-                <LogIn className="w-4 h-4" />
-                <span>تسجيل الدخول</span>
-              </button>
-              <button
-                onClick={() => {
-                  setIsMobileMenuOpen(false);
-                  openAuthModal(undefined, 'register');
-                }}
-                className="w-full py-2.5 rounded-xl text-xs font-bold bg-bazaar-card text-slate-200 border border-white/10 flex items-center justify-center gap-2 active:scale-95 transition-all"
-              >
-                <UserPlus className="w-4 h-4 text-bazaar-teal" />
-                <span>إنشاء حساب جديد</span>
-              </button>
-            </div>
+          <button type="button" onClick={() => go('bundles')} className="block w-full text-right py-2">عروض اليوم</button>
+          {!user && (
+            <button type="button" onClick={() => { setMobileOpen(false); openAuthModal(); }} className="block w-full text-right py-2 font-bold">سجّل الدخول</button>
           )}
         </div>
       )}

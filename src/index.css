@@ -4,86 +4,85 @@
 
 @layer base {
   html {
-    /* حتى لا تختفي العناصر تحت الشريط العلوي الثابت عند التمرير */
-    scroll-padding-top: 7rem;
+    scroll-padding-top: 8.5rem;
   }
 
   body {
-    background-color: #100f26;
-    color: #f1f5f9;
-    font-family: 'Tajawal', sans-serif;
+    background-color: #EAEDED;
+    color: #0F1111;
+    font-family: 'Tajawal', Arial, sans-serif;
     overflow-x: hidden;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Cairo', sans-serif;
+    font-family: 'Cairo', Arial, sans-serif;
   }
 }
 
-/* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #100f26;
+  background: #EAEDED;
 }
 ::-webkit-scrollbar-thumb {
-  background: #252355;
+  background: #888;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #f0a83c;
+  background: #555;
 }
 
-/* Glowing utilities */
-.glass-panel {
-  background: rgba(30, 29, 73, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
-.glass-card {
-  background: linear-gradient(135deg, rgba(30, 29, 73, 0.85) 0%, rgba(22, 21, 56, 0.95) 100%);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  transition: all 0.3s ease;
+.amazon-price {
+  color: #B12704;
+  font-weight: 700;
 }
 
-.glass-card:hover {
-  border-color: rgba(240, 168, 60, 0.4);
-  box-shadow: 0 10px 30px -10px rgba(240, 168, 60, 0.15);
-  transform: translateY(-3px);
+.amazon-link {
+  color: #007185;
+}
+.amazon-link:hover {
+  color: #C7511F;
+  text-decoration: underline;
+}
+
+.btn-cart {
+  background: #FFD814;
+  border: 1px solid #FCD200;
+  color: #0F1111;
+}
+.btn-cart:hover {
+  background: #F7CA00;
+}
+.btn-buy {
+  background: #FFA41C;
+  border: 1px solid #FF8F00;
+  color: #0F1111;
+}
+.btn-buy:hover {
+  background: #FA8900;
+}
+
+body.modal-open {
+  overflow: hidden;
+}
+
+.admin-shell {
+  background: #100f26;
+  color: #f1f5f9;
 }
 
 .gold-gradient-text {
   background: linear-gradient(135deg, #fff2cc 0%, #f0a83c 50%, #f59e0b 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-}
-
-.teal-gradient-text {
-  background: linear-gradient(135deg, #a7f3d0 0%, #3ddad0 50%, #06b6d4 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.purple-gradient-text {
-  background: linear-gradient(135deg, #e9d5ff 0%, #9b8bff 50%, #8b5cf6 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.bazaar-glow-blob {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(100px);
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* منع التمرير خلف النوافذ المنبثقة */
-body.modal-open {
-  overflow: hidden;
 }
