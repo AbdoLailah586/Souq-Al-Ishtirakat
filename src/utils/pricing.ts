@@ -57,8 +57,14 @@ export const offerDaysLeft = (item: Offerable): number | null => {
 };
 
 /** أقل سعر فعلي بين كل باقات الخدمة — يُستخدم في الترتيب و«يبدأ من» */
-export const minEffectivePrice = (variants: Offerable[]): number =>
-  variants.length ? Math.min(...variants.map(effectivePrice)) : 0;
+export const minEffectivePrice = (variants?: Offerable[] | null): number => {
+  if (!Array.isArray(variants) || variants.length === 0) return 0;
+  const prices = variants.map(v => v ? effectivePrice(v) : 0);
+  return prices.length ? Math.min(...prices) : 0;
+};
 
 /** هل تحتوي الخدمة على أي باقة عليها عرض ساري؟ */
-export const hasAnyOffer = (variants: Offerable[]): boolean => variants.some(isOfferActive);
+export const hasAnyOffer = (variants?: Offerable[] | null): boolean => {
+  if (!Array.isArray(variants) || variants.length === 0) return false;
+  return variants.some(v => v && isOfferActive(v));
+};

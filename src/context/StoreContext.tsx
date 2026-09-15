@@ -228,7 +228,7 @@ const rowToSettings = (r: any): SiteSettings => ({
   workingHours: r.working_hours || '', welcomeBonus: Number(r.welcome_bonus) || 0
 });
 
-const CATALOG_CACHE_KEY = 'souq_catalog_cache_v2';
+const CATALOG_CACHE_KEY = 'souq_catalog_cache_v3';
 
 interface CachedCatalog {
   services: Service[];
@@ -243,7 +243,20 @@ const loadCachedCatalog = (): CachedCatalog | null => {
     if (!raw) return null;
     const parsed = JSON.parse(raw);
     if (Array.isArray(parsed?.services) && parsed.services.length > 0) {
-      return parsed;
+      // Ensure bundles have valid arrays and fallbacks
+      const sanitizedBundles: Bundle[] = (parsed.bundles || []).map((b: any) => {
+        const fallback = BUNDLES.find(fb => fb.id === b.id);
+        return {
+          ...b,
+          componentsList: Array.isArray(b.componentsList) ? b.componentsList : (fallback?.componentsList || []),
+          features: Array.isArray(b.features) ? b.features : (fallback?.features || []),
+          imageUrl: b.imageUrl || fallback?.imageUrl
+        };
+      });
+      return {
+        ...parsed,
+        bundles: sanitizedBundles.length > 0 ? sanitizedBundles : BUNDLES
+      };
     }
     return null;
   } catch {

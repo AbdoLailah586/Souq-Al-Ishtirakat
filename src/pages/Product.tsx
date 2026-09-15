@@ -110,13 +110,13 @@ export const ProductPage: React.FC = () => {
             <div className="pt-2">
               <h2 className="font-bold text-sm text-[#0F1111] dark:text-white mb-2">مكونات ومزايا الباقة:</h2>
               <ul className="space-y-1.5 text-xs text-slate-600 dark:text-slate-300">
-                {selectedBundle.componentsList.map(c => (
+                {(selectedBundle.componentsList || []).map(c => (
                   <li key={c} className="flex items-center gap-2">
                     <span className="w-1.5 h-1.5 rounded-full bg-amazon-orange"></span>
                     <span>{c}</span>
                   </li>
                 ))}
-                {selectedBundle.features.map(f => (
+                {(selectedBundle.features || []).map(f => (
                   <li key={f} className="flex items-center gap-2">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                     <span>{f}</span>
@@ -276,7 +276,7 @@ export const ProductPage: React.FC = () => {
           <div className="py-2 space-y-2">
             <h2 className="font-bold text-sm text-[#0F1111] dark:text-white">حول هذا المنتج:</h2>
             <ul className="space-y-1.5 text-xs text-slate-600 dark:text-slate-300">
-              {service.features.map(f => (
+              {(service.features || []).map(f => (
                 <li key={f} className="flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-amazon-orange"></span>
                   <span>{f}</span>

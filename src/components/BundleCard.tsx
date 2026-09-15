@@ -109,7 +109,7 @@ export const BundleCard: React.FC<BundleCardProps> = ({ bundle }) => {
               <Gift className="w-3.5 h-3.5 text-amber-500" />
               <span>محتويات الباقة الرسمية:</span>
             </div>
-            {bundle.componentsList.map((item, i) => (
+            {(bundle.componentsList || []).map((item, i) => (
               <div key={i} className="flex items-center gap-2 text-xs text-slate-800 dark:text-slate-200">
                 <div className="w-4 h-4 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-300/40">
                   <Check className="w-2.5 h-2.5 stroke-[3]" />
