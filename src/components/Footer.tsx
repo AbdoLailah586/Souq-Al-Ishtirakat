@@ -33,9 +33,19 @@ export const Footer: React.FC = () => {
         <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 text-right">
           {/* Col 1: About */}
           <div className="space-y-3">
-            <h3 className="text-white font-bold text-sm sm:text-base font-cairo">
-              عن سوق الاشتراكات
-            </h3>
+            <div className="flex items-center gap-3">
+              <img
+                src="/logo.png"
+                alt={settings.siteName}
+                className="w-12 h-12 rounded-full object-cover ring-2 ring-amber-400/50 shadow-md"
+              />
+              <div>
+                <h3 className="text-white font-bold text-base font-cairo">
+                  {settings.siteName}
+                </h3>
+                <span className="text-[10px] text-amber-400/90 font-semibold tracking-wider block">SOUQ AL-ISHTIRAKAT</span>
+              </div>
+            </div>
             <p className="text-xs text-slate-400 leading-relaxed">
               المنصة الأولى الموثوقة لتوفير اشتراكات الذكاء الاصطناعي (ChatGPT, Claude, Gemini)، برامج التصميم والمونتاج (Adobe, Canva, CapCut) وخدمات التسويق بأفضل أسعار الجملة في مصر.
             </p>
@@ -191,9 +201,12 @@ export const Footer: React.FC = () => {
           <span>طرق الدفع المدعومة: InstaPay • فودافون كاش • اتصالات كاش • وي باي • أورنج كاش</span>
         </div>
 
-        <p className="text-[11px] text-slate-500">
-          جميع الحقوق محفوظة © {new Date().getFullYear()} {settings.siteName} .eg — منصة الاشتراكات الرقمية الأولى في مصر
-        </p>
+        <div className="flex items-center justify-center gap-2 pt-1">
+          <img src="/logo.png" alt={settings.siteName} className="w-5 h-5 rounded-full object-cover ring-1 ring-amber-400/40" />
+          <p className="text-[11px] text-slate-500">
+            جميع الحقوق محفوظة © {new Date().getFullYear()} {settings.siteName} .eg — منصة الاشتراكات الرقمية الأولى في مصر
+          </p>
+        </div>
       </div>
     </footer>
   );

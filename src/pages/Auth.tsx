@@ -521,9 +521,11 @@ export const AuthPage: React.FC<AuthPageProps> = ({
 
           {/* ترويسة النافذة */}
           <div className="bg-gradient-to-r from-bazaar-surface to-bazaar-card p-5 border-b border-white/10 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-bazaar-bg border border-bazaar-gold/40 flex items-center justify-center text-xl shadow-glow-gold">
-              🏮
-            </div>
+            <img
+              src="/logo.png"
+              alt="سوق الاشتراكات"
+              className="w-10 h-10 rounded-2xl object-cover ring-1 ring-bazaar-gold/40 shadow-glow-gold"
+            />
             <div>
               <h2 className="text-base font-black font-cairo gold-gradient-text">سوق الاشتراكات</h2>
               <p className="text-[11px] text-slate-400">
@@ -554,10 +556,12 @@ export const AuthPage: React.FC<AuthPageProps> = ({
       <div className="relative w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
         {/* اللوحة التعريفية */}
         <div className="hidden lg:block space-y-6 pr-4">
-          <div className="flex items-center gap-3">
-            <div className="w-14 h-14 rounded-3xl bg-gradient-to-br from-bazaar-card to-bazaar-surface border border-bazaar-gold/40 flex items-center justify-center text-3xl shadow-glow-gold">
-              🏮
-            </div>
+          <div className="flex items-center gap-3.5">
+            <img
+              src="/logo.png"
+              alt="سوق الاشتراكات"
+              className="w-14 h-14 rounded-3xl object-cover ring-2 ring-bazaar-gold/40 shadow-glow-gold"
+            />
             <div>
               <h1 className="text-3xl font-black font-cairo gold-gradient-text">سوق الاشتراكات</h1>
               <p className="text-xs text-slate-400">بازار الاشتراكات الرقمية الأول في مصر والوطن العربي</p>
@@ -592,7 +596,11 @@ export const AuthPage: React.FC<AuthPageProps> = ({
         {/* البطاقة */}
         <div className="bg-bazaar-card border border-bazaar-gold/25 rounded-3xl shadow-2xl overflow-hidden">
           <div className="lg:hidden bg-gradient-to-r from-bazaar-surface to-bazaar-card p-5 border-b border-white/10 flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-bazaar-bg border border-bazaar-gold/40 flex items-center justify-center text-2xl">🏮</div>
+            <img
+              src="/logo.png"
+              alt="سوق الاشتراكات"
+              className="w-11 h-11 rounded-2xl object-cover ring-1 ring-bazaar-gold/40 shadow-glow-gold"
+            />
             <div>
               <h1 className="text-lg font-black font-cairo gold-gradient-text">سوق الاشتراكات</h1>
               <p className="text-[10px] text-slate-400">اشتراكاتك الرقمية بضغطة زر</p>

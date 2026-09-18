@@ -69,7 +69,7 @@ export const Home: React.FC = () => {
         <div className="max-w-7xl mx-auto relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="space-y-3.5 text-right max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-amazon-yellow text-xs font-bold border border-white/15">
-              <span>🏮</span>
+              <img src="/logo.png" alt="سوق الاشتراكات" className="w-5 h-5 rounded-full object-cover ring-1 ring-amber-400/40" />
               <span>سوق الاشتراكات الرقمية — حسابات رسمية بأسعار الجملة</span>
             </div>
 

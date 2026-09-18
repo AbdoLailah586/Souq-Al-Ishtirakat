@@ -32,10 +32,18 @@ export const SettingsManager: React.FC = () => {
       <form onSubmit={handleSave} className="p-6 rounded-3xl bg-bazaar-card border border-white/10 space-y-5 text-xs">
         {/* هوية الموقع */}
         <div className="space-y-3 pb-4 border-b border-white/5">
-          <h3 className="font-bold text-sm text-white flex items-center gap-1.5">
-            <span>🏮</span>
-            <span>هوية الموقع</span>
+          <h3 className="font-bold text-sm text-white flex items-center gap-2">
+            <img src="/logo.png" alt="لوجو الموقع" className="w-6 h-6 rounded-full object-cover ring-1 ring-bazaar-gold/40" />
+            <span>هوية الموقع وشعاره</span>
           </h3>
+
+          <div className="flex items-center gap-3 p-3 bg-white/5 rounded-2xl border border-white/10">
+            <img src="/logo.png" alt="اللوجو الحالي" className="w-12 h-12 rounded-2xl object-cover ring-2 ring-bazaar-gold/40 shadow-md" />
+            <div>
+              <div className="text-xs font-bold text-white">اللوجو والشعار الرسمي</div>
+              <div className="text-[11px] text-slate-400">ملف الشعار النشط: /logo.png</div>
+            </div>
+          </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>

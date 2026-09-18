@@ -68,7 +68,12 @@ export const Navbar: React.FC = () => {
             {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
 
-          <button type="button" onClick={() => go('home')} className="shrink-0 px-1.5 py-1 border border-transparent hover:border-white rounded-sm">
+          <button type="button" onClick={() => go('home')} className="shrink-0 px-1.5 py-1 border border-transparent hover:border-white rounded-md flex items-center gap-2.5 group">
+            <img
+              src="/logo.png"
+              alt={settings.siteName}
+              className="w-10 h-10 sm:w-11 sm:h-11 rounded-full object-cover ring-2 ring-amber-400/50 shadow-md transition-transform group-hover:scale-105"
+            />
             <div className="leading-tight text-right">
               <div className="text-lg sm:text-xl font-black font-cairo tracking-tight">{settings.siteName}</div>
               <div className="text-[10px] text-slate-300 hidden sm:block">.eg</div>
@@ -211,7 +216,10 @@ export const Navbar: React.FC = () => {
       {mobileOpen && (
         <div className="lg:hidden bg-white dark:bg-[#161538] text-[#0F1111] dark:text-slate-100 border-b border-slate-200 dark:border-white/10 shadow-lg p-3 space-y-1">
           <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100 dark:border-white/10">
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400">مظهر الموقع:</span>
+            <div className="flex items-center gap-2">
+              <img src="/logo.png" alt={settings.siteName} className="w-8 h-8 rounded-full object-cover ring-1 ring-amber-400/40" />
+              <span className="font-bold text-sm font-cairo text-slate-900 dark:text-white">{settings.siteName}</span>
+            </div>
             <button
               type="button"
               onClick={toggleTheme}
