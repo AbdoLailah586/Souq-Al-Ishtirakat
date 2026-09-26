@@ -124,6 +124,12 @@ export const AboutWarranty: React.FC = () => {
                 <td className="py-2.5 px-3 text-emerald-700 font-bold">طوال فترة الاشتراك (25-30 يوم)</td>
               </tr>
               <tr className="hover:bg-slate-50">
+                <td className="py-2.5 px-3 font-semibold">ChatGPT Plus K12 Edu</td>
+                <td className="py-2.5 px-3">سنتان (24 شهر)</td>
+                <td className="py-2.5 px-3">حساب خاص K-12 تعليمي</td>
+                <td className="py-2.5 px-3 text-emerald-700 font-bold">ضمان استبدال 24 ساعة ودعم مستمر</td>
+              </tr>
+              <tr className="hover:bg-slate-50">
                 <td className="py-2.5 px-3 font-semibold">Gemini Pro (Google AI)</td>
                 <td className="py-2.5 px-3">18 شهر</td>
                 <td className="py-2.5 px-3">تفعيل شخصي على إيميلك</td>

@@ -228,7 +228,7 @@ const rowToSettings = (r: any): SiteSettings => ({
   workingHours: r.working_hours || '', welcomeBonus: Number(r.welcome_bonus) || 0
 });
 
-const CATALOG_CACHE_KEY = 'souq_catalog_cache_v3';
+const CATALOG_CACHE_KEY = 'souq_catalog_cache_v4';
 
 interface CachedCatalog {
   services: Service[];
@@ -285,8 +285,22 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const initialCache = useMemo(() => loadCachedCatalog(), []);
 
-  const [services, setServices] = useState<Service[]>(() => initialCache?.services?.length ? initialCache.services : SERVICES);
-  const [bundles, setBundles] = useState<Bundle[]>(() => initialCache?.bundles?.length ? initialCache.bundles : BUNDLES);
+  const [services, setServices] = useState<Service[]>(() => {
+    if (initialCache?.services?.length) {
+      const cachedIds = new Set(initialCache.services.map(s => s.id));
+      const missing = SERVICES.filter(s => !cachedIds.has(s.id));
+      return missing.length ? [...initialCache.services, ...missing] : initialCache.services;
+    }
+    return SERVICES;
+  });
+  const [bundles, setBundles] = useState<Bundle[]>(() => {
+    if (initialCache?.bundles?.length) {
+      const cachedIds = new Set(initialCache.bundles.map(b => b.id));
+      const missing = BUNDLES.filter(b => !cachedIds.has(b.id));
+      return missing.length ? [...initialCache.bundles, ...missing] : initialCache.bundles;
+    }
+    return BUNDLES;
+  });
   const [orders, setOrders] = useState<Order[]>([]);
   const [transactions, setTransactions] = useState<WalletTransaction[]>([]);
   const [settings, setSettings] = useState<SiteSettings>(() => initialCache?.settings || DEFAULT_SETTINGS);
@@ -433,17 +447,27 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
       let nextServices = SERVICES;
       if (svc.data && svc.data.length > 0) {
-        nextServices = svc.data.map(rowToService);
+        const dbServices = svc.data.map(rowToService);
+        const dbIds = new Set(dbServices.map(s => s.id));
+        const extraLocal = SERVICES.filter(s => !dbIds.has(s.id));
+        nextServices = [...dbServices, ...extraLocal];
       } else if (diskCache?.services?.length) {
-        nextServices = diskCache.services;
+        const cachedIds = new Set(diskCache.services.map(s => s.id));
+        const extraLocal = SERVICES.filter(s => !cachedIds.has(s.id));
+        nextServices = [...diskCache.services, ...extraLocal];
       }
       setServices(nextServices);
 
       let nextBundles = BUNDLES;
       if (bnd.data && bnd.data.length > 0) {
-        nextBundles = bnd.data.map(rowToBundle);
+        const dbBundles = bnd.data.map(rowToBundle);
+        const dbIds = new Set(dbBundles.map(b => b.id));
+        const extraBundles = BUNDLES.filter(b => !dbIds.has(b.id));
+        nextBundles = [...dbBundles, ...extraBundles];
       } else if (diskCache?.bundles?.length) {
-        nextBundles = diskCache.bundles;
+        const cachedIds = new Set(diskCache.bundles.map(b => b.id));
+        const extraBundles = BUNDLES.filter(b => !cachedIds.has(b.id));
+        nextBundles = [...diskCache.bundles, ...extraBundles];
       }
       setBundles(nextBundles);
 
@@ -455,17 +479,27 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
       setSettings(nextSettings);
 
-      // إذا نجح جلب البيانات من السيرفر، نحفظها فوراً في الكاش المحلي لضمان استمرار ظهورها
-      if (svc.data && svc.data.length > 0) {
+      // إذا توفرت بيانات الخدمات، نحفظها فوراً في الكاش المحلي لضمان استمرار ظهورها
+      if (nextServices && nextServices.length > 0) {
         saveCachedCatalog(nextServices, nextBundles, nextSettings);
       }
     } catch (e) {
       console.error('Failed to load catalog:', e);
       const diskCache = loadCachedCatalog();
-      if (diskCache?.services?.length) setServices(diskCache.services);
-      else setServices(SERVICES);
-      if (diskCache?.bundles?.length) setBundles(diskCache.bundles);
-      else setBundles(BUNDLES);
+      if (diskCache?.services?.length) {
+        const cachedIds = new Set(diskCache.services.map(s => s.id));
+        const extraLocal = SERVICES.filter(s => !cachedIds.has(s.id));
+        setServices([...diskCache.services, ...extraLocal]);
+      } else {
+        setServices(SERVICES);
+      }
+      if (diskCache?.bundles?.length) {
+        const cachedIds = new Set(diskCache.bundles.map(b => b.id));
+        const extraBundles = BUNDLES.filter(b => !cachedIds.has(b.id));
+        setBundles([...diskCache.bundles, ...extraBundles]);
+      } else {
+        setBundles(BUNDLES);
+      }
     }
   }, []);
 
