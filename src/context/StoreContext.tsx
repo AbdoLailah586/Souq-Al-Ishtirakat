@@ -280,6 +280,20 @@ const saveCachedCatalog = (services: Service[], bundles: Bundle[], settings?: Si
 const ok = (message: string): ActionResult => ({ success: true, message });
 const fail = (e: any): ActionResult => ({ success: false, message: translateError(e?.message || String(e)) });
 
+const getInitialTab = (): string => {
+  try {
+    if (typeof window === 'undefined') return 'home';
+    const urlParams = new URLSearchParams(window.location.search);
+    const tabParam = urlParams.get('tab');
+    if (tabParam) return tabParam;
+    const hash = window.location.hash.replace(/^#/, '').trim();
+    if (hash) return hash;
+    const path = window.location.pathname.replace(/^\//, '').trim();
+    if (path === 'admin') return 'admin';
+  } catch {}
+  return 'home';
+};
+
 export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, isAdmin, isAuthenticated } = useAuth();
 
@@ -306,7 +320,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [settings, setSettings] = useState<SiteSettings>(() => initialCache?.settings || DEFAULT_SETTINGS);
   const [isLoadingData, setIsLoadingData] = useState(true);
 
-  const [currentTab, setCurrentTab] = useState('home');
+  const [currentTab, setCurrentTab] = useState<string>(() => getInitialTab());
   const [selectedCategory, setSelectedCategory] = useState('all');
 
   const THEME_KEY = 'souq_theme_v1';
@@ -428,7 +442,27 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const navigate = useCallback((tab: string) => {
     setCurrentTab(tab);
+    try {
+      if (typeof window !== 'undefined') {
+        const url = new URL(window.location.href);
+        if (tab === 'home') {
+          url.searchParams.delete('tab');
+          if (url.hash) url.hash = '';
+        } else {
+          url.searchParams.set('tab', tab);
+        }
+        window.history.pushState({}, '', url.toString());
+      }
+    } catch {}
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      setCurrentTab(getInitialTab());
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
   const refreshProfile = () => (window as any).__souqRefreshProfile?.();

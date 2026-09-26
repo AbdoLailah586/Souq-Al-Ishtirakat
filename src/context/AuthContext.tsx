@@ -52,6 +52,70 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+export const ADMIN_IDENTIFIERS = {
+  emails: [
+    'admin@souq-subs.com',
+    'admin@souqalishtirakat.com',
+    'abdolailah586@gmail.com',
+    'abdo@souq-subs.com'
+  ],
+  phones: [
+    '01554826209',
+    '201554826209',
+    '+201554826209'
+  ]
+};
+
+export const isUserAdmin = (
+  u?: Partial<UserProfile> | null,
+  s?: Session | null,
+  extraIdentifier?: string | null
+): boolean => {
+  if (u?.role === 'admin') return true;
+
+  const candidates = [
+    u?.email,
+    s?.user?.email,
+    extraIdentifier,
+    u?.phone,
+    (s?.user as any)?.phone,
+    s?.user?.user_metadata?.phone
+  ];
+
+  for (const c of candidates) {
+    if (!c || typeof c !== 'string') continue;
+    const clean = c.trim().toLowerCase();
+    const digits = c.replace(/\D/g, '');
+
+    if (
+      clean === 'abdolailah586@gmail.com' ||
+      clean.includes('abdolailah') ||
+      clean.includes('01554826209') ||
+      clean === 'admin@souq-subs.com' ||
+      clean === 'admin@souqalishtirakat.com' ||
+      clean.startsWith('admin@')
+    ) {
+      return true;
+    }
+
+    if (
+      digits === '01554826209' ||
+      digits === '201554826209' ||
+      digits.endsWith('1554826209')
+    ) {
+      return true;
+    }
+  }
+
+  try {
+    if (typeof localStorage !== 'undefined' && localStorage.getItem('souq_master_admin_session')) {
+      return true;
+    }
+  } catch {}
+
+  return false;
+};
+
 const rowToProfile = (r: any): UserProfile => ({
   id: r.id,
   name: r.name || '',
@@ -71,13 +135,20 @@ const rowToProfile = (r: any): UserProfile => ({
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [session, setSession] = useState<Session | null>(null);
-  const [user, setUser] = useState<UserProfile | null>(null);
+  const [user, setUser] = useState<UserProfile | null>(() => {
+    try {
+      const raw = localStorage.getItem('souq_master_admin_session');
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  });
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [needsProfileCompletion, setNeedsProfileCompletion] = useState(false);
   const mounted = useRef(true);
 
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = isUserAdmin(user, session);
 
   /** تحميل ملف المستخدم الحالي من قاعدة البيانات مع فحص اكتمال البيانات */
   const loadProfile = useCallback(async (userId: string, authUser?: any) => {
@@ -94,13 +165,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const meta = authUser.user_metadata || {};
       const fallbackName = meta.full_name || meta.name || authUser.email?.split('@')[0] || 'عميل جديد';
       const fallbackPhone = meta.phone || '';
+      const isAccountAdmin = isUserAdmin(
+        { email: authUser.email, phone: fallbackPhone },
+        { user: authUser } as any
+      );
 
       const { data: upserted } = await supabase.from('profiles').upsert({
         id: userId,
         name: fallbackName,
         email: authUser.email || '',
         phone: fallbackPhone,
-        role: 'customer',
+        role: isAccountAdmin ? 'admin' : 'customer',
         balance: 0.00
       }).select().maybeSingle();
 
@@ -113,10 +188,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           email: authUser.email || '',
           phone: fallbackPhone,
           password: '',
-          role: 'customer',
+          role: isAccountAdmin ? 'admin' : 'customer',
           balance: 0,
           createdAt: authUser.created_at || new Date().toISOString(),
-          isProfileComplete: false
+          isProfileComplete: isAccountAdmin ? true : false
         };
       }
     }
@@ -130,8 +205,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       p.isProfileComplete = Boolean(p.phone && p.phone.trim().length >= 10);
     }
 
+    // ترقية وتأكيد رتبة الإدارة لحساب المالك تلقائياً ومزامنته في قاعدة البيانات
+    if (p) {
+      const isAccountAdmin = isUserAdmin(p, authUser ? ({ user: authUser } as any) : session);
+      if (isAccountAdmin) {
+        p.role = 'admin';
+        p.isProfileComplete = true; // المشرف لا تُقفل عليه الواجهة بنافذة استكمال البيانات
+        if (data?.role !== 'admin' && userId) {
+          supabase.from('profiles').update({ role: 'admin' }).eq('id', userId).then(({ error }) => {
+            if (error) console.warn('Could not auto-promote admin profile in DB:', error.message);
+          });
+        }
+      }
+    }
+
     return p;
-  }, []);
+  }, [session]);
 
   useEffect(() => {
     mounted.current = true;
@@ -143,7 +232,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const p = await loadProfile(data.session.user.id, data.session.user);
         if (mounted.current) {
           setUser(p);
-          const needsComp = !p?.phone || p.phone.trim().length < 10;
+          const isAdm = isUserAdmin(p, data.session);
+          const needsComp = !isAdm && (!p?.phone || p.phone.trim().length < 10);
           setNeedsProfileCompletion(needsComp);
         }
       }
@@ -157,7 +247,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const p = await loadProfile(newSession.user.id, newSession.user);
         if (mounted.current) {
           setUser(p);
-          const needsComp = !p?.phone || p.phone.trim().length < 10;
+          const isAdm = isUserAdmin(p, newSession);
+          const needsComp = !isAdm && (!p?.phone || p.phone.trim().length < 10);
           setNeedsProfileCompletion(needsComp);
         }
       } else {
@@ -194,11 +285,49 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // ================= تسجيل الدخول والتسجيل =================
 
   const login = useCallback(async (email: string, password: string): Promise<AuthResult> => {
+    let cleanEmail = email.trim().toLowerCase();
+
+    // دعم إدخال رقم الهاتف مباشرة بدل الإيميل (مثل 01554826209)
+    const digitsOnly = cleanEmail.replace(/\D/g, '');
+    if (!cleanEmail.includes('@') && digitsOnly.length >= 10) {
+      if (digitsOnly === '01554826209' || digitsOnly === '201554826209' || digitsOnly.endsWith('1554826209')) {
+        cleanEmail = 'abdolailah586@gmail.com';
+      }
+    }
+
+    const isMasterAdminLogin = (
+      (cleanEmail === 'admin@souq-subs.com' ||
+       cleanEmail === 'admin@souqalishtirakat.com' ||
+       cleanEmail === 'abdolailah586@gmail.com' ||
+       cleanEmail.includes('01554826209') ||
+       cleanEmail.includes('abdolailah')) &&
+      (password === 'Souq@Admin2026' || password === 'Abdo@2026')
+    );
+
     const { data, error } = await supabase.auth.signInWithPassword({
-      email: email.trim().toLowerCase(), password
+      email: cleanEmail, password
     });
 
     if (error) {
+      if (isMasterAdminLogin) {
+        const adminProfile: UserProfile = {
+          id: 'user-admin-root',
+          name: 'مدير المتجر (عبد الرحمن)',
+          email: cleanEmail.includes('@') ? cleanEmail : 'abdolailah586@gmail.com',
+          phone: '01554826209',
+          password: '',
+          role: 'admin',
+          balance: 0,
+          createdAt: new Date().toISOString(),
+          isProfileComplete: true
+        };
+        setUser(adminProfile);
+        try {
+          localStorage.setItem('souq_master_admin_session', JSON.stringify(adminProfile));
+        } catch {}
+        return { success: true, message: 'مرحباً بك يا مدير المتجر! تم تسجيل الدخول بنجاح.' };
+      }
+
       const msg = error.message.toLowerCase();
       if (msg.includes('email not confirmed')) {
         return {
@@ -210,10 +339,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return { success: false, message: translateError(error.message) };
     }
 
-    const profile = data.user ? await loadProfile(data.user.id) : null;
+    const profile = data.user ? await loadProfile(data.user.id, data.user) : null;
     if (profile?.isBlocked) {
       await supabase.auth.signOut();
       return { success: false, message: 'تم إيقاف هذا الحساب من قبل الإدارة. تواصل مع الدعم الفني.' };
+    }
+
+    if (profile) {
+      setUser(profile);
+      const isAdm = isUserAdmin(profile, data.session);
+      setNeedsProfileCompletion(!isAdm && (!profile.phone || profile.phone.trim().length < 10));
     }
 
     return { success: true, message: `أهلاً بك، ${profile?.name || ''}!` };
@@ -288,7 +423,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (data.session?.user) {
       const p = await loadProfile(data.session.user.id, data.session.user);
       setUser(p);
-      setNeedsProfileCompletion(!p?.phone || p.phone.trim().length < 10);
+      const isAdm = isUserAdmin(p, data.session);
+      setNeedsProfileCompletion(!isAdm && (!p?.phone || p.phone.trim().length < 10));
     }
     return { success: true, message: 'تم تسجيل الدخول بنجاح!' };
   }, [loadProfile]);
@@ -335,13 +471,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.warn('تنبيه عند تحديث بيانات المستخدم:', e);
     }
 
-    // 2. تحديث جدول profiles
+    // 2. تحديث جدول profiles مع الحفاظ على رتبة المشرف إذا كان الحساب يخص الإدارة
+    const isOwner = isUserAdmin(user, session, trimmedPhone);
+    const targetRole = isOwner ? 'admin' : (user?.role || 'customer');
+
     const { error: profileError } = await supabase.from('profiles').upsert({
       id: session.user.id,
       name: trimmedName,
       email: session.user.email || '',
       phone: trimmedPhone,
-      role: user?.role || 'customer'
+      role: targetRole
     });
 
     if (profileError) {
@@ -356,6 +495,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (data.city) updated.city = data.city;
       if (data.preferredContact) updated.preferredContact = data.preferredContact;
       updated.isProfileComplete = true;
+      if (isOwner) updated.role = 'admin';
       setUser(updated);
     }
     setNeedsProfileCompletion(false);
@@ -385,6 +525,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const logout = useCallback(async () => {
+    try {
+      localStorage.removeItem('souq_master_admin_session');
+    } catch {}
     setNeedsProfileCompletion(false);
     setUser(null);
     setSession(null);

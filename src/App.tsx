@@ -61,15 +61,15 @@ const RequireAuthPrompt: React.FC<{ title: string }> = ({ title }) => {
 
 export const App: React.FC = () => {
   const { isAuthenticated, isAdmin, needsProfileCompletion } = useAuth();
-  const { currentTab } = useStore();
+  const { currentTab, openAuthModal } = useStore();
 
   // معاينة شاشة استكمال البيانات للمراجعة والاختبار
   if (typeof window !== 'undefined' && window.location.search.includes('preview_complete_profile')) {
     return <CompleteProfilePage />;
   }
 
-  // 🛑 بوابة استكمال البيانات: إجبارية لأي مستخدم سجل دخوله بالفعل ولم يكمل بياناته
-  if (isAuthenticated && needsProfileCompletion) {
+  // 🛑 بوابة استكمال البيانات: إجبارية لأي مستخدم سجل دخوله بالفعل ولم يكمل بياناته (باستثناء حساب الأدمن)
+  if (isAuthenticated && needsProfileCompletion && !isAdmin) {
     return <CompleteProfilePage />;
   }
 
@@ -98,13 +98,23 @@ export const App: React.FC = () => {
         {currentTab === 'admin' &&
           (isAdmin ? (
             <AdminDashboard />
+          ) : !isAuthenticated ? (
+            <RequireAuthPrompt title="لوحة إدارة المتجر (Admin)" />
           ) : (
-            <div className="max-w-xl mx-auto my-20 p-8 rounded-sm bg-white border border-rose-200 text-center space-y-2 shadow-sm">
+            <div className="max-w-xl mx-auto my-20 p-8 rounded-sm bg-white dark:bg-[#161538] border border-rose-200 dark:border-rose-900/40 text-center space-y-4 shadow-sm">
               <div className="text-4xl">🔒</div>
-              <h2 className="text-lg font-bold font-cairo text-[#0F1111]">صفحة محظورة</h2>
-              <p className="text-xs text-amazon-muted">
-                هذه الصفحة مخصّصة لإدارة المتجر فقط ولا يمكن الوصول إليها بحساب عميل.
+              <h2 className="text-lg font-bold font-cairo text-[#0F1111] dark:text-white">صفحة خاصة بإدارة المتجر</h2>
+              <p className="text-xs text-amazon-muted dark:text-slate-400 leading-relaxed">
+                هذه الصفحة مخصّصة للمشرفين والمسؤولين عن إدارة متجر سوق الاشتراكات فقط. إذا كنت مدير المتجر، يرجى تسجيل الدخول بحساب المشرف.
               </p>
+              <div className="pt-2">
+                <button
+                  onClick={() => openAuthModal('يرجى تسجيل الدخول بحساب المشرف للوصول إلى لوحة الإدارة.')}
+                  className="px-6 py-2.5 rounded-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs shadow-sm transition-all"
+                >
+                  تسجيل الدخول كمدير
+                </button>
+              </div>
             </div>
           ))}
       </main>

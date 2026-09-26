@@ -3,7 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useStore } from '../../context/StoreContext';
 import {
   UserCog, Save, Lock, Mail, Phone, User as UserIcon,
-  CheckCircle2, AlertCircle, LogOut, Wallet, ShoppingBag, Calendar
+  CheckCircle2, AlertCircle, LogOut, Wallet, ShoppingBag, Calendar, ShieldCheck
 } from 'lucide-react';
 
 export const Profile: React.FC = () => {
@@ -82,13 +82,24 @@ export const Profile: React.FC = () => {
           </p>
         </div>
 
-        <button
-          onClick={logout}
-          className="px-4 py-2 rounded-full border border-slate-300 bg-slate-50 hover:bg-slate-100 text-rose-700 text-xs font-bold flex items-center gap-1.5 transition-all self-start sm:self-auto"
-        >
-          <LogOut className="w-4 h-4" />
-          <span>تسجيل الخروج</span>
-        </button>
+        <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
+          {isAdmin && (
+            <button
+              onClick={() => navigate('admin')}
+              className="px-4 py-2 rounded-full bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black flex items-center gap-1.5 shadow-sm transition-all"
+            >
+              <ShieldCheck className="w-4 h-4" />
+              <span>لوحة الإدارة</span>
+            </button>
+          )}
+          <button
+            onClick={logout}
+            className="px-4 py-2 rounded-full border border-slate-300 bg-slate-50 hover:bg-slate-100 text-rose-700 text-xs font-bold flex items-center gap-1.5 transition-all"
+          >
+            <LogOut className="w-4 h-4" />
+            <span>تسجيل الخروج</span>
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
