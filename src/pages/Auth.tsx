@@ -82,6 +82,9 @@ export const AuthPage: React.FC<AuthPageProps> = ({
       return;
     }
     setFeedback(res);
+    if (res.success && onClose) {
+      onClose();
+    }
   };
 
   const handleRegister = async (e: React.FormEvent) => {
